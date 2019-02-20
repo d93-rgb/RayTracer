@@ -1,12 +1,13 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <vector>
 #include <math.h>
 
 #include <glm.hpp>
 
-constexpr auto WIDTH = 10;
-constexpr auto HEIGHT = 10;
+constexpr auto WIDTH = 800;
+constexpr auto HEIGHT = 450;
 
 
 struct Ray
@@ -47,33 +48,81 @@ struct Ray
 };
 
 
+
 int main(void)
 {
 	char var = 65;
 	std::ofstream ofs;
 
-	glm::vec3 ro = glm::vec3(0, 0, -5);
+	glm::vec3 ro = glm::vec3(0, 0, -7);
 	glm::vec3 rd = glm::vec3(0, 0, 1);
 
 	Ray ray =  Ray(ro, rd);
+	
+	glm::vec3 sph_or = glm::vec3(0, 0, 0);
 	float radius = 1;
 
-	float intersect = ray.intersect_sphere(glm::vec3(0, 0, 0), radius);
+	float intersect = ray.intersect_sphere(sph_or, radius);
 	
 	
 
 	std::cout << "intersect = " << intersect << std::endl;
+	
+	/***************************************/
+	// LOOPING OVER PIXELS
+	/***************************************/
+	float u = 0, v = 0;
+	float d = 1;
+	float t_int;
+	glm::vec3 x_dir = glm::vec3(1, 0, 0);
+	glm::vec3 y_dir = glm::vec3(0, 1, 0);
+	glm::vec3 z_dir = glm::vec3(0, 0, -1);
+	glm::vec3 s;
+	glm::vec3 def_col = glm::vec3(0, 0, 0);
+	glm::vec3 sph_col = glm::vec3(127, 0, 0);
 
-	ofs.open("picture.poppm");
+	std::vector<glm::vec3> col(WIDTH * HEIGHT);
+	
+	for (int y = 0, i = 0; y < HEIGHT; ++y)
+	{
+		for (int x = 0; x < WIDTH; ++x)
+		{
+			u = -1 + 2 * (float)x / WIDTH;
+			v = -1 + 2 * (float)y / HEIGHT;
+
+			s = u * x_dir + v * y_dir - d * z_dir;
+
+			ray.rd = glm::normalize(s);
+
+			t_int = ray.intersect_sphere(sph_or, radius);
+
+			if (t_int >= 0 && t_int != INFINITY)
+			{
+				col[i++] = sph_col;
+			}
+			else {
+				col[i++] = def_col;
+			}
+		}
+	}
+	
+	
+	
+	
+	
+	/***************************************/
+	// WRITING TO IMAGE FILE
+	/***************************************/
+	ofs.open("picture.ppm");
 	// don't use \n as ending white space, because of windows
 	ofs << "P6\n" << WIDTH << " " << HEIGHT << "\n255 ";
 
-
+	// write to image file
 	for (int i = 0; i < WIDTH * HEIGHT; ++i)
 	{
-		char r = 255 * ((i%3) == 0 ? 1 : 0);
-		char g = 255 * ((i%3) == 1 ? 1 : 0);
-		char b = 255 * ((i%3) == 2 ? 1 : 0);
+		char r = col[i].x;
+		char g = col[i].y;
+		char b = col[i].z;
 
 		ofs << r <<  g  << b;
 	}
