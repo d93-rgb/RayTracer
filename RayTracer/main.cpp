@@ -1,18 +1,21 @@
 #include <iostream>
 #include <fstream>
+#include <string>
 
 constexpr auto WIDTH = 10;
 constexpr auto HEIGHT = 10;
 
 int main(void)
 {
-	char var;
+	char var = 65;
 	std::ofstream ofs;
 
 	std::cout << "Initial code." << std::endl;
 
 	ofs.open("picture.ppm");
-	ofs << "P6\n" << WIDTH << "\n" << HEIGHT << "\n255\n";
+	// don't use \n as ending white space, because of windows
+	ofs << "P6\n" << WIDTH << " " << HEIGHT << "\n255 ";
+
 
 	for (int i = 0; i < WIDTH * HEIGHT; ++i)
 	{
@@ -20,12 +23,15 @@ int main(void)
 		char g = 255 * ((i%3) == 1 ? 1 : 0);
 		char b = 255 * ((i%3) == 2 ? 1 : 0);
 
-		ofs << r << g << b;
+		ofs << r <<  g  << b;
 	}
 
 	ofs.close();
 
-	std::cout << "Done creating image.";
+	std::cout << "Done creating image." << std::endl;
+
+	//std::cout << (int)var << std::endl;
+	//getchar();
 	
 	return 0;
 }
