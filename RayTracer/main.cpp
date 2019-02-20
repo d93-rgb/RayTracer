@@ -1,3 +1,5 @@
+#define _USE_MATH_DEFINES
+
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -8,8 +10,8 @@
 
 #include <glm.hpp>
 
-constexpr auto WIDTH = 100;
-constexpr auto HEIGHT = 100;
+constexpr auto WIDTH = 900;
+constexpr auto HEIGHT = 450;
 
 struct Object
 {
@@ -25,6 +27,20 @@ struct Ray
 	{
 		this->ro = ro;
 		this->rd = rd;
+	}
+};
+
+struct Light
+{
+	glm::vec3 p;
+	glm::vec3 dir;
+	glm::vec3 col;
+
+	Light(glm::vec3 p, glm::vec3 dir, glm::vec3 col)
+	{
+		this->p = p;
+		this->dir = glm::normalize(dir);
+		this->col = col;
 	}
 };
 
@@ -52,8 +68,8 @@ struct Sphere : public Object
 		float tmp;
 
 		float term_1 = glm::dot(rd, rd);
-		float term_2 = 2 * glm::dot(rd, ro);
-		float term_3 = glm::dot(ro, ro) - r * r;
+		float term_2 = 2 * glm::dot(rd, ro-origin);
+		float term_3 = glm::dot(ro-origin, ro-origin) - r * r;
 
 		float disc = term_2 * term_2 - 4 * term_1*term_3;
 
@@ -71,35 +87,51 @@ struct Sphere : public Object
 	}
 };
 
+glm::vec3 diff_shade(Sphere *obj, glm::vec3 ob_pos, Light &light)
+{
+	glm::vec3 l_dir = -light.dir;
+	glm::vec3 col = obj->color * light.col * glm::max(0.f, glm::dot(obj->get_normal(ob_pos), l_dir));
+	return col;
+}
+
 int main(void)
 {
 	char var = 65;
 	std::ofstream ofs;
 
-	glm::vec3 ro = glm::vec3(0, 0, -5);
+	float fov = M_PI/2.f;
+	float fov_tan = tan(fov / 2);
+
+	glm::vec3 ro = glm::vec3(0, 0, 0);
 	glm::vec3 rd = glm::vec3(0, 0, 1);
 
+	Light dist_light = Light(glm::vec3(2, 200, 1), glm::vec3(1, -1, 0.5), glm::vec3(1));
 	Ray ray =  Ray(ro, rd);
 	
-	glm::vec3 sph_or = glm::vec3(0, 0, 0);
-	float radius = 1;
+	glm::vec3 sph_or_1 = glm::vec3(-4, -2, 6);
+	glm::vec3 sph_or_2 = glm::vec3(-4, 2, 8);
+	glm::vec3 sph_or_3 = glm::vec3(6, 3, 12);
+	float radius[] = { 1, 1.5 , 3};
 
-	Sphere sph_1 = Sphere(sph_or, radius, glm::vec3(127, 0, 0));
-	Sphere sph_2 = Sphere(glm::vec3(-0.2, 0, 0), radius, glm::vec3(127, 127, 0));
+	Sphere sph_1 = Sphere(sph_or_1, radius[0], glm::vec3(127, 0, 0));
+	Sphere sph_2 = Sphere(sph_or_2, radius[1], glm::vec3(127, 127, 0));
+	Sphere sph_3 = Sphere(sph_or_3, radius[2], glm::vec3(0, 0, 200));
 	
-	Sphere spheres[2] = { sph_1, sph_2 };
+	Sphere spheres[] = { sph_1, sph_2, sph_3 };
 
 	/***************************************/
 	// LOOPING OVER PIXELS
 	/***************************************/
 	float u = 0, v = 0;
-	float d = 1;
+	float d = 2;
 	float t_int;
+	float tmp;
 	glm::vec3 x_dir = glm::vec3(1, 0, 0);
 	glm::vec3 y_dir = glm::vec3(0, 1, 0);
 	glm::vec3 z_dir = glm::vec3(0, 0, -1);
 	glm::vec3 s;
-	glm::vec3 def_col = glm::vec3(0, 0, 0);
+	glm::vec3 inters_p;
+	glm::vec3 def_col = glm::vec3(50, 50, 50);
 
 	std::vector<glm::vec3> col(WIDTH * HEIGHT);
 	
@@ -107,32 +139,32 @@ int main(void)
 	{
 		for (int x = 0; x < WIDTH; ++x)
 		{
-			u = (2 * (float)(x) - WIDTH) / HEIGHT;
-			v = (2 * (float)(y) - HEIGHT)/ HEIGHT;
+			u = (2 * (float)(x + 0.5) - WIDTH) / HEIGHT * fov_tan;
+			v = (-2 * (float)(y + 0.5) + HEIGHT)/ HEIGHT * fov_tan;
 
 			s = u * x_dir + v * y_dir - d * z_dir;
 
 			ray.rd = glm::normalize(s);
 
+			t_int = INFINITY;
 			for (Sphere sphs : spheres)
-			//for(int j = 0; j < sizeof(spheres)/sizeof(*spheres); ++j)
 			{
-				t_int = sphs.intersect(ray.ro, ray.rd);
+				tmp = sphs.intersect(ray.ro, ray.rd);
 
-				// get intersection point
-				glm::vec3 inters_p = ray.ro + t_int * ray.rd;
-
-
-				if (t_int >= 0 && t_int != INFINITY)
+				if (tmp >= 0 && t_int > tmp)
 				{
-					col[i] = sphs.color * glm::max(0.f, glm::dot(-rd, sphs.get_normal(inters_p)));
+					t_int = tmp;
+					// get intersection point
+					inters_p = ray.ro + t_int * ray.rd;
+					
+					col[i] = diff_shade(&sphs, inters_p, dist_light);
+					//col[i] = sphs.color * glm::max(0.f, glm::dot(-rd, sphs.get_normal(inters_p)));
 					//std::cout << col[i].x << " " << col[i].y << " " << col[i].z << std::endl;
-					break;
-				}
-				else {
-					col[i] = def_col;
 				}
 			}
+			// no intersection found
+			if (t_int < 0 || t_int == INFINITY) col[i] = def_col;
+
 			// progress to next pixel
 			++i;
 		}
@@ -166,8 +198,8 @@ int main(void)
 	//std::cout << (int)var << std::endl;
 	//getchar();
 	
-	// wait 3s before closing
-	std::this_thread::sleep_for(std::chrono::seconds(3));
+	// wait 1s before closing
+	std::this_thread::sleep_for(std::chrono::seconds(1));
 
 	return 0;
 }
