@@ -2,13 +2,19 @@
 #include <fstream>
 #include <string>
 #include <vector>
+#include <chrono>
+#include <thread>
 #include <math.h>
 
 #include <glm.hpp>
 
-constexpr auto WIDTH = 800;
+constexpr auto WIDTH = 900;
 constexpr auto HEIGHT = 450;
 
+struct Object
+{
+	virtual float intersect(glm::vec3 &, glm::vec3 &) const = 0;
+};
 
 struct Ray
 {
@@ -27,9 +33,9 @@ struct Ray
 		float t1 = INFINITY, t2 = t1;
 		float tmp;
 
-		float term_1 = rd.x*rd.x + rd.y*rd.y + rd.z*rd.z;
-		float term_2 = 2 * (rd.x*ro.x + rd.y*ro.y + rd.z*ro.z);
-		float term_3 = ro.x*ro.x + ro.y*ro.y + ro.z*ro.z - r * r;
+		float term_1 = glm::dot(rd, rd);
+		float term_2 = 2 * glm::dot(rd, ro);
+		float term_3 = glm::dot(ro, ro) - r * r;
 
 		float disc = term_2*term_2 - 4 * term_1*term_3;
 		
@@ -47,14 +53,53 @@ struct Ray
 	}
 };
 
+struct Sphere : public Object
+{
+	glm::vec3 origin;
+	float r;
 
+	Sphere(glm::vec3 origin, float radius)
+	{
+		this->origin = origin;
+		this->r = radius;
+	}
+
+	glm::vec3 get_normal(glm::vec3 p)
+	{
+		return glm::normalize(p - origin);
+	}
+
+	float intersect(glm::vec3 &rd, glm::vec3 &ro) const override
+	{
+		float t1 = INFINITY, t2 = t1;
+		float tmp;
+
+		float term_1 = glm::dot(rd, rd);
+		float term_2 = 2 * glm::dot(rd, ro);
+		float term_3 = glm::dot(ro, ro) - r * r;
+
+		float disc = term_2 * term_2 - 4 * term_1*term_3;
+
+		if (disc < 0)
+		{
+			return INFINITY;
+		}
+
+		t1 = (-term_2 + sqrt(disc)) / (2 * term_1);
+		t2 = (-term_2 - sqrt(disc)) / (2 * term_1);
+
+		tmp = fmin(t1, t2);
+		tmp = tmp >= 0 ? tmp : fmax(t1, t2);
+		return tmp >= 0 ? tmp : INFINITY;
+	}
+};
 
 int main(void)
 {
 	char var = 65;
 	std::ofstream ofs;
 
-	glm::vec3 ro = glm::vec3(0, 0, -7);
+	glm::vec3 ro = glm::vec3(0, 0, -4);
 	glm::vec3 rd = glm::vec3(0, 0, 1);
 
 	Ray ray =  Ray(ro, rd);
@@ -62,11 +107,7 @@ int main(void)
 	glm::vec3 sph_or = glm::vec3(0, 0, 0);
 	float radius = 1;
 
-	float intersect = ray.intersect_sphere(sph_or, radius);
-	
-	
-
-	std::cout << "intersect = " << intersect << std::endl;
+	Sphere sph = Sphere(sph_or, radius);
 	
 	/***************************************/
 	// LOOPING OVER PIXELS
@@ -87,18 +128,22 @@ int main(void)
 	{
 		for (int x = 0; x < WIDTH; ++x)
 		{
-			u = -1 + 2 * (float)x / WIDTH;
-			v = -1 + 2 * (float)y / HEIGHT;
+			u = (2 * (float)(x) - WIDTH) / HEIGHT;
+			v = (2 * (float)(y) - HEIGHT)/ HEIGHT;
 
 			s = u * x_dir + v * y_dir - d * z_dir;
 
 			ray.rd = glm::normalize(s);
 
-			t_int = ray.intersect_sphere(sph_or, radius);
+			t_int = sph.intersect(ray.ro, ray.rd);
+
+			// get intersection point
+			glm::vec3 inters_p = ray.ro + t_int * ray.rd;
+
 
 			if (t_int >= 0 && t_int != INFINITY)
 			{
-				col[i++] = sph_col;
+				col[i++] = sph_col * glm::max(0.f, glm::dot(-rd, sph.get_normal(inters_p)));
 			}
 			else {
 				col[i++] = def_col;
@@ -132,7 +177,10 @@ int main(void)
 	std::cout << "Done creating image." << std::endl;
 
 	//std::cout << (int)var << std::endl;
-	getchar();
+	//getchar();
 	
+	// wait 3s before closing
+	std::this_thread::sleep_for(std::chrono::seconds(3));
+
 	return 0;
 }
