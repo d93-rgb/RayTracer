@@ -8,8 +8,8 @@
 
 #include <glm.hpp>
 
-constexpr auto WIDTH = 900;
-constexpr auto HEIGHT = 450;
+constexpr auto WIDTH = 100;
+constexpr auto HEIGHT = 100;
 
 struct Object
 {
@@ -26,42 +26,19 @@ struct Ray
 		this->ro = ro;
 		this->rd = rd;
 	}
-
-
-	float intersect_sphere(glm::vec3 sph_origin, float r)
-	{
-		float t1 = INFINITY, t2 = t1;
-		float tmp;
-
-		float term_1 = glm::dot(rd, rd);
-		float term_2 = 2 * glm::dot(rd, ro);
-		float term_3 = glm::dot(ro, ro) - r * r;
-
-		float disc = term_2*term_2 - 4 * term_1*term_3;
-		
-		if (disc < 0)
-		{
-			return INFINITY;
-		}
-
-		t1 = (-term_2 + sqrt(disc)) / (2 * term_1);
-		t2 = (-term_2 - sqrt(disc)) / (2 * term_1);
-
-		tmp = fmin(t1, t2);
-		tmp = tmp >= 0 ? tmp : fmax(t1, t2);
-		return tmp >= 0 ? tmp : INFINITY;
-	}
 };
 
 struct Sphere : public Object
 {
 	glm::vec3 origin;
 	float r;
+	glm::vec3 color;
 
-	Sphere(glm::vec3 origin, float radius)
+	Sphere(glm::vec3 origin, float radius, glm::vec3 color)
 	{
 		this->origin = origin;
 		this->r = radius;
+		this->color = color;
 	}
 
 	glm::vec3 get_normal(glm::vec3 p)
@@ -69,7 +46,7 @@ struct Sphere : public Object
 		return glm::normalize(p - origin);
 	}
 
-	float intersect(glm::vec3 &rd, glm::vec3 &ro) const override
+	float intersect(glm::vec3 &ro, glm::vec3 &rd) const override
 	{
 		float t1 = INFINITY, t2 = t1;
 		float tmp;
@@ -99,7 +76,7 @@ int main(void)
 	char var = 65;
 	std::ofstream ofs;
 
-	glm::vec3 ro = glm::vec3(0, 0, -4);
+	glm::vec3 ro = glm::vec3(0, 0, -5);
 	glm::vec3 rd = glm::vec3(0, 0, 1);
 
 	Ray ray =  Ray(ro, rd);
@@ -107,8 +84,11 @@ int main(void)
 	glm::vec3 sph_or = glm::vec3(0, 0, 0);
 	float radius = 1;
 
-	Sphere sph = Sphere(sph_or, radius);
+	Sphere sph_1 = Sphere(sph_or, radius, glm::vec3(127, 0, 0));
+	Sphere sph_2 = Sphere(glm::vec3(-0.2, 0, 0), radius, glm::vec3(127, 127, 0));
 	
+	Sphere spheres[2] = { sph_1, sph_2 };
+
 	/***************************************/
 	// LOOPING OVER PIXELS
 	/***************************************/
@@ -120,7 +100,6 @@ int main(void)
 	glm::vec3 z_dir = glm::vec3(0, 0, -1);
 	glm::vec3 s;
 	glm::vec3 def_col = glm::vec3(0, 0, 0);
-	glm::vec3 sph_col = glm::vec3(127, 0, 0);
 
 	std::vector<glm::vec3> col(WIDTH * HEIGHT);
 	
@@ -135,19 +114,27 @@ int main(void)
 
 			ray.rd = glm::normalize(s);
 
-			t_int = sph.intersect(ray.ro, ray.rd);
-
-			// get intersection point
-			glm::vec3 inters_p = ray.ro + t_int * ray.rd;
-
-
-			if (t_int >= 0 && t_int != INFINITY)
+			for (Sphere sphs : spheres)
+			//for(int j = 0; j < sizeof(spheres)/sizeof(*spheres); ++j)
 			{
-				col[i++] = sph_col * glm::max(0.f, glm::dot(-rd, sph.get_normal(inters_p)));
+				t_int = sphs.intersect(ray.ro, ray.rd);
+
+				// get intersection point
+				glm::vec3 inters_p = ray.ro + t_int * ray.rd;
+
+
+				if (t_int >= 0 && t_int != INFINITY)
+				{
+					col[i] = sphs.color * glm::max(0.f, glm::dot(-rd, sphs.get_normal(inters_p)));
+					//std::cout << col[i].x << " " << col[i].y << " " << col[i].z << std::endl;
+					break;
+				}
+				else {
+					col[i] = def_col;
+				}
 			}
-			else {
-				col[i++] = def_col;
-			}
+			// progress to next pixel
+			++i;
 		}
 	}
 	
@@ -158,16 +145,16 @@ int main(void)
 	/***************************************/
 	// WRITING TO IMAGE FILE
 	/***************************************/
-	ofs.open("picture.ppm");
+	ofs.open("picture.ppm", _IOSbinary);
 	// don't use \n as ending white space, because of windows
-	ofs << "P6\n" << WIDTH << " " << HEIGHT << "\n255 ";
+	ofs << "P6 " << WIDTH << " " << HEIGHT << " 255 ";
 
 	// write to image file
 	for (int i = 0; i < WIDTH * HEIGHT; ++i)
 	{
-		char r = col[i].x;
-		char g = col[i].y;
-		char b = col[i].z;
+		unsigned char r = (unsigned int)round(col[i].x);
+		unsigned char g = (unsigned int)round(col[i].y);
+		unsigned char b = (unsigned int)round(col[i].z);
 
 		ofs << r <<  g  << b;
 	}
