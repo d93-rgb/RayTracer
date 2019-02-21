@@ -80,14 +80,13 @@ struct Sphere : public Object
 	glm::vec3 origin;
 	float r;
 	glm::vec3 color;
-	Material mat;
 
-	Sphere(glm::vec3 origin, float radius, glm::vec3 color, Material m) :
-		mat(m)
+	Sphere(glm::vec3 origin, float radius, glm::vec3 color, Material m)
 	{
 		this->origin = origin;
 		this->r = radius;
 		this->color = color;
+		this->mat = m;
 	}
 
 	glm::vec3 get_normal(glm::vec3 p)
@@ -122,26 +121,30 @@ struct Sphere : public Object
 
 struct Plane : public Object
 {
-	Material mat;
 	glm::vec3 pos;
 	glm::vec3 normal;
 	glm::vec3 color;
 	float k;
 	
-	Plane(glm::vec3 p, glm::vec3 n, glm::vec3 c, Material m) : 
-		pos(p), normal(glm::normalize(n)), color(c), mat(m)
+	Plane(glm::vec3 p, glm::vec3 n, glm::vec3 c, Material m) :
+		pos(p), normal(glm::normalize(n)), color(c)
 	{
+		this->mat = m;
 		k = glm::dot(normal, pos);
 	}
 
 	float intersect(Ray &ray) const
 	{
-		float num = k - glm::dot(normal, ray.ro);
 		float denom = glm::dot(normal, ray.rd);
+
+		if (abs(denom) < 1e-6) return INFINITY;
+
+		float num = k - glm::dot(normal, ray.ro);
 
 		float t = num / denom;
 
-		return t >= 0 ? t : 0.f;
+		//if(t >= 0) std::cout << t << std::endl;
+		return t >= 0 ? t : INFINITY;
 	}
 
 	glm::vec3 get_normal(glm::vec3 p)
@@ -193,32 +196,32 @@ int main(void)
 	char var = 65;
 	std::ofstream ofs;
 
-	float fov = deg2rad(80.f);
+	float fov = deg2rad(75.f);
 	float fov_tan = tan(fov / 2);
 
 	glm::vec3 ro = glm::vec3(0, 0, 0);
-	glm::vec3 rd = glm::vec3(0, 0, 1);
+	glm::vec3 rd = glm::vec3(0, 0, -1);
 
 	Light dist_light = Light(glm::vec3(2, 200, 1), glm::vec3(5, 4, 0.5), glm::vec3(0.8f));
 	Ray ray =  Ray(ro, rd);
 	
-	glm::vec3 sph_or_1 = glm::vec3(-4, -2, 10);
-	glm::vec3 sph_or_2 = glm::vec3(-4, 2, 10);
-	glm::vec3 sph_or_3 = glm::vec3(4, 3, 9);
+	glm::vec3 sph_or_1 = glm::vec3(-4, -2, -10);
+	glm::vec3 sph_or_2 = glm::vec3(-4, 2, -10);
+	glm::vec3 sph_or_3 = glm::vec3(4, 3, -9);
 	float radius[] = { 1, 1.5 , 3};
 
 	Material m1 = Material(glm::vec3(0.1, 0, 0), glm::vec3(0.7, 0, 0), glm::vec3(0.3, 0, 0));
 	Material m2 = Material(glm::vec3(0, 0.1, 0), glm::vec3(0, 0.7, 0), glm::vec3(0, 0.3, 0));
 	Material m3 = Material(glm::vec3(0.1, 0, 0.1), glm::vec3(0.7, 0, 0.7), glm::vec3(0.7, 0, 0.7));
-	Material m4 = Material(glm::vec3(0, 0, 0), glm::vec3(0, 0, 0), glm::vec3(0, 0, 0));
+	Material m4 = Material(glm::vec3(0.1, 0.1, 0.1), glm::vec3(0.3, 0.3, 0), glm::vec3(0, 0, 0));
 
 	Sphere sph_1 = Sphere(sph_or_1, radius[0], glm::vec3(0.5, 0, 0), m1);
 	Sphere sph_2 = Sphere(sph_or_2, radius[1], glm::vec3(0.5, 0.5, 0), m2);
 	Sphere sph_3 = Sphere(sph_or_3, radius[2], glm::vec3(0, 0, 0.8), m3);
 	
-	Plane pl_1 = Plane(glm::vec3(0), glm::vec3(1, 1, -1), glm::vec3(0.5), m4);
+	Plane pl_1 = Plane(glm::vec3(0, -25, 15), glm::vec3(0, 10, 5), glm::vec3(0.2), m4);
 
-	Object *objects[] = { &sph_1, &sph_2, &sph_3, /*&pl_1*/ };
+	Object *objects[] = { &sph_1, &sph_2, &sph_3, &pl_1 };
 	
 	/***************************************/
 	// LOOPING OVER PIXELS
@@ -229,10 +232,10 @@ int main(void)
 	float tmp;
 	glm::vec3 x_dir = glm::vec3(1, 0, 0);
 	glm::vec3 y_dir = glm::vec3(0, 1, 0);
-	glm::vec3 z_dir = glm::vec3(0, 0, -1);
+	glm::vec3 z_dir = glm::vec3(0, 0, 1);
 	glm::vec3 s;
 	glm::vec3 inters_p;
-	glm::vec3 def_col = glm::vec3(0.1, 0.1, 0.1);
+	glm::vec3 def_col = glm::vec3(0.8, 0.8, 0.8);
 
 	std::vector<glm::vec3> col(WIDTH * HEIGHT);
 	
@@ -258,7 +261,7 @@ int main(void)
 					// get intersection point
 					inters_p = ray.ro + t_int * ray.rd;
 					
-					col[i] = 0.1f * objs->mat.ka + diff_shade(objs, inters_p, dist_light);
+					col[i] = objs->mat.ka + diff_shade(objs, inters_p, dist_light);
 					col[i] += spec_shade(objs, inters_p, dist_light, ray.rd);
 					//col[i] = sphs.color * glm::max(0.f, glm::dot(-rd, sphs.get_normal(inters_p)));
 					//std::cout << col[i].x << " " << col[i].y << " " << col[i].z << std::endl;
