@@ -10,12 +10,17 @@
 
 #include <glm.hpp>
 
-constexpr auto WIDTH = 1600;
-constexpr auto HEIGHT = 900;
+constexpr auto WIDTH = 1024;
+constexpr auto HEIGHT = 768;
 
 
 float deg2rad(float deg) { return deg * M_PI / 180; }
 float rad2deg(float rad) { return rad * 180 / M_PI; }
+
+void print_vec3(glm::vec3 v)
+{
+	std::cout << "(" << v.x << ", " << v.y << ", " << v.z << ")" << std::endl;
+}
 
 struct Object
 {
@@ -91,16 +96,40 @@ struct Sphere : public Object
 	}
 };
 
-glm::vec3 diff_shade(Sphere *obj, glm::vec3 ob_pos, Light &light)
+/*
+*	Calculate reflection vector.
+*	N should be normalized.
+*/
+glm::vec3 reflect(glm::vec3 L, glm::vec3 N)
+{
+	return L - 2 * glm::dot(N, L) * N;
+}
+
+
+/*
+*	Calculate diffuse shading of an object.
+*/
+glm::vec3 diff_shade(Sphere *obj, 
+	glm::vec3 ob_pos, 
+	Light &light)
 {
 	glm::vec3 l_dir = -light.dir;
 	glm::vec3 col = obj->color * light.col * glm::max(0.f, glm::dot(obj->get_normal(ob_pos), l_dir));
 	return col;
 }
 
-glm::vec3 spec_shade(Sphere *obj, glm::vec3 ob_pos, Light &light)
+/*
+*	Calculate specular shading of an object.
+*/
+glm::vec3 spec_shade(Sphere *obj, 
+	glm::vec3 ob_pos, 
+	Light &light,
+	glm::vec3 view_dir)
 {
-	return glm::vec3();
+	glm::vec3 refl = reflect(light.dir, obj->get_normal(ob_pos));
+	refl = glm::normalize(refl);
+
+	return glm::max(0.f, glm::dot(refl, -view_dir)) * light.col;
 }
 
 int main(void)
@@ -108,18 +137,18 @@ int main(void)
 	char var = 65;
 	std::ofstream ofs;
 
-	float fov = deg2rad(90.f);
+	float fov = deg2rad(80.f);
 	float fov_tan = tan(fov / 2);
 
 	glm::vec3 ro = glm::vec3(0, 0, 0);
 	glm::vec3 rd = glm::vec3(0, 0, 1);
 
-	Light dist_light = Light(glm::vec3(2, 200, 1), glm::vec3(4, -0.5, 2), glm::vec3(1));
+	Light dist_light = Light(glm::vec3(2, 200, 1), glm::vec3(0, 0, 2), glm::vec3(1));
 	Ray ray =  Ray(ro, rd);
 	
 	glm::vec3 sph_or_1 = glm::vec3(-4, -2, 6);
 	glm::vec3 sph_or_2 = glm::vec3(-4, 2, 8);
-	glm::vec3 sph_or_3 = glm::vec3(4, 3, 5);
+	glm::vec3 sph_or_3 = glm::vec3(4, 3, 9);
 	float radius[] = { 1, 1.5 , 3};
 
 	Sphere sph_1 = Sphere(sph_or_1, radius[0], glm::vec3(127, 0, 0));
@@ -167,6 +196,7 @@ int main(void)
 					inters_p = ray.ro + t_int * ray.rd;
 					
 					col[i] = 0.1f * sphs.color + diff_shade(&sphs, inters_p, dist_light);
+					col[i] += spec_shade(&sphs, inters_p, dist_light, ray.rd);
 					//col[i] = sphs.color * glm::max(0.f, glm::dot(-rd, sphs.get_normal(inters_p)));
 					//std::cout << col[i].x << " " << col[i].y << " " << col[i].z << std::endl;
 				}
