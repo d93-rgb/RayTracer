@@ -10,8 +10,12 @@
 
 #include <glm.hpp>
 
-constexpr auto WIDTH = 900;
-constexpr auto HEIGHT = 450;
+constexpr auto WIDTH = 1600;
+constexpr auto HEIGHT = 900;
+
+
+float deg2rad(float deg) { return deg * M_PI / 180; }
+float rad2deg(float rad) { return rad * 180 / M_PI; }
 
 struct Object
 {
@@ -94,23 +98,28 @@ glm::vec3 diff_shade(Sphere *obj, glm::vec3 ob_pos, Light &light)
 	return col;
 }
 
+glm::vec3 spec_shade(Sphere *obj, glm::vec3 ob_pos, Light &light)
+{
+	return glm::vec3();
+}
+
 int main(void)
 {
 	char var = 65;
 	std::ofstream ofs;
 
-	float fov = M_PI/2.f;
+	float fov = deg2rad(90.f);
 	float fov_tan = tan(fov / 2);
 
 	glm::vec3 ro = glm::vec3(0, 0, 0);
 	glm::vec3 rd = glm::vec3(0, 0, 1);
 
-	Light dist_light = Light(glm::vec3(2, 200, 1), glm::vec3(1, -1, 0.5), glm::vec3(1));
+	Light dist_light = Light(glm::vec3(2, 200, 1), glm::vec3(4, -0.5, 2), glm::vec3(1));
 	Ray ray =  Ray(ro, rd);
 	
 	glm::vec3 sph_or_1 = glm::vec3(-4, -2, 6);
 	glm::vec3 sph_or_2 = glm::vec3(-4, 2, 8);
-	glm::vec3 sph_or_3 = glm::vec3(6, 3, 12);
+	glm::vec3 sph_or_3 = glm::vec3(4, 3, 5);
 	float radius[] = { 1, 1.5 , 3};
 
 	Sphere sph_1 = Sphere(sph_or_1, radius[0], glm::vec3(127, 0, 0));
@@ -123,7 +132,7 @@ int main(void)
 	// LOOPING OVER PIXELS
 	/***************************************/
 	float u = 0, v = 0;
-	float d = 2;
+	float d = 1;
 	float t_int;
 	float tmp;
 	glm::vec3 x_dir = glm::vec3(1, 0, 0);
@@ -157,7 +166,7 @@ int main(void)
 					// get intersection point
 					inters_p = ray.ro + t_int * ray.rd;
 					
-					col[i] = diff_shade(&sphs, inters_p, dist_light);
+					col[i] = 0.1f * sphs.color + diff_shade(&sphs, inters_p, dist_light);
 					//col[i] = sphs.color * glm::max(0.f, glm::dot(-rd, sphs.get_normal(inters_p)));
 					//std::cout << col[i].x << " " << col[i].y << " " << col[i].z << std::endl;
 				}
