@@ -153,6 +153,54 @@ struct Plane : public Object
 	}
 };
 
+struct Rectangle : public Object
+{
+	// position of the lower left corner
+	glm::vec3 pos;
+	glm::vec3 v1;
+	glm::vec3 v2;
+	// normal of the plane the rectangle resides in
+	glm::vec3 normal;
+
+	float v1_len;
+	float v2_len;
+
+	Rectangle(glm::vec3 p, glm::vec3 n, glm::vec3 u, glm::vec3 v, Material m) :
+		pos(p), normal(glm::normalize(n)), v1(u), v2(v))
+	{
+		this->mat = m;
+		v1_len = glm::length(u);
+		v2_len = glm::length(v);
+	}
+
+	float intersect(Ray &ray) const
+	{
+		float denom = glm::dot(ray.rd, normal);
+		
+		if (abs(denom) < 1e-6) return INFINITY;
+		
+		float num = glm::dot(normal, pos - ray.ro);
+
+		float t = num / denom;
+
+		if (t < 0) return INFINITY;
+		
+		glm::vec3 isec_p = ray.ro + t * ray.rd;
+
+		float inside_1 = glm::dot(isec_p, v1) / v1_len;
+		float inside_2 = glm::dot(isec_p, v2) / v2_len;
+
+		bool test = (0 <= inside_1) && (inside_1 <= 1) && (0 <= inside_2) && (inside_2 <= 1);
+
+		return test == true ? t : INFINITY;
+	}
+
+	glm::vec3 get_normal(glm::vec3 p)
+	{
+		return normal;
+	}
+};
+
 /*
 *	Calculate reflection vector.
 *	N should be normalized.
