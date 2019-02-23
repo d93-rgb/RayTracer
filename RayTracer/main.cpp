@@ -166,7 +166,7 @@ struct Rectangle : public Object
 	float v2_len;
 
 	Rectangle(glm::vec3 p, glm::vec3 n, glm::vec3 u, glm::vec3 v, Material m) :
-		pos(p), normal(glm::normalize(n)), v1(u), v2(v))
+		pos(p), normal(glm::normalize(n)), v1(u), v2(v)
 	{
 		this->mat = m;
 		v1_len = glm::length(u);
@@ -250,18 +250,23 @@ int main(void)
 	glm::vec3 ro = glm::vec3(0, 0, 0);
 	glm::vec3 rd = glm::vec3(0, 0, -1);
 
-	Light dist_light = Light(glm::vec3(2, 200, 1), glm::vec3(5, 4, 0.5), glm::vec3(0.8f));
+	Light dist_light = Light(glm::vec3(2, 200, 1), glm::vec3(0, 0, -0.5), glm::vec3(0.8f));
 	Ray ray =  Ray(ro, rd);
 	
+
+	/***************************************/
+	// CREATING SCENE
+	/***************************************/
 	glm::vec3 sph_or_1 = glm::vec3(-4, -2, -10);
 	glm::vec3 sph_or_2 = glm::vec3(-4, 2, -10);
 	glm::vec3 sph_or_3 = glm::vec3(4, 3, -9);
-	float radius[] = { 1, 1.5 , 3};
+	float radius[] = { 1, 1.5, 3 };
 
 	Material m1 = Material(glm::vec3(0.1, 0, 0), glm::vec3(0.7, 0, 0), glm::vec3(0.3, 0, 0));
 	Material m2 = Material(glm::vec3(0, 0.1, 0), glm::vec3(0, 0.7, 0), glm::vec3(0, 0.3, 0));
 	Material m3 = Material(glm::vec3(0.1, 0, 0.1), glm::vec3(0.7, 0, 0.7), glm::vec3(0.7, 0, 0.7));
 	Material m4 = Material(glm::vec3(0.1, 0.1, 0.1), glm::vec3(0.3, 0.3, 0), glm::vec3(0, 0, 0));
+	Material m5 = Material(glm::vec3(0.1, 0.1, 0.1), glm::vec3(0.7, 0, 0), glm::vec3(0.2, 0, 0));
 
 	Sphere sph_1 = Sphere(sph_or_1, radius[0], glm::vec3(0.5, 0, 0), m1);
 	Sphere sph_2 = Sphere(sph_or_2, radius[1], glm::vec3(0.5, 0.5, 0), m2);
@@ -269,7 +274,10 @@ int main(void)
 	
 	Plane pl_1 = Plane(glm::vec3(0, -25, 15), glm::vec3(0, 10, 5), glm::vec3(0.2), m4);
 
-	Object *objects[] = { &sph_1, &sph_2, &sph_3, &pl_1 };
+	Rectangle rect_1 = Rectangle(glm::vec3(5, 5, -5), 
+		glm::vec3(0, 0, 1), glm::vec3(1, 0, 0), glm::vec3(0, 1, 0), m5);
+
+	Object *objects[] = { &sph_1, &sph_2, &sph_3, &pl_1, &rect_1 };
 	
 	/***************************************/
 	// LOOPING OVER PIXELS
