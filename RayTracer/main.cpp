@@ -10,6 +10,8 @@
 
 #include <glm.hpp>
 
+#include "object.h"
+
 constexpr auto WIDTH = 1024;
 constexpr auto HEIGHT = 768;
 
@@ -23,18 +25,6 @@ void print_vec3(glm::vec3 v)
 	std::cout << "(" << v.x << ", " << v.y << ", " << v.z << ")" << std::endl;
 }
 
-
-struct Material
-{
-	glm::vec3 ka, kd, ks;
-
-	Material() : ka(0), kd(0), ks(0) {}
-
-	Material(glm::vec3 amb, glm::vec3 dif, glm::vec3 spe)
-		: ka(amb), kd(dif), ks(spe) {}
-};
-
-
 struct Ray
 {
 	glm::vec3 ro;
@@ -45,18 +35,6 @@ struct Ray
 		this->ro = ro;
 		this->rd = rd;
 	}
-};
-
-
-struct Object
-{
-	Material mat;
-
-	Object() = default;
-
-	virtual float intersect(Ray &ray) const = 0;
-
-	virtual glm::vec3 get_normal(glm::vec3 p) = 0;
 };
 
 struct Light
@@ -71,133 +49,6 @@ struct Light
 		this->p = p;
 		this->dir = glm::normalize(dir);
 		this->col = col;
-	}
-};
-
-
-struct Sphere : public Object
-{
-	glm::vec3 origin;
-	float r;
-	glm::vec3 color;
-
-	Sphere(glm::vec3 origin, float radius, glm::vec3 color, Material m)
-	{
-		this->origin = origin;
-		this->r = radius;
-		this->color = color;
-		this->mat = m;
-	}
-
-	glm::vec3 get_normal(glm::vec3 p)
-	{
-		return glm::normalize(p - origin);
-	}
-
-	float intersect(Ray &ray) const
-	{
-		float t1 = INFINITY, t2 = t1;
-		float tmp;
-
-		float term_1 = glm::dot(ray.rd, ray.rd);
-		float term_2 = 2 * glm::dot(ray.rd, ray.ro-origin);
-		float term_3 = glm::dot(ray.ro-origin, ray.ro-origin) - r * r;
-
-		float disc = term_2 * term_2 - 4 * term_1*term_3;
-
-		if (disc < 0)
-		{
-			return INFINITY;
-		}
-
-		t1 = (-term_2 + sqrt(disc)) / (2 * term_1);
-		t2 = (-term_2 - sqrt(disc)) / (2 * term_1);
-
-		tmp = fmin(t1, t2);
-		tmp = tmp >= 0 ? tmp : fmax(t1, t2);
-		return tmp >= 0 ? tmp : INFINITY;
-	}
-};
-
-struct Plane : public Object
-{
-	glm::vec3 pos;
-	glm::vec3 normal;
-	glm::vec3 color;
-	float k;
-	
-	Plane(glm::vec3 p, glm::vec3 n, glm::vec3 c, Material m) :
-		pos(p), normal(glm::normalize(n)), color(c)
-	{
-		this->mat = m;
-		k = glm::dot(normal, pos);
-	}
-
-	float intersect(Ray &ray) const
-	{
-		float denom = glm::dot(normal, ray.rd);
-
-		if (abs(denom) < 1e-6) return INFINITY;
-
-		float num = k - glm::dot(normal, ray.ro);
-
-		float t = num / denom;
-
-		//if(t >= 0) std::cout << t << std::endl;
-		return t >= 0 ? t : INFINITY;
-	}
-
-	glm::vec3 get_normal(glm::vec3 p)
-	{
-		return normal;
-	}
-};
-
-struct Rectangle : public Object
-{
-	// position of the lower left corner
-	glm::vec3 pos;
-	glm::vec3 v1;
-	glm::vec3 v2;
-	// normal of the plane the rectangle resides in
-	glm::vec3 normal;
-
-	float v1_len;
-	float v2_len;
-
-	Rectangle(glm::vec3 p, glm::vec3 n, glm::vec3 u, glm::vec3 v, Material m) :
-		pos(p), normal(glm::normalize(n)), v1(u), v2(v)
-	{
-		this->mat = m;
-		v1_len = glm::length(u);
-		v2_len = glm::length(v);
-	}
-
-	float intersect(Ray &ray) const
-	{
-		float denom = glm::dot(ray.rd, normal);
-		
-		if (abs(denom) < 1e-6) return INFINITY;
-		
-		float num = glm::dot(normal, pos - ray.ro);
-
-		float t = num / denom;
-
-		if (t < 0) return INFINITY;
-		
-		glm::vec3 isec_p = ray.ro + t * ray.rd;
-
-		float inside_1 = glm::dot(isec_p, v1) / v1_len;
-		float inside_2 = glm::dot(isec_p, v2) / v2_len;
-
-		bool test = (0 <= inside_1) && (inside_1 <= 1) && (0 <= inside_2) && (inside_2 <= 1);
-
-		return test == true ? t : INFINITY;
-	}
-
-	glm::vec3 get_normal(glm::vec3 p)
-	{
-		return normal;
 	}
 };
 
@@ -274,8 +125,8 @@ int main(void)
 	
 	Plane pl_1 = Plane(glm::vec3(0, -25, 15), glm::vec3(0, 10, 5), glm::vec3(0.2), m4);
 
-	Rectangle rect_1 = Rectangle(glm::vec3(5, 5, -5), 
-		glm::vec3(0, 0, 1), glm::vec3(1, 0, 0), glm::vec3(0, 1, 0), m5);
+	Rectangle rect_1 = Rectangle(glm::vec3(-2, -2, -5), 
+		glm::vec3(0, 0, 1), 2.f, 3.f, m5);
 
 	Object *objects[] = { &sph_1, &sph_2, &sph_3, &pl_1, &rect_1 };
 	
