@@ -108,7 +108,7 @@ struct Plane : public Object
 struct Rectangle : public Object
 {
 	// position of the lower left corner
-	glm::vec3 pos;
+	glm::vec3 center;
 	glm::vec3 v1;
 	glm::vec3 v2;
 	// normal of the plane the rectangle resides in
@@ -117,14 +117,15 @@ struct Rectangle : public Object
 	float v1_dot;
 	float v2_dot;
 
-	Rectangle(glm::vec3 p, glm::vec3 n, float u, float v, Material m) :
-		pos(p), normal(glm::normalize(n))
+	Rectangle(glm::vec3 center, glm::vec3 u, glm::vec3 v, Material m) :
+		center(center - 0.5f * (u + v))
 	{
 		this->mat = m;
-		this->v1 = u * glm::vec3(1, 0, 0);
-		this->v2 = v * glm::vec3(0, 1, 0);
-		v1_dot = glm::dot(u, u);
-		v2_dot = glm::dot(v, v);
+		this->v1 = u;
+		this->v2 = v;
+		this->normal = glm::normalize(glm::cross(u, v));
+		v1_dot = glm::dot(v1, v1);
+		v2_dot = glm::dot(v2, v2);
 	}
 
 	float intersect(Ray &ray) const
@@ -133,7 +134,7 @@ struct Rectangle : public Object
 
 		if (abs(denom) < 1e-6) return INFINITY;
 
-		float num = glm::dot(normal, pos - ray.ro);
+		float num = glm::dot(normal, center - ray.ro);
 
 		float t = num / denom;
 
@@ -141,8 +142,8 @@ struct Rectangle : public Object
 
 		glm::vec3 isec_p = ray.ro + t * ray.rd;
 
-		float inside_1 = glm::dot(isec_p - pos, v1) / v1_dot;
-		float inside_2 = glm::dot(isec_p - pos, v2) / v2_dot;
+		float inside_1 = glm::dot(isec_p - center, v1) / v1_dot;
+		float inside_2 = glm::dot(isec_p - center, v2) / v2_dot;
 
 		bool test = (0 <= inside_1) && (inside_1 <= 1) && (0 <= inside_2) && (inside_2 <= 1);
 
@@ -150,6 +151,11 @@ struct Rectangle : public Object
 	}
 
 	glm::vec3 get_normal(glm::vec3 p)
+	{
+		return normal;
+	}
+
+	glm::vec3 get_normal()
 	{
 		return normal;
 	}
