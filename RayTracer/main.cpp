@@ -6,11 +6,13 @@
 #include <vector>
 #include <chrono>
 #include <thread>
+
 #include <math.h>
 
 #include <glm.hpp>
 
 #include "object.h"
+#include "light.h"
 
 constexpr auto WIDTH = 1024;
 constexpr auto HEIGHT = 768;
@@ -25,33 +27,6 @@ void print_vec3(glm::vec3 v)
 	std::cout << "(" << v.x << ", " << v.y << ", " << v.z << ")" << std::endl;
 }
 
-struct Ray
-{
-	glm::vec3 ro;
-	glm::vec3 rd;
-
-	Ray(glm::vec3 ro, glm::vec3 rd)
-	{
-		this->ro = ro;
-		this->rd = rd;
-	}
-};
-
-struct Light
-{
-	glm::vec3 p;
-	glm::vec3 dir;
-	glm::vec3 col;
-	float intensity;
-
-	Light(glm::vec3 p, glm::vec3 dir, glm::vec3 col)
-	{
-		this->p = p;
-		this->dir = glm::normalize(dir);
-		this->col = col;
-	}
-};
-
 /*
 *	Calculate reflection vector.
 *	N should be normalized.
@@ -60,7 +35,6 @@ glm::vec3 reflect(glm::vec3 L, glm::vec3 N)
 {
 	return L - 2 * glm::dot(N, L) * N;
 }
-
 
 /*
 *	Calculate diffuse shading of an object.

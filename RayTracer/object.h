@@ -3,6 +3,19 @@
 
 #include "material.h"
 
+
+struct Ray
+{
+	glm::vec3 ro;
+	glm::vec3 rd;
+
+	Ray(glm::vec3 ro, glm::vec3 rd)
+	{
+		this->ro = ro;
+		this->rd = rd;
+	}
+};
+
 struct Object
 {
 	Material mat;
@@ -13,22 +26,6 @@ struct Object
 
 	virtual glm::vec3 get_normal(glm::vec3 p) = 0;
 };
-
-struct Light
-{
-	glm::vec3 p;
-	glm::vec3 dir;
-	glm::vec3 col;
-	float intensity;
-
-	Light(glm::vec3 p, glm::vec3 dir, glm::vec3 col)
-	{
-		this->p = p;
-		this->dir = glm::normalize(dir);
-		this->col = col;
-	}
-};
-
 
 struct Sphere : public Object
 {
