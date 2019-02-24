@@ -69,9 +69,9 @@ bool calc_shadow(glm::vec3 p, Scene sc, Light light)
 {
 	float t_int = INFINITY;
 	float tmp;
-	float eps = 2 * 0.00001f;
+	float eps = 1e-4f;
 	
-	Ray ray = Ray(p, glm::normalize(light.p - p));
+	Ray ray = Ray(p, -light.dir);
 	ray.ro += ray.rd * eps;
 
 	for (Object *objs : sc.get_scene())
@@ -100,7 +100,7 @@ int main(void)
 	glm::vec3 ro = glm::vec3(0, 0, 0);
 	glm::vec3 rd = glm::vec3(0, 0, -1);
 
-	Light dist_light = Light(glm::vec3(4, 6, -2), glm::vec3(-0.5, -6, -2), glm::vec3(0.8f));
+	DistantLight dist_light = DistantLight(glm::vec3(-0.5, -6, -2), glm::vec3(0.8f));
 	Ray ray =  Ray(ro, rd);
 	
 
