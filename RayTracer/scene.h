@@ -6,7 +6,10 @@ struct Scene
 {
 	std::vector<Object*> sc;
 
-	Scene() = default;
+	Scene() 
+	{
+		init();
+	}
 
 	void emplace_back(Object *o)
 	{
@@ -17,4 +20,9 @@ struct Scene
 	{
 		return sc;
 	}
+
+	void init();
+
+	~Scene() = default;
 };
+

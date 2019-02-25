@@ -2,19 +2,7 @@
 #include <glm.hpp>
 
 #include "material.h"
-
-
-struct Ray
-{
-	glm::vec3 ro;
-	glm::vec3 rd;
-
-	Ray(glm::vec3 ro, glm::vec3 rd)
-	{
-		this->ro = ro;
-		this->rd = rd;
-	}
-};
+#include "ray.h"
 
 struct Object
 {

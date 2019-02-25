@@ -70,7 +70,8 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>C:\ThirdParty\headers\glm-0.9.9.3\glm;$(IncludePath)</IncludePath>
+    <IncludePath>C:\ThirdParty\AntTweakBar_116\AntTweakBar\include;C:\ThirdParty\headers\glm-0.9.9.3\glm;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\ThirdParty\AntTweakBar_116\AntTweakBar\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -79,6 +80,10 @@
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
     </ClCompile>
+    <Link>
+      <AdditionalDependencies>AntTweakBar64.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <ImportLibrary>AntTweakBar64.lib</ImportLibrary>
+    </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -118,14 +123,17 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Scene.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="picture.ppm" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="gui.h" />
     <ClInclude Include="light.h" />
     <ClInclude Include="material.h" />
     <ClInclude Include="object.h" />
+    <ClInclude Include="ray.h" />
     <ClInclude Include="scene.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
