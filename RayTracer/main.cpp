@@ -1,5 +1,8 @@
 #define _USE_MATH_DEFINES
 
+// use for debugging
+#define DEBUG
+
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -58,31 +61,34 @@ glm::vec3 reflect(glm::vec3 L, glm::vec3 N)
 /*
 *	Calculate diffuse shading of an object.
 */
-glm::vec3 diff_shade(Object *obj, 
-	glm::vec3 ob_pos, 
-	Light &light)
+glm::vec3 diff_shade(Object &obj,
+	const glm::vec3 &ob_pos, 
+	const Light &light)
 {
-	glm::vec3 col = obj->mat.kd * glm::max(0.f, glm::dot(obj->get_normal(ob_pos), -light.dir));
+	glm::vec3 col = light.getEmission(light.p - ob_pos) * obj.mat->kd * 
+		glm::max(0.f, glm::dot(obj.get_normal(ob_pos), -light.dir));
 	return col;
 }
 
 /*
 *	Calculate specular shading of an object.
 */
-glm::vec3 spec_shade(Object *obj, 
-	glm::vec3 ob_pos, 
-	Light &light,
+glm::vec3 spec_shade(Object &obj,
+	const glm::vec3 &ob_pos,
+	const Light &light,
 	glm::vec3 view_dir)
 {
-	glm::vec3 refl = reflect(light.dir, obj->get_normal(ob_pos));
+	glm::vec3 refl = reflect(light.dir, obj.get_normal(ob_pos));
 	refl = glm::normalize(refl);
 
+#ifdef DEBUG
 	debug_vec.push_back(glm::max(0.f, glm::dot(refl, -view_dir)));
+#endif
 
-	return glm::max(0.f, glm::dot(refl, -view_dir)) * light.col * obj->mat.ks;
+	return light.getEmission(view_dir) * obj.mat->ks * glm::max(0.f, glm::dot(refl, -view_dir));
 }
 
-bool calc_shadow(glm::vec3 p, Scene sc, Light light)
+bool calc_shadow(glm::vec3 p, Scene &sc, const Light &light)
 {
 	float t_int = INFINITY;
 	float tmp;
@@ -91,7 +97,7 @@ bool calc_shadow(glm::vec3 p, Scene sc, Light light)
 	Ray ray = Ray(p, -light.dir);
 	ray.ro += ray.rd * eps;
 
-	for (Object *objs : sc.get_scene())
+	for (auto &objs : sc.get_scene())
 	{
 		tmp = objs->intersect(ray);
 
@@ -116,8 +122,6 @@ int main(void)
 
 	glm::vec3 ro = glm::vec3(0, 0, 0);
 	glm::vec3 rd = glm::vec3(0, 0, -1);
-
-	DistantLight dist_light = DistantLight(glm::vec3(-2, -4, -1), glm::vec3(0.8f));
 
 	glm::vec3 translation = glm::vec3(0, 0, -15);
 	float rot_ang = (float)0;
@@ -148,15 +152,18 @@ int main(void)
 	float d = 1;
 	float t_int;
 	float tmp;
+	float visible = 0.f;
 	glm::vec3 x_dir = glm::vec3(1, 0, 0);
 	glm::vec3 y_dir = glm::vec3(0, 1, 0);
 	glm::vec3 z_dir = glm::vec3(0, 0, 1);
 	glm::vec3 s;
 	glm::vec3 inters_p;
 	glm::vec3 def_col = glm::vec3(0.2, 0.2, 0.2);
+	glm::vec3 contribution = glm::vec3(0.f);
 
 	std::vector<glm::vec3> col(WIDTH * HEIGHT);
 
+	std::shared_ptr<Material> ob_mat;
 	Object *ob = nullptr;
 	
 
@@ -180,7 +187,7 @@ int main(void)
 			ray.rd = glm::normalize(s);
 
 			t_int = INFINITY;
-			for (Object *objs : sc.get_scene())
+			for (auto &objs : sc.get_scene())
 			{
 				tmp = objs->intersect(ray);
 
@@ -188,7 +195,7 @@ int main(void)
 				{
 					t_int = tmp;
 
-					ob = objs;
+					ob = objs.get();
 					//col[i] = sphs.color * glm::max(0.f, glm::dot(-rd, sphs.get_normal(inters_p)));
 					//std::cout << col[i].x << " " << col[i].y << " " << col[i].z << std::endl;
 				}
@@ -203,10 +210,17 @@ int main(void)
 				// get intersection point
 				inters_p = ray.ro + t_int * ray.rd;
 
-				col[i] = ob->mat.ka + diff_shade(ob, inters_p, dist_light);
-				col[i] += spec_shade(ob, inters_p, dist_light, ray.rd);
+				// accumulate all light contribution
+				for (auto &li : sc.lights)
+				{
+					// phong shading
+					contribution = ob->mat->kd * li->getEmission(ray.rd) + 
+						diff_shade(*ob, inters_p, *li) +
+						spec_shade(*ob, inters_p, *li, ray.rd);
 
-				col[i] *= calc_shadow(inters_p, sc, dist_light);
+					visible = calc_shadow(inters_p, sc, *li) == true ? 1.0f : 0.0f;
+					col[i] +=  visible * contribution;
+				}
 			}
 
 			// progress to next pixel

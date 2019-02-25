@@ -1,4 +1,5 @@
 #pragma once
+#include <memory>
 #include <glm.hpp>
 
 #include "material.h"
@@ -6,7 +7,7 @@
 
 struct Object
 {
-	Material mat;
+	std::shared_ptr<Material> mat;
 
 	Object() = default;
 
@@ -21,7 +22,7 @@ struct Sphere : public Object
 	float r;
 	glm::vec3 color;
 
-	Sphere(glm::vec3 origin, float radius, glm::vec3 color, Material m)
+	Sphere(glm::vec3 origin, float radius, glm::vec3 color, std::shared_ptr<Material> m)
 	{
 		this->origin = origin;
 		this->r = radius;
@@ -66,7 +67,7 @@ struct Plane : public Object
 	glm::vec3 color;
 	float k;
 
-	Plane(glm::vec3 p, glm::vec3 n, glm::vec3 c, Material m) :
+	Plane(glm::vec3 p, glm::vec3 n, glm::vec3 c, std::shared_ptr<Material> m) :
 		pos(p), normal(glm::normalize(n)), color(c)
 	{
 		this->mat = m;
@@ -105,7 +106,7 @@ struct Rectangle : public Object
 	float v1_dot;
 	float v2_dot;
 
-	Rectangle(glm::vec3 center, glm::vec3 u, glm::vec3 v, Material m) :
+	Rectangle(glm::vec3 center, glm::vec3 u, glm::vec3 v, std::shared_ptr<Material> m) :
 		center(center - 0.5f * (u + v))
 	{
 		this->mat = m;

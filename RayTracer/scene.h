@@ -1,22 +1,26 @@
 #pragma once
 #include <vector>
+#include <memory>
+
 #include "object.h"
+#include "light.h"
 
 struct Scene
 {
-	std::vector<Object*> sc;
+	std::vector<std::unique_ptr<Object>> sc;
+	std::vector<std::unique_ptr<Light>> lights;
 
 	Scene() 
 	{
 		init();
 	}
 
-	void emplace_back(Object *o)
+	/*void emplace_back(std::unique_ptr<Object> o)
 	{
 		sc.emplace_back(o);
 	}
-
-	std::vector<Object*> get_scene()
+*/
+	std::vector<std::unique_ptr<Object>>& get_scene()
 	{
 		return sc;
 	}
