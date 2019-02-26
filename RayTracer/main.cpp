@@ -62,10 +62,10 @@ glm::vec3 reflect(glm::vec3 L, glm::vec3 N)
 *	Calculate diffuse shading of an object.
 */
 glm::vec3 diff_shade(Object &obj,
-	const glm::vec3 &ob_pos, 
+	const glm::vec3 &ob_pos,
 	const Light &light)
 {
-	glm::vec3 col = light.getEmission(light.p - ob_pos) * obj.mat->kd * 
+	glm::vec3 col = light.getEmission(light.p - ob_pos) * obj.mat->diffuse *
 		glm::max(0.f, glm::dot(obj.get_normal(ob_pos), -light.dir));
 	return col;
 }
@@ -85,7 +85,7 @@ glm::vec3 spec_shade(Object &obj,
 	debug_vec.push_back(glm::max(0.f, glm::dot(refl, -view_dir)));
 #endif
 
-	return light.getEmission(view_dir) * obj.mat->ks * glm::max(0.f, glm::dot(refl, -view_dir));
+	return light.getEmission(view_dir) * obj.mat->specular * glm::max(0.f, glm::dot(refl, -view_dir));
 }
 
 bool calc_shadow(glm::vec3 p, Scene &sc, const Light &light)
@@ -93,7 +93,7 @@ bool calc_shadow(glm::vec3 p, Scene &sc, const Light &light)
 	float t_int = INFINITY;
 	float tmp;
 	float eps = 1e-3f;
-	
+
 	Ray ray = Ray(p, -light.dir);
 	ray.ro += ray.rd * eps;
 
@@ -144,7 +144,7 @@ int main(void)
 	// CREATING SCENE
 	/***************************************/
 	Scene sc;
-	
+
 	/***************************************/
 	// LOOPING OVER PIXELS
 	/***************************************/
@@ -165,12 +165,12 @@ int main(void)
 
 	std::shared_ptr<Material> ob_mat;
 	Object *ob = nullptr;
-	
 
-/*
-	Gui g = Gui();
-	g.init();
-*/
+
+	/*
+		Gui g = Gui();
+		g.init();
+	*/
 
 	// transform camera origin to world coordinates
 	transform_camera_ro(ray.ro, rot_ang);
@@ -179,7 +179,7 @@ int main(void)
 		for (int x = 0; x < WIDTH; ++x)
 		{
 			u = (2 * (float)(x + 0.5) - WIDTH) / HEIGHT * fov_tan;
-			v = (-2 * (float)(y + 0.5) + HEIGHT)/ HEIGHT * fov_tan;
+			v = (-2 * (float)(y + 0.5) + HEIGHT) / HEIGHT * fov_tan;
 
 			s = u * x_dir + v * y_dir - d * z_dir;
 
@@ -214,12 +214,12 @@ int main(void)
 				for (auto &li : sc.lights)
 				{
 					// phong shading
-					contribution = ob->mat->kd * li->getEmission(ray.rd) + 
+					contribution = ob->mat->ambient * li->getEmission(ray.rd) +
 						diff_shade(*ob, inters_p, *li) +
 						spec_shade(*ob, inters_p, *li, ray.rd);
 
 					visible = calc_shadow(inters_p, sc, *li) == true ? 1.0f : 0.0f;
-					col[i] +=  visible * contribution;
+					col[i] += visible * contribution;
 				}
 			}
 
@@ -227,10 +227,10 @@ int main(void)
 			++i;
 		}
 	}
-	
-	
-	
-	
+
+
+
+
 	/***************************************/
 	// WRITING TO IMAGE FILE
 	/***************************************/
@@ -247,7 +247,7 @@ int main(void)
 		unsigned char g = (unsigned int)round(col[i].y);
 		unsigned char b = (unsigned int)round(col[i].z);
 
-		ofs << r <<  g  << b;
+		ofs << r << g << b;
 	}
 
 	ofs.close();
@@ -261,10 +261,10 @@ int main(void)
 	ofs.close();
 	*/
 	std::cout << "Done creating image." << std::endl;
-	
+
 	//std::cout << (int)var << std::endl;
 	//getchar();
-	
+
 	// wait 1s before closing
 	std::this_thread::sleep_for(std::chrono::seconds(1));
 

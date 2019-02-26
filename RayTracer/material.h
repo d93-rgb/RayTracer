@@ -3,10 +3,10 @@
 
 struct Material
 {
-	glm::vec3 ka, kd, ks;
+	glm::vec3 ambient, diffuse, specular;
 
-	Material() : ka(0), kd(0), ks(0) {}
+	Material() : ambient(0), diffuse(0), specular(0) {}
 
 	Material(glm::vec3 amb, glm::vec3 dif, glm::vec3 spe)
-		: ka(amb), kd(dif), ks(spe) {}
+		: ambient(amb), diffuse(dif), specular(spe) {}
 };
