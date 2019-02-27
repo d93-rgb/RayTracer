@@ -20,7 +20,7 @@ struct Scene
 		sc.emplace_back(o);
 	}
 */
-	std::vector<std::unique_ptr<Object>>& get_scene()
+	const std::vector<std::unique_ptr<Object>>& get_scene() const
 	{
 		return sc;
 	}

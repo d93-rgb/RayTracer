@@ -50,16 +50,17 @@ void transform_camera_rd(glm::vec3 &rd, float rot_angle)
 }
 
 /*
-*	Calculate reflection vector.
-*	N should be normalized.
+	Calculate the reflection vector.
+	DIR	: the incident ray
+	N	: the normalized normal vector of a surface
 */
-glm::vec3 reflect(glm::vec3 L, glm::vec3 N)
+glm::vec3 reflect(glm::vec3 DIR, glm::vec3 N)
 {
-	return L - 2 * glm::dot(N, L) * N;
+	return DIR - 2 * glm::dot(N, DIR) * N;
 }
 
 /*
-*	Calculate diffuse shading of an object.
+	Calculate diffuse shading of an object.
 */
 glm::vec3 diff_shade(Object &obj,
 	const glm::vec3 &ob_pos,
@@ -71,12 +72,12 @@ glm::vec3 diff_shade(Object &obj,
 }
 
 /*
-*	Calculate specular shading of an object.
+	Calculate specular shading of an object.
 */
-glm::vec3 spec_shade(Object &obj,
+glm::vec3 spec_shade(const Object &obj,
 	const glm::vec3 &ob_pos,
 	const Light &light,
-	glm::vec3 view_dir)
+	const glm::vec3 &view_dir)
 {
 	glm::vec3 refl = reflect(light.dir, obj.get_normal(ob_pos));
 	refl = glm::normalize(refl);
@@ -88,7 +89,7 @@ glm::vec3 spec_shade(Object &obj,
 	return light.getEmission(view_dir) * obj.mat->specular * glm::max(0.f, glm::dot(refl, -view_dir));
 }
 
-bool calc_shadow(glm::vec3 p, Scene &sc, const Light &light)
+bool calc_shadow(glm::vec3 p, const Scene &sc, const Light &light)
 {
 	float t_int = INFINITY;
 	float tmp;
@@ -110,6 +111,54 @@ bool calc_shadow(glm::vec3 p, Scene &sc, const Light &light)
 	if (t_int < 0 || t_int == INFINITY) return true;
 
 	return false;
+}
+
+/*
+	Shoot next ray and obtain the next intersection point
+	s: the scene with its objects
+	ray: the next ray to trace
+*/
+glm::vec3 trace_ray(const Scene &s, const Ray &ray)
+{
+	float t_int = INFINITY;
+	float tmp = INFINITY;
+	Object *ob;
+
+	// get nearest intersection point
+	for (auto &objs : s.get_scene())
+	{
+		tmp = objs->intersect(ray);
+
+		if (tmp >= 0 && t_int > tmp)
+		{
+			t_int = tmp;
+
+			ob = objs.get();
+			//col[i] = sphs.color * glm::max(0.f, glm::dot(-rd, sphs.get_normal(inters_p)));
+			//std::cout << col[i].x << " " << col[i].y << " " << col[i].z << std::endl;
+		}
+	}
+
+}
+
+glm::vec3 handle_reflection(const Scene &s, 
+	const Ray &ray, 
+	const Object *o, 
+	const glm::vec3 &isect_p)
+{
+	glm::vec3 refl_rd = reflect(ray.rd, o->get_normal(isect_p));
+
+	trace_ray(s, Ray(ray.ro, refl_rd));
+}
+
+glm::vec3 handle_transmission(Ray ray)
+{
+
+}
+
+glm::vec3 handle_refraction(Ray ray)
+{
+
 }
 
 int main(void)
@@ -186,20 +235,6 @@ int main(void)
 			transform_camera_rd(s, rot_ang);
 			ray.rd = glm::normalize(s);
 
-			t_int = INFINITY;
-			for (auto &objs : sc.get_scene())
-			{
-				tmp = objs->intersect(ray);
-
-				if (tmp >= 0 && t_int > tmp)
-				{
-					t_int = tmp;
-
-					ob = objs.get();
-					//col[i] = sphs.color * glm::max(0.f, glm::dot(-rd, sphs.get_normal(inters_p)));
-					//std::cout << col[i].x << " " << col[i].y << " " << col[i].z << std::endl;
-				}
-			}
 			// no intersection found
 			if (t_int < 0 || t_int == INFINITY)
 			{

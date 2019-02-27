@@ -11,9 +11,9 @@ struct Object
 
 	Object() = default;
 
-	virtual float intersect(Ray &ray) const = 0;
+	virtual float intersect(const Ray &ray) const = 0;
 
-	virtual glm::vec3 get_normal(glm::vec3 p) = 0;
+	virtual glm::vec3 get_normal(glm::vec3 p) const = 0;
 };
 
 struct Sphere : public Object
@@ -30,12 +30,12 @@ struct Sphere : public Object
 		this->mat = m;
 	}
 
-	glm::vec3 get_normal(glm::vec3 p)
+	glm::vec3 get_normal(glm::vec3 p) const
 	{
 		return glm::normalize(p - origin);
 	}
 
-	float intersect(Ray &ray) const
+	float intersect(const Ray &ray) const
 	{
 		float t1 = INFINITY, t2 = t1;
 		float tmp;
@@ -74,7 +74,7 @@ struct Plane : public Object
 		k = glm::dot(normal, pos);
 	}
 
-	float intersect(Ray &ray) const
+	float intersect(const Ray &ray) const
 	{
 		float denom = glm::dot(normal, ray.rd);
 
@@ -88,7 +88,7 @@ struct Plane : public Object
 		return t >= 0 ? t : INFINITY;
 	}
 
-	glm::vec3 get_normal(glm::vec3 p)
+	glm::vec3 get_normal(glm::vec3 p) const
 	{
 		return normal;
 	}
@@ -96,7 +96,6 @@ struct Plane : public Object
 
 struct Rectangle : public Object
 {
-	// position of the lower left corner
 	glm::vec3 center;
 	glm::vec3 v1;
 	glm::vec3 v2;
@@ -117,7 +116,7 @@ struct Rectangle : public Object
 		v2_dot = glm::dot(v2, v2);
 	}
 
-	float intersect(Ray &ray) const
+	float intersect(const Ray &ray) const
 	{
 		float denom = glm::dot(ray.rd, normal);
 
@@ -139,12 +138,12 @@ struct Rectangle : public Object
 		return test == true ? t : INFINITY;
 	}
 
-	glm::vec3 get_normal(glm::vec3 p)
+	glm::vec3 get_normal(glm::vec3 p) const
 	{
 		return normal;
 	}
 
-	glm::vec3 get_normal()
+	glm::vec3 get_normal() const
 	{
 		return normal;
 	}
