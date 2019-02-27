@@ -166,9 +166,11 @@ glm::vec3 shoot_recursively(const Scene &s,
 		contribution = phong_shade(s, ray, isect_p, *o);
 	}
 
+
 	if (glm::length((*o)->mat->reflective) > 0)
 	{
-		contribution += handle_reflection(s, ray, isect_p, o, depth);
+		glm::vec3 reflective = (*o)->mat->reflective;
+		contribution +=  reflective * handle_reflection(s, ray, isect_p, o, depth);
 	}
 
 	return contribution;

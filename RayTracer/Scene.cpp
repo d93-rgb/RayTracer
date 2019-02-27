@@ -27,9 +27,9 @@ void Scene::init()
 		std::shared_ptr<Material>(new Material(glm::vec3(0, 0.f, 0.f), glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.f, 0.f, 0)))
 	};
 
-	mats[4]->reflective = glm::vec3(1.0f); // ideal mirror
+	mats[4]->reflective = glm::vec3(0.8f); 
 	mats[5]->reflective = glm::vec3(1.0f); // ideal mirror
-	mats[7]->reflective = glm::vec3(1.0f); // ideal mirror
+	mats[7]->reflective = glm::vec3(0.4f); 
 
 	// material for walls
 	std::shared_ptr<Material> wall_bot =
