@@ -72,7 +72,7 @@ glm::vec3 handle_reflection(const Scene &s,
 {
 	glm::vec3 refl_rd = glm::normalize(reflect(ray.rd, (*o)->get_normal(isect_p)));
 
-	return shoot_recursively(s, Ray(ray.ro + eps * refl_rd, refl_rd), o, ++depth);
+	return shoot_recursively(s, Ray(isect_p + eps * refl_rd, refl_rd), o, ++depth);
 }
 
 glm::vec3 handle_transmission(Ray ray)
