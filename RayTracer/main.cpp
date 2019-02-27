@@ -23,6 +23,8 @@
 constexpr auto WIDTH = 1024;
 constexpr auto HEIGHT = 768;
 
+constexpr auto MAX_DEPTH = 2;
+
 std::vector<float> debug_vec;
 
 float deg2rad(float deg) { return deg * (float)M_PI / 180; }
@@ -114,15 +116,17 @@ bool calc_shadow(glm::vec3 p, const Scene &sc, const Light &light)
 }
 
 /*
-	Shoot next ray and obtain the next intersection point
+	Shoot next ray and obtain the next intersection point.
+	Returns the distance to the hit surface and saves hit object
+	in the given pointer 'o'.
 	s: the scene with its objects
 	ray: the next ray to trace
+	o: the object that was hit
 */
-glm::vec3 trace_ray(const Scene &s, const Ray &ray)
+float shoot_ray(const Scene &s, const Ray &ray, Object **o)
 {
 	float t_int = INFINITY;
 	float tmp = INFINITY;
-	Object *ob;
 
 	// get nearest intersection point
 	for (auto &objs : s.get_scene())
@@ -132,33 +136,66 @@ glm::vec3 trace_ray(const Scene &s, const Ray &ray)
 		if (tmp >= 0 && t_int > tmp)
 		{
 			t_int = tmp;
-
-			ob = objs.get();
+			*o = objs.get();
 			//col[i] = sphs.color * glm::max(0.f, glm::dot(-rd, sphs.get_normal(inters_p)));
 			//std::cout << col[i].x << " " << col[i].y << " " << col[i].z << std::endl;
 		}
 	}
+	return t_int;
+}
 
+glm::vec3 shoot_recursively(const Scene &s, 
+	const Ray &ray,
+	Object **o,
+	int depth)
+{
+	if (depth == MAX_DEPTH)
+	{
+		return glm::vec3(0);
+	}
+
+	float distance;
+	glm::vec3 contribution = glm::vec3(0);
+	glm::vec3 isect_p;
+
+	distance = shoot_ray(s, ray, o);
+
+	// check for no intersection
+	if (distance < 0 || distance == INFINITY)
+	{
+		return glm::vec3(0);
+	}
+
+	isect_p = ray.ro + distance * ray.rd;
+
+	if (glm::length((*o)->mat->specular) > 0)
+	{
+		contribution += handle_reflection(s, ray, isect_p, o, depth);
+	}
+
+
+	return contribution;
 }
 
 glm::vec3 handle_reflection(const Scene &s, 
 	const Ray &ray, 
-	const Object *o, 
-	const glm::vec3 &isect_p)
+	const glm::vec3 &isect_p,
+	Object **o,
+	int depth)
 {
-	glm::vec3 refl_rd = reflect(ray.rd, o->get_normal(isect_p));
+	glm::vec3 refl_rd = reflect(ray.rd, (*o)->get_normal(isect_p));
 
-	trace_ray(s, Ray(ray.ro, refl_rd));
+	return shoot_recursively(s, Ray(ray.ro, refl_rd), o, ++depth);
 }
 
 glm::vec3 handle_transmission(Ray ray)
 {
-
+	return glm::vec3(0);
 }
 
 glm::vec3 handle_refraction(Ray ray)
 {
-
+	return glm::vec3(0);
 }
 
 int main(void)
@@ -199,8 +236,7 @@ int main(void)
 	/***************************************/
 	float u = 0, v = 0;
 	float d = 1;
-	float t_int;
-	float tmp;
+	float distance;
 	float visible = 0.f;
 	glm::vec3 x_dir = glm::vec3(1, 0, 0);
 	glm::vec3 y_dir = glm::vec3(0, 1, 0);
@@ -235,15 +271,17 @@ int main(void)
 			transform_camera_rd(s, rot_ang);
 			ray.rd = glm::normalize(s);
 
+
+			distance = shoot_ray(sc, ray, &ob);
 			// no intersection found
-			if (t_int < 0 || t_int == INFINITY)
+			if (distance < 0 || distance == INFINITY)
 			{
 				col[i] = def_col;
 			}
 			else
 			{
 				// get intersection point
-				inters_p = ray.ro + t_int * ray.rd;
+				inters_p = ray.ro + distance * ray.rd;
 
 				// accumulate all light contribution
 				for (auto &li : sc.lights)
