@@ -61,7 +61,7 @@ void render()
 	float fov_tan = tan(fov / 2);
 	float u = 0, v = 0;
 	float d = 1;
-	float rot_ang = deg2rad(30.f);
+	float rot_ang = deg2rad(0.f);
 	std::vector<glm::vec3> col(WIDTH * HEIGHT);
 
 	glm::vec3 ro = glm::vec3(0, 0, 13);
