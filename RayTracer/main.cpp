@@ -64,7 +64,7 @@ glm::vec3 reflect(glm::vec3 DIR, glm::vec3 N)
 /*
 	Calculate diffuse shading of an object.
 */
-glm::vec3 diff_shade(Object &obj,
+glm::vec3 diff_shade(const Object &obj,
 	const glm::vec3 &ob_pos,
 	const Light &light)
 {
@@ -113,6 +113,28 @@ bool calc_shadow(glm::vec3 p, const Scene &sc, const Light &light)
 	if (t_int < 0 || t_int == INFINITY) return true;
 
 	return false;
+}
+
+glm::vec3 phong_shade(const Scene &sc,
+	const Ray &ray,
+	const glm::vec3 &ob_pos,
+	const Object *o)
+{
+	float visible;
+	glm::vec3 color;
+	glm::vec3 contribution;
+
+	// accumulate all light contribution
+	for (auto &li : sc.lights)
+	{
+		// phong shading
+		contribution = o->mat->ambient * li->getEmission(ray.rd) +
+			diff_shade(*o, ob_pos, *li) +
+			spec_shade(*o, ob_pos, *li, ray.rd);
+
+		visible = calc_shadow(ob_pos, sc, *li) == true ? 1.0f : 0.0f;
+		color += visible * contribution;
+	}
 }
 
 /*
@@ -198,6 +220,11 @@ glm::vec3 handle_refraction(Ray ray)
 	return glm::vec3(0);
 }
 
+void render(const Scene &sc)
+{
+
+}
+
 int main(void)
 {
 	char var = 65;
@@ -280,20 +307,7 @@ int main(void)
 			}
 			else
 			{
-				// get intersection point
-				inters_p = ray.ro + distance * ray.rd;
-
-				// accumulate all light contribution
-				for (auto &li : sc.lights)
-				{
-					// phong shading
-					contribution = ob->mat->ambient * li->getEmission(ray.rd) +
-						diff_shade(*ob, inters_p, *li) +
-						spec_shade(*ob, inters_p, *li, ray.rd);
-
-					visible = calc_shadow(inters_p, sc, *li) == true ? 1.0f : 0.0f;
-					col[i] += visible * contribution;
-				}
+				col[i] = phong_shade(sc, ray, ray.ro + distance * ray.rd , ob);
 			}
 
 			// progress to next pixel
