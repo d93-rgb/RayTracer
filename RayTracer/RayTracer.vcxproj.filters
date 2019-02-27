@@ -24,6 +24,9 @@
     <ClCompile Include="scene.cpp">
       <Filter>Source Files\rt</Filter>
     </ClCompile>
+    <ClCompile Include="renderer.cpp">
+      <Filter>Source Files\rt</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="picture.ppm">
@@ -47,6 +50,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="ray.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="renderer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

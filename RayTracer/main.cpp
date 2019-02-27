@@ -16,6 +16,7 @@
 #include <gtc\matrix_transform.hpp>
 
 #include "object.h"
+#include "renderer.h"
 #include "light.h"
 #include "scene.h"
 #include "gui.h"
@@ -23,9 +24,12 @@
 constexpr auto WIDTH = 1024;
 constexpr auto HEIGHT = 768;
 
-constexpr auto MAX_DEPTH = 2;
+float eps = 1e-3f;
+int MAX_DEPTH = 2;
 
 std::vector<float> debug_vec;
+
+void write_file(const char *file, std::vector<glm::vec3> &col);
 
 float deg2rad(float deg) { return deg * (float)M_PI / 180; }
 float rad2deg(float rad) { return rad * 180 / (float)M_PI; }
@@ -51,207 +55,28 @@ void transform_camera_rd(glm::vec3 &rd, float rot_angle)
 		glm::vec3(sin(rot_angle), 0, cos(rot_angle))) * pos+translation;*/
 }
 
-/*
-	Calculate the reflection vector.
-	DIR	: the incident ray
-	N	: the normalized normal vector of a surface
-*/
-glm::vec3 reflect(glm::vec3 DIR, glm::vec3 N)
+void render()
 {
-	return DIR - 2 * glm::dot(N, DIR) * N;
-}
-
-/*
-	Calculate diffuse shading of an object.
-*/
-glm::vec3 diff_shade(const Object &obj,
-	const glm::vec3 &ob_pos,
-	const Light &light)
-{
-	glm::vec3 col = light.getEmission(light.p - ob_pos) * obj.mat->diffuse *
-		glm::max(0.f, glm::dot(obj.get_normal(ob_pos), -light.dir));
-	return col;
-}
-
-/*
-	Calculate specular shading of an object.
-*/
-glm::vec3 spec_shade(const Object &obj,
-	const glm::vec3 &ob_pos,
-	const Light &light,
-	const glm::vec3 &view_dir)
-{
-	glm::vec3 refl = reflect(light.dir, obj.get_normal(ob_pos));
-	refl = glm::normalize(refl);
-
-#ifdef DEBUG
-	debug_vec.push_back(glm::max(0.f, glm::dot(refl, -view_dir)));
-#endif
-
-	return light.getEmission(view_dir) * obj.mat->specular * glm::max(0.f, glm::dot(refl, -view_dir));
-}
-
-bool calc_shadow(glm::vec3 p, const Scene &sc, const Light &light)
-{
-	float t_int = INFINITY;
-	float tmp;
-	float eps = 1e-3f;
-
-	Ray ray = Ray(p, -light.dir);
-	ray.ro += ray.rd * eps;
-
-	for (auto &objs : sc.get_scene())
-	{
-		tmp = objs->intersect(ray);
-
-		if (tmp >= 0 && t_int > tmp)
-		{
-			t_int = tmp;
-		}
-	}
-	// no intersection found
-	if (t_int < 0 || t_int == INFINITY) return true;
-
-	return false;
-}
-
-glm::vec3 phong_shade(const Scene &sc,
-	const Ray &ray,
-	const glm::vec3 &ob_pos,
-	const Object *o)
-{
-	float visible;
-	glm::vec3 color;
-	glm::vec3 contribution;
-
-	// accumulate all light contribution
-	for (auto &li : sc.lights)
-	{
-		// phong shading
-		contribution = o->mat->ambient * li->getEmission(ray.rd) +
-			diff_shade(*o, ob_pos, *li) +
-			spec_shade(*o, ob_pos, *li, ray.rd);
-
-		visible = calc_shadow(ob_pos, sc, *li) == true ? 1.0f : 0.0f;
-		color += visible * contribution;
-	}
-}
-
-/*
-	Shoot next ray and obtain the next intersection point.
-	Returns the distance to the hit surface and saves hit object
-	in the given pointer 'o'.
-	s: the scene with its objects
-	ray: the next ray to trace
-	o: the object that was hit
-*/
-float shoot_ray(const Scene &s, const Ray &ray, Object **o)
-{
-	float t_int = INFINITY;
-	float tmp = INFINITY;
-
-	// get nearest intersection point
-	for (auto &objs : s.get_scene())
-	{
-		tmp = objs->intersect(ray);
-
-		if (tmp >= 0 && t_int > tmp)
-		{
-			t_int = tmp;
-			*o = objs.get();
-			//col[i] = sphs.color * glm::max(0.f, glm::dot(-rd, sphs.get_normal(inters_p)));
-			//std::cout << col[i].x << " " << col[i].y << " " << col[i].z << std::endl;
-		}
-	}
-	return t_int;
-}
-
-glm::vec3 shoot_recursively(const Scene &s, 
-	const Ray &ray,
-	Object **o,
-	int depth)
-{
-	if (depth == MAX_DEPTH)
-	{
-		return glm::vec3(0);
-	}
-
-	float distance;
-	glm::vec3 contribution = glm::vec3(0);
-	glm::vec3 isect_p;
-
-	distance = shoot_ray(s, ray, o);
-
-	// check for no intersection
-	if (distance < 0 || distance == INFINITY)
-	{
-		return glm::vec3(0);
-	}
-
-	isect_p = ray.ro + distance * ray.rd;
-
-	if (glm::length((*o)->mat->specular) > 0)
-	{
-		contribution += handle_reflection(s, ray, isect_p, o, depth);
-	}
-
-
-	return contribution;
-}
-
-glm::vec3 handle_reflection(const Scene &s, 
-	const Ray &ray, 
-	const glm::vec3 &isect_p,
-	Object **o,
-	int depth)
-{
-	glm::vec3 refl_rd = reflect(ray.rd, (*o)->get_normal(isect_p));
-
-	return shoot_recursively(s, Ray(ray.ro, refl_rd), o, ++depth);
-}
-
-glm::vec3 handle_transmission(Ray ray)
-{
-	return glm::vec3(0);
-}
-
-glm::vec3 handle_refraction(Ray ray)
-{
-	return glm::vec3(0);
-}
-
-void render(const Scene &sc)
-{
-
-}
-
-int main(void)
-{
-	char var = 65;
-	std::ofstream ofs;
-
 	float fov = deg2rad(65.f);
 	float fov_tan = tan(fov / 2);
+	float u = 0, v = 0;
+	float d = 1;
+	float rot_ang = deg2rad(30.f);
+	std::vector<glm::vec3> col(WIDTH * HEIGHT);
 
-	glm::vec3 ro = glm::vec3(0, 0, 0);
+	glm::vec3 ro = glm::vec3(0, 0, 13);
 	glm::vec3 rd = glm::vec3(0, 0, -1);
 
-	glm::vec3 translation = glm::vec3(0, 0, -15);
-	float rot_ang = (float)0;
+	glm::vec3 x_dir = glm::vec3(1, 0, 0);
+	glm::vec3 y_dir = glm::vec3(0, 1, 0);
+	glm::vec3 z_dir = glm::vec3(0, 0, 1);
+	glm::vec3 s;
 
 	Ray ray = Ray(ro, rd);
+	glm::vec3 def_col = glm::vec3(0.2, 0.2, 0.2);
 
-	// DEBUGGING
-	//glm::mat3 mat3 = glm::mat3(translation, glm::vec3(1), glm::vec3(1, 2, 3));
-
-	//for (int i = 0; i < 3; ++i)
-	//{
-	//	for (int j = 0; j < 3; ++j)
-	//	{
-	//		std::cout << mat3[i][j] << " ";
-	//	}
-	//	std::cout << std::endl;
-	//}	
+	std::shared_ptr<Material> ob_mat;
+	Object *ob = nullptr;
 
 	/***************************************/
 	// CREATING SCENE
@@ -261,31 +86,9 @@ int main(void)
 	/***************************************/
 	// LOOPING OVER PIXELS
 	/***************************************/
-	float u = 0, v = 0;
-	float d = 1;
-	float distance;
-	float visible = 0.f;
-	glm::vec3 x_dir = glm::vec3(1, 0, 0);
-	glm::vec3 y_dir = glm::vec3(0, 1, 0);
-	glm::vec3 z_dir = glm::vec3(0, 0, 1);
-	glm::vec3 s;
-	glm::vec3 inters_p;
-	glm::vec3 def_col = glm::vec3(0.2, 0.2, 0.2);
-	glm::vec3 contribution = glm::vec3(0.f);
-
-	std::vector<glm::vec3> col(WIDTH * HEIGHT);
-
-	std::shared_ptr<Material> ob_mat;
-	Object *ob = nullptr;
-
-
-	/*
-		Gui g = Gui();
-		g.init();
-	*/
-
 	// transform camera origin to world coordinates
 	transform_camera_ro(ray.ro, rot_ang);
+
 	for (int y = 0, i = 0; y < HEIGHT; ++y)
 	{
 		for (int x = 0; x < WIDTH; ++x)
@@ -297,31 +100,26 @@ int main(void)
 
 			transform_camera_rd(s, rot_ang);
 			ray.rd = glm::normalize(s);
-
-
-			distance = shoot_ray(sc, ray, &ob);
-			// no intersection found
-			if (distance < 0 || distance == INFINITY)
-			{
-				col[i] = def_col;
-			}
-			else
-			{
-				col[i] = phong_shade(sc, ray, ray.ro + distance * ray.rd , ob);
-			}
-
+			
+			col[i] = shoot_recursively(sc, ray, &ob, 0);
+			
 			// progress to next pixel
 			++i;
 		}
 	}
 
+	write_file("picture.ppm", col);
 
+}
 
+void write_file(const char *file, std::vector<glm::vec3> &col)
+{
+	std::ofstream ofs;
 
 	/***************************************/
 	// WRITING TO IMAGE FILE
 	/***************************************/
-	ofs.open("picture.ppm", _IOSbinary);
+	ofs.open(file, _IOSbinary);
 	// don't use \n as ending white space, because of windows
 	ofs << "P6 " << WIDTH << " " << HEIGHT << " 255 ";
 
@@ -339,6 +137,25 @@ int main(void)
 
 	ofs.close();
 
+	std::cout << "Done creating image." << std::endl;
+}
+
+int main(int argc, const char **agrv)
+{
+	//for (int i = 0; i < 3; ++i)
+	//{
+	//	for (int j = 0; j < 3; ++j)
+	//	{
+	//		std::cout << mat3[i][j] << " ";
+	//	}
+	//	std::cout << std::endl;
+	//}	
+
+	/*
+		Gui g = Gui();
+		g.init();
+	*/
+
 	/*
 	ofs.open("debug.txt");
 	for (float f : debug_vec)
@@ -347,13 +164,8 @@ int main(void)
 	}
 	ofs.close();
 	*/
-	std::cout << "Done creating image." << std::endl;
-
-	//std::cout << (int)var << std::endl;
 	//getchar();
-
-	// wait 1s before closing
-	std::this_thread::sleep_for(std::chrono::seconds(1));
+	render();
 
 	return 0;
 }
