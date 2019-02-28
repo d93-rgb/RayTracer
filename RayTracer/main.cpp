@@ -20,6 +20,7 @@
 #include "light.h"
 #include "scene.h"
 #include "gui.h"
+#include "camera.h"
 
 constexpr auto WIDTH = 1024;
 constexpr auto HEIGHT = 768;
@@ -59,20 +60,23 @@ void render()
 {
 	float fov = deg2rad(65.f);
 	float fov_tan = tan(fov / 2);
-	float u = 0, v = 0;
-	float d = 1;
+	float u = 0.f, v = 0.f;
+	float d = 1.f;
 	float rot_ang = deg2rad(0.f);
+	float rot_x = deg2rad(0.f);
 	std::vector<glm::vec3> col(WIDTH * HEIGHT);
-
-	glm::vec3 ro = glm::vec3(-1, 2, 20);
-	glm::vec3 rd = glm::vec3(0, 0, -1);
 
 	glm::vec3 x_dir = glm::vec3(1, 0, 0);
 	glm::vec3 y_dir = glm::vec3(0, 1, 0);
 	glm::vec3 z_dir = glm::vec3(0, 0, 1);
+	glm::vec3 translation = glm::vec3(-5.f, 21.f, -18);
 	glm::vec3 s;
 
-	Ray ray = Ray(ro, rd);
+	glm::mat4 cam_to_world = glm::rotate(glm::mat4(1), rot_x, x_dir) *
+		glm::translate(glm::mat4(1.f), translation);
+	Camera cam;
+	cam.setCamToWorld(cam_to_world);
+	
 	glm::vec3 def_col = glm::vec3(0.2, 0.2, 0.2);
 
 	std::shared_ptr<Material> ob_mat;
@@ -87,7 +91,7 @@ void render()
 	// LOOPING OVER PIXELS
 	/***************************************/
 	// transform camera origin to world coordinates
-	transform_camera_ro(ray.ro, rot_ang);
+	//transform_camera_ro(ray.ro, rot_ang);
 
 	for (int y = 0, i = 0; y < HEIGHT; ++y)
 	{
@@ -98,8 +102,8 @@ void render()
 
 			s = u * x_dir + v * y_dir - d * z_dir;
 
-			transform_camera_rd(s, rot_ang);
-			ray.rd = glm::normalize(s);
+			/*transform_camera_rd(s, rot_ang);
+			ray.rd = glm::normalize(s);*/
 			
 			col[i] = shoot_recursively(sc, ray, &ob, 0);
 			

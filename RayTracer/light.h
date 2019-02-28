@@ -31,6 +31,12 @@ struct Light
 		const glm::vec3 &view_dir) = 0;
 
 	virtual bool calc_shadow(glm::vec3 p, const Scene &sc) = 0;
+
+	virtual glm::vec3 phong_shade(const Scene & sc, 
+		const Ray & ray, 
+		const glm::vec3 & ob_pos, 
+		const Object * o) = 0;
+
 };
 
 
@@ -48,6 +54,7 @@ struct PointLight : public Light
 	glm::vec3 diff_shade(const Object & obj, const glm::vec3 & ob_pos);
 	glm::vec3 spec_shade(const Object & obj, const glm::vec3 & ob_pos, const glm::vec3 & view_dir);
 	bool calc_shadow(glm::vec3 p, const Scene &sc);
+	glm::vec3 phong_shade(const Scene & sc, const Ray & ray, const glm::vec3 & ob_pos, const Object * o);
 };
 
 struct SpotLight : public Light
@@ -73,4 +80,5 @@ struct DistantLight : public Light
 	glm::vec3 diff_shade(const Object & obj, const glm::vec3 & ob_pos);
 	glm::vec3 spec_shade(const Object & obj, const glm::vec3 & ob_pos, const glm::vec3 & view_dir);
 	bool calc_shadow(glm::vec3 p, const Scene &sc);
+	glm::vec3 phong_shade(const Scene & sc, const Ray & ray, const glm::vec3 & ob_pos, const Object * o);
 };

@@ -6,7 +6,7 @@ void Scene::init()
 
 	std::vector<glm::vec3> sph_origins = {
 		glm::vec3(-10, -2, -5),
-		glm::vec3(-5, 20, -22),
+		glm::vec3(-9, 21, -22),
 		glm::vec3(9, 3, -15),
 		glm::vec3(-11, 7, -15),
 		glm::vec3(0, 12, -25),
@@ -69,5 +69,5 @@ void Scene::init()
 
 	lights.emplace_back(std::unique_ptr<Light>(new PointLight(glm::vec3(-4, 24, -26.f),
 		glm::vec3(-2, -4, -2), 
-		glm::vec3(10.f))));
+		glm::vec3(20.f))));
 }
