@@ -61,6 +61,7 @@ void render()
 	float fov = deg2rad(65.f);
 	float fov_tan = tan(fov / 2);
 	float u = 0.f, v = 0.f;
+	// distance to view plane
 	float d = 1.f;
 	float rot_ang = deg2rad(0.f);
 	float rot_x = deg2rad(0.f);
@@ -69,18 +70,19 @@ void render()
 	glm::vec3 x_dir = glm::vec3(1, 0, 0);
 	glm::vec3 y_dir = glm::vec3(0, 1, 0);
 	glm::vec3 z_dir = glm::vec3(0, 0, 1);
-	glm::vec3 translation = glm::vec3(-5.f, 21.f, -18);
-	glm::vec3 s;
-
-	glm::mat4 cam_to_world = glm::rotate(glm::mat4(1), rot_x, x_dir) *
-		glm::translate(glm::mat4(1.f), translation);
-	Camera cam;
-	cam.setCamToWorld(cam_to_world);
-	
+	glm::vec3 translation = glm::vec3(0.f);//glm::vec3(-5.f, 21.f, -18);
 	glm::vec3 def_col = glm::vec3(0.2, 0.2, 0.2);
 
+	// subject to change
+	glm::mat4 cam_to_world = glm::rotate(glm::mat4(1), rot_x, x_dir) *
+		glm::translate(glm::mat4(1.f), translation);
+	
 	std::shared_ptr<Material> ob_mat;
 	Object *ob = nullptr;
+
+	Camera cam;
+	cam.setCamToWorld(cam_to_world);
+	cam.update();
 
 	/***************************************/
 	// CREATING SCENE
@@ -99,16 +101,8 @@ void render()
 		{
 			u = (2 * (float)(x + 0.5) - WIDTH) / HEIGHT * fov_tan;
 			v = (-2 * (float)(y + 0.5) + HEIGHT) / HEIGHT * fov_tan;
-
-			s = u * x_dir + v * y_dir - d * z_dir;
-
-			/*transform_camera_rd(s, rot_ang);
-			ray.rd = glm::normalize(s);*/
 			
-			col[i] = shoot_recursively(sc, ray, &ob, 0);
-			
-			// progress to next pixel
-			++i;
+			col[i++] = shoot_recursively(sc, cam.getPrimaryRay(u, v, d), &ob, 0);
 		}
 	}
 

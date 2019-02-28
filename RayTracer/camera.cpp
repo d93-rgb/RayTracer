@@ -1,10 +1,5 @@
 #include "camera.h"
 
-Camera::Camera()
-{
-}
-
-
 Camera::~Camera()
 {
 }
@@ -16,7 +11,8 @@ void Camera::setCamToWorld(glm::mat4 m)
 
 void Camera::update()
 {
-	up *= camToWorld;
-	right *= camToWorld;
-	front *= camToWorld;
+	origin = camToWorld * origin;
+	up = camToWorld * up;
+	right = camToWorld * right;
+	front = camToWorld * front;
 }

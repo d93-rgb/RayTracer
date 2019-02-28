@@ -5,21 +5,34 @@
 class Camera
 {
 public:
-	Camera() : origin(glm::vec3(0.f)),
-		right(glm::vec3(0.f, 1.f, 0.f)),
-		up(glm::vec3(0.f, 1.f, 0.f)),
-		front(glm::vec3(0.f, 1.f, -1.f)) {}
-	Camera(glm::vec3 o, glm::vec3 up, glm::vec3 right, glm::vec3 front) : 
-		origin(o), up(up), right(right), front(front) {}
+	Camera() : origin(glm::vec4(0.f, 0.f, 0.f, 1.f)),
+		right(glm::vec4(1.f, 0.f, 0.f, 0.f)),
+		up(glm::vec4(0.f, 1.f, 0.f, 0.f)),
+		front(glm::vec4(0.f, 0.f, 1.f, 0.f)) {}
+
+	Camera(glm::vec4 o, glm::vec4 up, glm::vec4 right, glm::vec4 front) : 
+		origin(o),
+		up(glm::normalize(up)),
+		right(glm::normalize(right)),
+		front(glm::normalize(front)) {}
 
 	~Camera();
 	void setCamToWorld(glm::mat4);
 
+	Ray getPrimaryRay(float u, float v, float d)
+	{
+		return Ray(origin, glm::normalize(u * right + v * up - d * front));
+	}
+
+	glm::vec4 getOrigin() 
+	{
+		return origin;
+	}
+
 	void update();
 
 protected:
-	glm::vec3 origin;
-	glm::vec3 up, right, front;
+	glm::vec4 origin;
+	glm::vec4 up, right, front;
 	glm::mat4 camToWorld;
 };
-
