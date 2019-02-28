@@ -48,7 +48,6 @@ void render()
 	float d = 1.f;
 	std::vector<glm::vec3> col(WIDTH * HEIGHT);
 	
-	std::shared_ptr<Material> ob_mat;
 	Object *ob = nullptr;
 
 	/***************************************/
