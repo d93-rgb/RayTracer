@@ -37,19 +37,27 @@ glm::vec3 phong_shade(const Scene &sc,
 	const glm::vec3 &ob_pos,
 	const Object *o)
 {
-	float visible = 1.f;
+	bool visible = true;
 	glm::vec3 color(0);
 	glm::vec3 contribution;
+
 
 	// accumulate all light contribution
 	for (auto &l : sc.lights)
 	{
-		contribution = o->mat->ambient * l->getEmission(ray.rd) +
-			l->diff_shade(*o, ob_pos) +
-			l->spec_shade(*o, ob_pos, ray.rd);
+		// DEBUGGING
+		glm::vec3 dir = l->p - ob_pos;
+		float sqd_dist = glm::dot(dir, dir);
+		// DEBUGGING END
+		visible = l->calc_shadow(ob_pos, sc);
 
-		visible = l->calc_shadow(ob_pos, sc) == true ? 1.0f : 0.0f;
-		color += visible * contribution;
+		if (visible) {
+			contribution = (o->mat->ambient * l->getEmission(ray.rd) +
+				l->diff_shade(*o, ob_pos) +
+				l->spec_shade(*o, ob_pos, ray.rd)) / sqd_dist;
+
+			color += contribution;
+		}
 	}
 	return color;
 }
@@ -110,7 +118,7 @@ glm::vec3 shoot_recursively(const Scene &s,
 	//if ((glm::length((*o)->mat->ambient) > 0) || (glm::length((*o)->mat->specular) > 0))
 	if(1)
 	{
-		contribution = phong_shade(s, Ray(ray.ro + eps * ray.rd, ray.rd), isect_p, *o);
+		contribution = phong_shade(s, ray/*Ray(ray.ro + eps * ray.rd, ray.rd)*/, isect_p, *o);
 	}
 
 

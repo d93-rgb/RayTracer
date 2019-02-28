@@ -13,7 +13,7 @@ void Scene::init()
 		glm::vec3(0, -2, -11),
 		glm::vec3(-3, -2, -4),
 		glm::vec3(-14, -2, -3),
-		//glm::vec3(-4, 26, -25.f)
+		//glm::vec3(-4, 20, -15.f)
 	};
 	float radius[] = { 1, 1.5, 3, 2, 4 , 4, 2, 3, 2};
 
@@ -35,14 +35,15 @@ void Scene::init()
 
 	// material for walls
 	std::shared_ptr<Material> wall_bot =
-		std::shared_ptr<Material>(new Material(glm::vec3(0.1, 0.1, 0.1), glm::vec3(0.4, 0.4, 0.4), glm::vec3(0, 0, 0)));
+		std::shared_ptr<Material>(new Material(glm::vec3(0.2, 0.2, 0.2), glm::vec3(0.4, 0.4, 0.4), glm::vec3(0.1, 0.1, 0.1)));
 	std::shared_ptr<Material> wall_front =
-		std::shared_ptr<Material>(new Material(glm::vec3(0.5, 0.5, 0.5), glm::vec3(0.2, 0.2, 0.2), glm::vec3(0, 0, 0)));
+		std::shared_ptr<Material>(new Material(glm::vec3(0.3, 0.3, 0.3), glm::vec3(0.2, 0.2, 0.2), glm::vec3(0.1, 0.1, 0.1)));
 	std::shared_ptr<Material> wall_right =
-		std::shared_ptr<Material>(new Material(glm::vec3(0.3, 0.3, 0.3), glm::vec3(0.5, 0.6, 0.4), glm::vec3(0, 0, 0)));
+		std::shared_ptr<Material>(new Material(glm::vec3(0.3, 0.3, 0.3), glm::vec3(0.5, 0.6, 0.4), glm::vec3(0.1, 0.1, 0.1)));
 	std::shared_ptr<Material> wall_left =
-		std::shared_ptr<Material>(new Material(glm::vec3(0.1, 0.1, 0.1), glm::vec3(0.2, 0.4, 0.6), glm::vec3(0, 0, 0)));
+		std::shared_ptr<Material>(new Material(glm::vec3(0.3, 0.3, 0.3), glm::vec3(0.2, 0.4, 0.6), glm::vec3(0.1, 0.1, 0.1)));
 	
+	wall_bot->reflective = glm::vec3(0.5f);
 	for (size_t i = 0; i < sph_origins.size(); ++i)
 	{
 		sc.emplace_back(std::unique_ptr<Object>(new Sphere(sph_origins[i], radius[i], glm::vec3(0.f), mats[i])));
@@ -63,8 +64,10 @@ void Scene::init()
 		glm::vec3(0, 50, 0), glm::vec3(0, 0, 60), wall_left)));
 
 	// add lights to the scene
-	lights.emplace_back(std::unique_ptr<Light>(new DistantLight(glm::vec3(-2, -4, -2), glm::vec3(0.8f))));
-	lights.emplace_back(std::unique_ptr<Light>(new PointLight(glm::vec3(-4, 26, -25.f), 
+	//lights.emplace_back(std::unique_ptr<Light>(new DistantLight(glm::vec3(-2, -4, -2), glm::vec3(0.8f))));
+	//lights.emplace_back(std::unique_ptr<Light>(new DistantLight(glm::vec3(0, 0, -2), glm::vec3(0.8f))));
+
+	lights.emplace_back(std::unique_ptr<Light>(new PointLight(glm::vec3(-4, 24, -26.f),
 		glm::vec3(-2, -4, -2), 
-		glm::vec3(40.f))));
+		glm::vec3(10.f))));
 }

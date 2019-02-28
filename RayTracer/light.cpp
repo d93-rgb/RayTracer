@@ -5,12 +5,14 @@
 glm::vec3 PointLight::diff_shade(const Object & obj, const glm::vec3 & ob_pos)
 {
 	glm::vec3 dir = ob_pos - this->p;
-	float sq_dist = glm::dot(dir, dir);
+	
+	//float sq_dist = glm::dot(dir, dir); // attenuation
+	
 
 	glm::vec3 col = getEmission(dir) * obj.mat->diffuse *
 		glm::max(0.f, glm::dot(obj.get_normal(ob_pos), -glm::normalize(dir)));
 
-	return col / sq_dist;
+	return col; // sq_dist;
 }
 
 /*
@@ -22,7 +24,8 @@ glm::vec3 PointLight::spec_shade(const Object &obj,
 {
 	glm::vec3 dir = ob_pos - this->p;
 	glm::vec3 refl = reflect(dir, obj.get_normal(ob_pos));
-	float sq_dist = glm::dot(dir, dir);
+	
+	//float sq_dist = glm::dot(dir, dir);
 
 	refl = glm::normalize(refl);
 
@@ -32,12 +35,12 @@ glm::vec3 PointLight::spec_shade(const Object &obj,
 
 	return getEmission(view_dir) *
 		obj.mat->specular *
-		glm::max(0.f, glm::dot(refl, -view_dir)) / 
-		sq_dist;
+		glm::max(0.f, glm::dot(refl, -view_dir));
 }
 
 bool PointLight::calc_shadow(glm::vec3 p, const Scene &sc)
 {
+	return true;
 	float t_int = INFINITY;
 	float tmp;
 

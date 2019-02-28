@@ -24,7 +24,7 @@
 constexpr auto WIDTH = 1024;
 constexpr auto HEIGHT = 768;
 
-float eps = 1e-3f;
+float eps = 7e-3f;
 int MAX_DEPTH = 4;
 
 std::vector<float> debug_vec;
@@ -61,10 +61,10 @@ void render()
 	float fov_tan = tan(fov / 2);
 	float u = 0, v = 0;
 	float d = 1;
-	float rot_ang = deg2rad(20.f);
+	float rot_ang = deg2rad(0.f);
 	std::vector<glm::vec3> col(WIDTH * HEIGHT);
 
-	glm::vec3 ro = glm::vec3(0, 3, 16);
+	glm::vec3 ro = glm::vec3(-1, 2, 22);
 	glm::vec3 rd = glm::vec3(0, 0, -1);
 
 	glm::vec3 x_dir = glm::vec3(1, 0, 0);
