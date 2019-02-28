@@ -6,7 +6,7 @@ void Scene::init()
 
 	std::vector<glm::vec3> sph_origins = {
 		glm::vec3(-10, -2, -5),
-		glm::vec3(-5, 9, -18),
+		glm::vec3(-5, 20, -22),
 		glm::vec3(9, 3, -15),
 		glm::vec3(-11, 7, -15),
 		glm::vec3(0, 12, -25),
@@ -18,13 +18,13 @@ void Scene::init()
 	float radius[] = { 1, 1.5, 3, 2, 4 , 4, 2, 3, 2};
 
 	std::vector<std::shared_ptr<Material>> mats = {
-		std::shared_ptr<Material>(new Material(glm::vec3(0.1, 0, 0), glm::vec3(0.7, 0, 0), glm::vec3(1.0, 0, 0))),
-		std::shared_ptr<Material>(new Material(glm::vec3(0, 0.1, 0), glm::vec3(0, 0.7, 0), glm::vec3(0, 1.0, 0))),
-		std::shared_ptr<Material>(new Material(glm::vec3(0.1, 0, 0.1), glm::vec3(0.7, 0, 0.7), glm::vec3(0.7, 0, 0.7))),
-		std::shared_ptr<Material>(new Material(glm::vec3(0.1, 0.1, 0.1), glm::vec3(0.3, 0.3, 0.8), glm::vec3(0.7, 0.7, 0.7))),
+		std::shared_ptr<Material>(new Material(glm::vec3(0.02, 0, 0), glm::vec3(0.7, 0, 0), glm::vec3(1.0, 0, 0))),
+		std::shared_ptr<Material>(new Material(glm::vec3(0, 0.02, 0), glm::vec3(0, 0.7, 0), glm::vec3(0, 1.0, 0))),
+		std::shared_ptr<Material>(new Material(glm::vec3(0.02, 0, 0.02), glm::vec3(0.7, 0, 0.7), glm::vec3(0.7, 0, 0.7))),
+		std::shared_ptr<Material>(new Material(glm::vec3(0.013, 0.013, 0.035), glm::vec3(0.3, 0.3, 0.8), glm::vec3(0.7, 0.7, 0.7))),
 		std::shared_ptr<Material>(new Material(glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.0, 0.0, 0.0), glm::vec3(0, 0, 0))),
 		std::shared_ptr<Material>(new Material(glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.0, 0.0, 0.0), glm::vec3(0, 0, 0))),
-		std::shared_ptr<Material>(new Material(glm::vec3(0.1, 0.1, 0.1), glm::vec3(0.8, 0.8, 0.0), glm::vec3(0.5, 0.5, 0))),
+		std::shared_ptr<Material>(new Material(glm::vec3(0.02, 0.02, 0.f), glm::vec3(0.8, 0.8, 0.0), glm::vec3(0.5, 0.5, 0))),
 		std::shared_ptr<Material>(new Material(glm::vec3(0, 0.f, 0.f), glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.f, 0.f, 0))),
 		std::shared_ptr<Material>(new Material(glm::vec3(0, 0.f, 0.f), glm::vec3(1.0, 1.0, 1.0), glm::vec3(0.f, 0.f, 0)))
 	};
@@ -35,13 +35,13 @@ void Scene::init()
 
 	// material for walls
 	std::shared_ptr<Material> wall_bot =
-		std::shared_ptr<Material>(new Material(glm::vec3(0.2, 0.2, 0.2), glm::vec3(0.4, 0.4, 0.4), glm::vec3(0.1, 0.1, 0.1)));
+		std::shared_ptr<Material>(new Material(glm::vec3(0.02, 0.02, 0.02), glm::vec3(0.4, 0.4, 0.4), glm::vec3(0.1, 0.1, 0.1)));
 	std::shared_ptr<Material> wall_front =
-		std::shared_ptr<Material>(new Material(glm::vec3(0.3, 0.3, 0.3), glm::vec3(0.2, 0.2, 0.2), glm::vec3(0.1, 0.1, 0.1)));
+		std::shared_ptr<Material>(new Material(glm::vec3(0.02, 0.02, 0.02), glm::vec3(0.2, 0.2, 0.2), glm::vec3(0.1, 0.1, 0.1)));
 	std::shared_ptr<Material> wall_right =
-		std::shared_ptr<Material>(new Material(glm::vec3(0.3, 0.3, 0.3), glm::vec3(0.5, 0.6, 0.4), glm::vec3(0.1, 0.1, 0.1)));
+		std::shared_ptr<Material>(new Material(glm::vec3(0.02, 0.024, 0.016), glm::vec3(0.5, 0.6, 0.4), glm::vec3(0.1, 0.1, 0.1)));
 	std::shared_ptr<Material> wall_left =
-		std::shared_ptr<Material>(new Material(glm::vec3(0.3, 0.3, 0.3), glm::vec3(0.2, 0.4, 0.6), glm::vec3(0.1, 0.1, 0.1)));
+		std::shared_ptr<Material>(new Material(glm::vec3(0.02, 0.02, 0.02), glm::vec3(0.2, 0.4, 0.6), glm::vec3(0.1, 0.1, 0.1)));
 	
 	wall_bot->reflective = glm::vec3(0.5f);
 	for (size_t i = 0; i < sph_origins.size(); ++i)

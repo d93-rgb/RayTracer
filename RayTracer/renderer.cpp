@@ -39,7 +39,6 @@ glm::vec3 phong_shade(const Scene &sc,
 {
 	bool visible = true;
 	glm::vec3 color(0);
-	glm::vec3 contribution;
 
 
 	// accumulate all light contribution
@@ -50,13 +49,12 @@ glm::vec3 phong_shade(const Scene &sc,
 		float sqd_dist = glm::dot(dir, dir);
 		// DEBUGGING END
 		visible = l->calc_shadow(ob_pos, sc);
-
+		color = o->mat->ambient * l->getEmission(ray.rd);
+		
 		if (visible) {
-			contribution = (o->mat->ambient * l->getEmission(ray.rd) +
-				l->diff_shade(*o, ob_pos) +
+			color +=
+				(l->diff_shade(*o, ob_pos) +
 				l->spec_shade(*o, ob_pos, ray.rd)) / sqd_dist;
-
-			color += contribution;
 		}
 	}
 	return color;

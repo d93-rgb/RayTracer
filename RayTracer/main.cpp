@@ -64,7 +64,7 @@ void render()
 	float rot_ang = deg2rad(0.f);
 	std::vector<glm::vec3> col(WIDTH * HEIGHT);
 
-	glm::vec3 ro = glm::vec3(-1, 2, 22);
+	glm::vec3 ro = glm::vec3(-1, 2, 20);
 	glm::vec3 rd = glm::vec3(0, 0, -1);
 
 	glm::vec3 x_dir = glm::vec3(1, 0, 0);
