@@ -29,6 +29,11 @@ public:
 		return origin;
 	}
 
+	glm::vec4 getUpVec()
+	{
+		return up;
+	}
+
 	void update();
 
 protected:

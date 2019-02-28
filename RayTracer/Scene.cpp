@@ -3,6 +3,10 @@
 
 void Scene::init()
 {
+	glm::vec3 translation = glm::vec3(-1.f, 2.f, 20.f);
+	float rot_y = glm::radians(0.f);
+
+	glm::mat4 cam_to_world;
 
 	std::vector<glm::vec3> sph_origins = {
 		glm::vec3(-10, -2, -5),
@@ -16,6 +20,8 @@ void Scene::init()
 		//glm::vec3(-4, 20, -15.f)
 	};
 	float radius[] = { 1, 1.5, 3, 2, 4 , 4, 2, 3, 2};
+
+	Camera cam;
 
 	std::vector<std::shared_ptr<Material>> mats = {
 		std::shared_ptr<Material>(new Material(glm::vec3(0.02, 0, 0), glm::vec3(0.7, 0, 0), glm::vec3(1.0, 0, 0))),
@@ -70,4 +76,7 @@ void Scene::init()
 	lights.emplace_back(std::unique_ptr<Light>(new PointLight(glm::vec3(-4, 24, -26.f),
 		glm::vec3(-2, -4, -2), 
 		glm::vec3(20.f))));
+
+	cam.setCamToWorld(glm::rotate(glm::translate(glm::mat4(1.f), translation),
+		rot_y, glm::vec3(cam.getUpVec())));
 }

@@ -13,7 +13,6 @@
 #include <math.h>
 
 #include <glm.hpp>
-#include <gtc\matrix_transform.hpp>
 
 #include "object.h"
 #include "renderer.h"
@@ -32,57 +31,25 @@ std::vector<float> debug_vec;
 
 void write_file(const char *file, std::vector<glm::vec3> &col);
 
-float deg2rad(float deg) { return deg * (float)M_PI / 180; }
-float rad2deg(float rad) { return rad * 180 / (float)M_PI; }
+//float deg2rad(float deg) { return deg * (float)M_PI / 180; }
+//float rad2deg(float rad) { return rad * 180 / (float)M_PI; }
 
 void print_vec3(glm::vec3 v)
 {
 	std::cout << "(" << v.x << ", " << v.y << ", " << v.z << ")" << std::endl;
 }
 
-void transform_camera_ro(glm::vec3 &ro, float rot_angle)
-{
-	ro = glm::rotate(glm::mat4(1.0f), rot_angle, glm::vec3(0, 1, 0)) * glm::vec4(ro, 0.0f);
-	/*return glm::mat3x3(glm::vec3(cos(rot_angle), 0, -sin(rot_angle)),
-		glm::vec3(0, 1, 0),
-		glm::vec3(sin(rot_angle), 0, cos(rot_angle))) * pos+translation;*/
-}
-
-void transform_camera_rd(glm::vec3 &rd, float rot_angle)
-{
-	rd = glm::rotate(glm::mat4(1.0f), rot_angle, glm::vec3(0, 1, 0)) * glm::vec4(rd, 0.0f);
-	/*return glm::mat3x3(glm::vec3(cos(rot_angle), 0, -sin(rot_angle)),
-		glm::vec3(0, 1, 0),
-		glm::vec3(sin(rot_angle), 0, cos(rot_angle))) * pos+translation;*/
-}
-
 void render()
 {
-	float fov = deg2rad(65.f);
+	float fov = glm::radians(65.f);
 	float fov_tan = tan(fov / 2);
 	float u = 0.f, v = 0.f;
 	// distance to view plane
 	float d = 1.f;
-	float rot_ang = deg2rad(0.f);
-	float rot_x = deg2rad(0.f);
 	std::vector<glm::vec3> col(WIDTH * HEIGHT);
-
-	glm::vec3 x_dir = glm::vec3(1, 0, 0);
-	glm::vec3 y_dir = glm::vec3(0, 1, 0);
-	glm::vec3 z_dir = glm::vec3(0, 0, 1);
-	glm::vec3 translation = glm::vec3(0.f);//glm::vec3(-5.f, 21.f, -18);
-	glm::vec3 def_col = glm::vec3(0.2, 0.2, 0.2);
-
-	// subject to change
-	glm::mat4 cam_to_world = glm::rotate(glm::mat4(1), rot_x, x_dir) *
-		glm::translate(glm::mat4(1.f), translation);
 	
 	std::shared_ptr<Material> ob_mat;
 	Object *ob = nullptr;
-
-	Camera cam;
-	cam.setCamToWorld(cam_to_world);
-	cam.update();
 
 	/***************************************/
 	// CREATING SCENE
@@ -92,9 +59,6 @@ void render()
 	/***************************************/
 	// LOOPING OVER PIXELS
 	/***************************************/
-	// transform camera origin to world coordinates
-	//transform_camera_ro(ray.ro, rot_ang);
-
 	for (int y = 0, i = 0; y < HEIGHT; ++y)
 	{
 		for (int x = 0; x < WIDTH; ++x)
@@ -102,7 +66,7 @@ void render()
 			u = (2 * (float)(x + 0.5) - WIDTH) / HEIGHT * fov_tan;
 			v = (-2 * (float)(y + 0.5) + HEIGHT) / HEIGHT * fov_tan;
 			
-			col[i++] = shoot_recursively(sc, cam.getPrimaryRay(u, v, d), &ob, 0);
+			col[i++] = shoot_recursively(sc, sc.cam.getPrimaryRay(u, v, d), &ob, 0);
 		}
 	}
 

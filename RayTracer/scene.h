@@ -2,13 +2,18 @@
 #include <vector>
 #include <memory>
 
+#include <gtc\matrix_transform.hpp>
+
 #include "object.h"
 #include "light.h"
+#include "camera.h"
 
 struct Scene
 {
 	std::vector<std::unique_ptr<Object>> sc;
 	std::vector<std::unique_ptr<Light>> lights;
+
+	Camera cam;
 
 	Scene() 
 	{
