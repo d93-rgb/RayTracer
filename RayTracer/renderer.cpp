@@ -11,59 +11,6 @@ glm::vec3 reflect(glm::vec3 DIR, glm::vec3 N)
 	return DIR - 2 * glm::dot(N, DIR) * N;
 }
 
-/*
-	Calculate diffuse shading of an object.
-*/
-glm::vec3 diff_shade(const Object &obj,
-	const glm::vec3 &ob_pos,
-	const Light &light)
-{
-	glm::vec3 col = light.getEmission(light.p - ob_pos) * obj.mat->diffuse *
-		glm::max(0.f, glm::dot(obj.get_normal(ob_pos), -light.dir));
-	return col;
-}
-
-/*
-	Calculate specular shading of an object.
-*/
-glm::vec3 spec_shade(const Object &obj,
-	const glm::vec3 &ob_pos,
-	const Light &light,
-	const glm::vec3 &view_dir)
-{
-	glm::vec3 refl = reflect(light.dir, obj.get_normal(ob_pos));
-	refl = glm::normalize(refl);
-
-#ifdef DEBUG
-	debug_vec.push_back(glm::max(0.f, glm::dot(refl, -view_dir)));
-#endif
-
-	return light.getEmission(view_dir) * obj.mat->specular * glm::max(0.f, glm::dot(refl, -view_dir));
-}
-
-bool calc_shadow(glm::vec3 p, const Scene &sc, const Light &light)
-{
-	float t_int = INFINITY;
-	float tmp;
-
-	Ray ray = Ray(p, -light.dir);
-	ray.ro += ray.rd * eps;
-
-	for (auto &objs : sc.get_scene())
-	{
-		tmp = objs->intersect(ray);
-
-		if (tmp >= 0 && t_int > tmp)
-		{
-			t_int = tmp;
-		}
-	}
-	// no intersection found
-	if (t_int < 0 || t_int == INFINITY) return true;
-
-	return false;
-}
-
 glm::vec3 handle_reflection(const Scene &s,
 	const Ray &ray,
 	const glm::vec3 &isect_p,
@@ -95,13 +42,13 @@ glm::vec3 phong_shade(const Scene &sc,
 	glm::vec3 contribution;
 
 	// accumulate all light contribution
-	for (auto &li : sc.lights)
+	for (auto &l : sc.lights)
 	{
-		contribution = o->mat->ambient * li->getEmission(ray.rd) +
-			diff_shade(*o, ob_pos, *li) +
-			spec_shade(*o, ob_pos, *li, ray.rd);
+		contribution = o->mat->ambient * l->getEmission(ray.rd) +
+			l->diff_shade(*o, ob_pos) +
+			l->spec_shade(*o, ob_pos, ray.rd);
 
-		visible = calc_shadow(ob_pos, sc, *li) == true ? 1.0f : 0.0f;
+		visible = l->calc_shadow(ob_pos, sc) == true ? 1.0f : 0.0f;
 		color += visible * contribution;
 	}
 	return color;
@@ -163,7 +110,7 @@ glm::vec3 shoot_recursively(const Scene &s,
 	//if ((glm::length((*o)->mat->ambient) > 0) || (glm::length((*o)->mat->specular) > 0))
 	if(1)
 	{
-		contribution = phong_shade(s, ray, isect_p, *o);
+		contribution = phong_shade(s, Ray(ray.ro + eps * ray.rd, ray.rd), isect_p, *o);
 	}
 
 

@@ -27,6 +27,9 @@
     <ClCompile Include="renderer.cpp">
       <Filter>Source Files\rt</Filter>
     </ClCompile>
+    <ClCompile Include="light.cpp">
+      <Filter>Source Files\rt</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="picture.ppm">

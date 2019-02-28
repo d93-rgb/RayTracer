@@ -1,6 +1,12 @@
 #pragma once
 #include <glm.hpp>
 
+#include "object.h"
+
+struct Scene;
+
+extern float eps;
+
 struct Light
 {
 	glm::vec3 p;
@@ -16,7 +22,17 @@ struct Light
 	}
 
 	virtual glm::vec3 getEmission(glm::vec3 dir) const = 0;
+
+	virtual glm::vec3 diff_shade(const Object &obj,
+		const glm::vec3 &ob_pos) = 0;
+
+	virtual glm::vec3 spec_shade(const Object &obj,
+		const glm::vec3 &ob_pos,
+		const glm::vec3 &view_dir) = 0;
+
+	virtual bool calc_shadow(glm::vec3 p, const Scene &sc) = 0;
 };
+
 
 struct PointLight : public Light
 {
@@ -28,6 +44,10 @@ struct PointLight : public Light
 	{
 		return emission;
 	}
+
+	glm::vec3 diff_shade(const Object & obj, const glm::vec3 & ob_pos);
+	glm::vec3 spec_shade(const Object & obj, const glm::vec3 & ob_pos, const glm::vec3 & view_dir);
+	bool calc_shadow(glm::vec3 p, const Scene &sc);
 };
 
 struct SpotLight : public Light
@@ -50,4 +70,7 @@ struct DistantLight : public Light
 	{
 		return emission;
 	}
+	glm::vec3 diff_shade(const Object & obj, const glm::vec3 & ob_pos);
+	glm::vec3 spec_shade(const Object & obj, const glm::vec3 & ob_pos, const glm::vec3 & view_dir);
+	bool calc_shadow(glm::vec3 p, const Scene &sc);
 };
