@@ -14,8 +14,8 @@ void Scene::init()
 		glm::vec3(-11, 7, -15),
 		glm::vec3(0, 12, -25),
 		glm::vec3(5, -2, -11),
-		glm::vec3(-3, -2, -4),
-		glm::vec3(-14, -2, -3),
+		glm::vec3(-6, -3, -4),
+		glm::vec3(4, 7, -2),
 		//glm::vec3(-4, 20, -15.f)
 	};
 	std::unique_ptr<Object> cube_1[6], cube_2[6];
@@ -30,8 +30,8 @@ void Scene::init()
 		std::shared_ptr<Material>(new Material(glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.0, 0.0, 0.0), glm::vec3(0, 0, 0))),
 		std::shared_ptr<Material>(new Material(glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.0, 0.0, 0.0), glm::vec3(0, 0, 0))),
 		std::shared_ptr<Material>(new Material(glm::vec3(0.02, 0.02, 0.f), glm::vec3(0.8, 0.8, 0.0), glm::vec3(0.5, 0.5, 0))),
-		std::shared_ptr<Material>(new Material(glm::vec3(0, 0.f, 0.f), glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.f, 0.f, 0))),
-		std::shared_ptr<Material>(new Material(glm::vec3(0, 0.f, 0.f), glm::vec3(1.0, 1.0, 1.0), glm::vec3(0.f, 0.f, 0)))
+		std::shared_ptr<Material>(new Material(glm::vec3(0.001, 0.001f, 0.001f), glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0f, 0.0f, 0.0f))),
+		std::shared_ptr<Material>(new Material(glm::vec3(0, 0.f, 0.f), glm::vec3(1.0, 1.0, 1.0), glm::vec3(0.f, 0.f, 0.f)))
 	};
 
 	mats[2]->setShininess(10.f);
@@ -39,7 +39,10 @@ void Scene::init()
 
 	mats[4]->reflective = glm::vec3(0.8f);
 	mats[5]->reflective = glm::vec3(1.0f); // ideal mirror
-	mats[7]->reflective = glm::vec3(0.6f);
+	
+	// glass sphere
+	mats[7]->transparent = glm::vec3(1.f);
+	mats[7]->setRefractiveIdx(1.5f);
 
 	// material for walls
 	std::shared_ptr<Material> wall_bot =

@@ -13,13 +13,35 @@ glm::vec3 reflect(glm::vec3 dir, glm::vec3 N)
 
 /*
 	Calculate the refracted vector.
-	dir	: the incident ray
+	V	: the view direction
 	N	: the normalized normal vector of a surface
 */
-glm::vec3 refract(glm::vec3 dir, glm::vec3 N)
+bool refract(glm::vec3 V, glm::vec3 N, float refr_idx, glm::vec3 *refracted)
 {
+	float alpha = glm::dot(-V, N);
 
-	return glm::vec3(0);
+	// TODO: calculate refracted ray when coming from a medium other than air
+	// refractive index of air = 1.f
+	float eta = 1.f / refr_idx;
+
+	if (alpha < 0.f)
+	{
+		eta = 1.f / eta;
+		alpha *= -1;
+		N = -N;
+	}
+
+	float radicand = 1.f - eta * eta * (1.f - alpha * alpha);
+
+	// check for total internal reflection
+	if (radicand < 0.f)
+	{
+		*refracted = glm::vec3(0.f);
+		return false;
+	}
+
+	*refracted = eta * V - (eta * alpha + sqrt(radicand)) * N;
+	return true;
 }
 
 glm::vec3 handle_reflection(const Scene &s,
@@ -33,9 +55,21 @@ glm::vec3 handle_reflection(const Scene &s,
 	return shoot_recursively(s, Ray(isect_p + eps * refl_rd, refl_rd), o, ++depth);
 }
 
-glm::vec3 handle_transmission(Ray ray)
+glm::vec3 handle_transmission(const Scene &s,
+	const Ray &ray,
+	const glm::vec3 &isect_p,
+	Object **o,
+	int depth)
 {
-	return glm::vec3(0);
+	glm::vec3 refr_rd;
+	if (!refract(ray.rd, (*o)->get_normal(isect_p), (*o)->mat->refr_indx, &refr_rd))
+	{
+		refr_rd = glm::normalize(reflect(ray.rd, (*o)->get_normal(isect_p)));
+		return shoot_recursively(s, Ray(isect_p + eps * refr_rd, refr_rd), o, ++depth);
+	}
+	refr_rd = glm::normalize(refr_rd);
+
+	return shoot_recursively(s, Ray(isect_p + eps * refr_rd, refr_rd), o, ++depth);
 }
 
 /*
@@ -110,7 +144,7 @@ glm::vec3 shoot_recursively(const Scene &s,
 	if (glm::length((*o)->mat->transparent) > 0)
 	{
 		glm::vec3 transparent = (*o)->mat->transparent;
-		contribution += transparent * handle_transmission(ray);
+		contribution += transparent * handle_transmission(s, ray, isect_p, o, depth);
 	}
 
 	return contribution;
