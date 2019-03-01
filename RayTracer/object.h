@@ -105,6 +105,8 @@ struct Rectangle : public Object
 	float v1_dot;
 	float v2_dot;
 
+	Rectangle() {};
+
 	Rectangle(glm::vec3 center, glm::vec3 u, glm::vec3 v, std::shared_ptr<Material> m) :
 		center(center - 0.5f * (u + v))
 	{

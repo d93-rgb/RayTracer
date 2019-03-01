@@ -46,7 +46,7 @@ void print_vec3(glm::vec3 v)
 
 void render()
 {
-	float fov = glm::radians(65.f);
+	float fov = glm::radians(55.f);
 	float fov_tan = tan(fov / 2);
 	float u = 0.f, v = 0.f;
 	// distance to view plane
