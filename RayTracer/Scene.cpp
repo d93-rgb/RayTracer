@@ -6,7 +6,7 @@ void Scene::init()
 	float rot_y = glm::radians(0.f);
 	float radius[] = { 1, 1.5, 3, 2, 4 , 4, 2, 3, 2 };
 
-	glm::vec3 translation = glm::vec3(-1.f, 2.f, 30.f);
+	glm::vec3 translation = glm::vec3(0.f, 0.f, 20.f);
 	std::vector<glm::vec3> sph_origins = {
 		glm::vec3(-10, -2, -5),
 		glm::vec3(-9, 21, -22),
@@ -43,7 +43,7 @@ void Scene::init()
 
 	// material for walls
 	std::shared_ptr<Material> wall_bot =
-		std::shared_ptr<Material>(new Material(glm::vec3(0.02, 0.02, 0.02), glm::vec3(0.4, 0.4, 0.4), glm::vec3(0.1, 0.1, 0.1)));
+		std::shared_ptr<Material>(new Material(glm::vec3(0.02, 0.02, 0.02), glm::vec3(0.4, 0.4, 0.4), glm::vec3(0.0, 0.0, 0.0)));
 	std::shared_ptr<Material> wall_front =
 		std::shared_ptr<Material>(new Material(glm::vec3(0.02, 0.02, 0.02), glm::vec3(0.2, 0.2, 0.2), glm::vec3(0.1, 0.1, 0.1)));
 	std::shared_ptr<Material> wall_right =
@@ -51,7 +51,7 @@ void Scene::init()
 	std::shared_ptr<Material> wall_left =
 		std::shared_ptr<Material>(new Material(glm::vec3(0.02, 0.02, 0.02), glm::vec3(0.2, 0.4, 0.6), glm::vec3(0.1, 0.1, 0.1)));
 
-	wall_bot->reflective = glm::vec3(0.5f);
+	wall_bot->reflective = glm::vec3(0.2f);
 
 	for (size_t i = 0; i < sph_origins.size(); ++i)
 	{
@@ -60,36 +60,38 @@ void Scene::init()
 
 	//bottom
 	sc.emplace_back(std::unique_ptr<Object>(new Rectangle(glm::vec3(-4, 2, -18),
-		glm::vec3(50, 0, 0), glm::vec3(0, 30, -30), wall_bot)));
+		glm::vec3(150, 0, 0), glm::vec3(0, 150, -150), wall_bot)));
 	//front
-	sc.emplace_back(std::unique_ptr<Object>(new Rectangle(glm::vec3(-4, 11, -27),
-		glm::vec3(50, 0, 0), glm::vec3(0, 70, 0), wall_right)));
-	//right
-	sc.emplace_back(std::unique_ptr<Object>(new Rectangle(glm::vec3(21, 2, -18),
-		glm::vec3(0, 50, 0), glm::vec3(0, 0, -60), wall_right)));
-	//left
-	sc.emplace_back(std::unique_ptr<Object>(new Rectangle(glm::vec3(-29.f, 2, -18),
-		glm::vec3(0, 50, 0), glm::vec3(0, 0, 60), wall_left)));
+	//sc.emplace_back(std::unique_ptr<Object>(new Rectangle(glm::vec3(-4, 11, -27),
+	//	glm::vec3(50, 0, 0), glm::vec3(0, 70, 0), wall_right)));
+	////right
+	//sc.emplace_back(std::unique_ptr<Object>(new Rectangle(glm::vec3(21, 2, -18),
+	//	glm::vec3(0, 50, 0), glm::vec3(0, 0, -60), wall_right)));
+	////left
+	//sc.emplace_back(std::unique_ptr<Object>(new Rectangle(glm::vec3(-29.f, 2, -18),
+	//	glm::vec3(0, 50, 0), glm::vec3(0, 0, 60), wall_left)));
 
 	// cube material
 	std::shared_ptr<Material> cube_mat_1 =
 		std::shared_ptr<Material>(new Material(
 			glm::vec3(0.02, 0.0, 0.02), 
 			glm::vec3(0.1, 0.0, 0.7f), 
-			glm::vec3(0.1, 0.0, 0.1)));
+			glm::vec3(0.6, 0.0, 0.6)));
 	std::shared_ptr<Material> cube_mat_2 =
 		std::shared_ptr<Material>(new Material(
 			glm::vec3(0.02, 0.02, 0.0),
-			glm::vec3(0.9, 0.4, 0.0f),
-			glm::vec3(0.1, 0.0, 0.0)));
+			glm::vec3(0.9, 0.2, 0.0f),
+			glm::vec3(0.6, 0.0, 0.6)));
+	cube_mat_1->setShininess(10.f);
+	cube_mat_2->setShininess(10.f);
 
-	create_cube(glm::vec3(-15.f, 15.f, -14.f),
+	create_cube(glm::vec3(13.f, 10.f, -20.f),
 		glm::vec3(0.f, 0.f, 1.f),
 		glm::vec3(1.f, 0.f, 0.f),
 		4.f,
 		cube_1,
 		cube_mat_1);
-	create_cube(glm::vec3(14.f, 11.f, -23.f),
+	create_cube(glm::vec3(14.f, 8.f, -3.f),
 		glm::vec3(0.f, 0.f, 1.f),
 		glm::vec3(1.f, 0.f, 0.f),
 		6.f,
@@ -145,9 +147,9 @@ void Scene::create_cube(glm::vec3 center,
 	//bottom
 	sides[1].reset(new Rectangle(center - t_u, n_front, -n_u_cross_f, mat));
 	//front
-	sides[2].reset(new Rectangle(center + t_f, -n_u_cross_f, n_up, mat));
+	sides[2].reset(new Rectangle(center + t_f, n_up, -n_u_cross_f, mat));
 	//back
-	sides[3].reset(new Rectangle(center - t_f, n_up, -n_u_cross_f, mat));
+	sides[3].reset(new Rectangle(center - t_f, -n_u_cross_f, n_up, mat));
 	//left
 	sides[4].reset(new Rectangle(center + t_uf, n_up, n_front, mat));
 	//right
