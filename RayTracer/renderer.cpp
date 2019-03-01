@@ -18,6 +18,7 @@ glm::vec3 reflect(glm::vec3 dir, glm::vec3 N)
 */
 glm::vec3 refract(glm::vec3 dir, glm::vec3 N)
 {
+
 	return glm::vec3(0);
 }
 

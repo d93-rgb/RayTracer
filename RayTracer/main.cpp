@@ -29,6 +29,11 @@ int MAX_DEPTH = 4;
 
 std::vector<float> debug_vec;
 
+float clamp(float f)
+{
+	return f < 0.f ? 0.f : (f > 1.f ? 1.f : f);
+}
+
 void write_file(const char *file, std::vector<glm::vec3> &col);
 
 //float deg2rad(float deg) { return deg * (float)M_PI / 180; }
@@ -87,8 +92,11 @@ void write_file(const char *file, std::vector<glm::vec3> &col)
 	// write to image file
 	for (int i = 0; i < WIDTH * HEIGHT; ++i)
 	{
-		col[i] = glm::min(glm::vec3(1), col[i]) * 255.f;
+		// gamma correction and mapping to [0;255]
+		col[i] = glm::pow(glm::min(glm::vec3(1), col[i]), 
+			glm::vec3(1/2.2f)) * 255.f;
 
+		// prevent sign extension by cating to unsigned int
 		unsigned char r = (unsigned int)round(col[i].x);
 		unsigned char g = (unsigned int)round(col[i].y);
 		unsigned char b = (unsigned int)round(col[i].z);
