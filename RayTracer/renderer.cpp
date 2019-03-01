@@ -3,12 +3,22 @@
 
 /*
 	Calculate the reflection vector.
-	DIR	: the incident ray
+	dir	: the incident ray
 	N	: the normalized normal vector of a surface
 */
-glm::vec3 reflect(glm::vec3 DIR, glm::vec3 N)
+glm::vec3 reflect(glm::vec3 dir, glm::vec3 N)
 {
-	return DIR - 2 * glm::dot(N, DIR) * N;
+	return dir - 2 * glm::dot(N, dir) * N;
+}
+
+/*
+	Calculate the refracted vector.
+	dir	: the incident ray
+	N	: the normalized normal vector of a surface
+*/
+glm::vec3 refract(glm::vec3 dir, glm::vec3 N)
+{
+	return glm::vec3(0);
 }
 
 glm::vec3 handle_reflection(const Scene &s,
@@ -23,11 +33,6 @@ glm::vec3 handle_reflection(const Scene &s,
 }
 
 glm::vec3 handle_transmission(Ray ray)
-{
-	return glm::vec3(0);
-}
-
-glm::vec3 handle_refraction(Ray ray)
 {
 	return glm::vec3(0);
 }
@@ -86,23 +91,25 @@ glm::vec3 shoot_recursively(const Scene &s,
 	isect_p = ray.ro + distance * ray.rd;
 
 	//if ((glm::length((*o)->mat->ambient) > 0) || (glm::length((*o)->mat->specular) > 0))
-	if (1)
-	{
 		// accumulate all light contribution
-		for (auto &l : s.lights)
-		{
-			contribution += l->phong_shade(s, 
-				ray/*Ray(ray.ro + eps * ray.rd, ray.rd)*/, 
-				isect_p, 
-				*o);
-		}
+	for (auto &l : s.lights)
+	{
+		contribution += l->phong_shade(s,
+			ray/*Ray(ray.ro + eps * ray.rd, ray.rd)*/,
+			isect_p,
+			*o);
 	}
-
 
 	if (glm::length((*o)->mat->reflective) > 0)
 	{
 		glm::vec3 reflective = (*o)->mat->reflective;
-		contribution +=  reflective * handle_reflection(s, ray, isect_p, o, depth);
+		contribution += reflective * handle_reflection(s, ray, isect_p, o, depth);
+	}
+
+	if (glm::length((*o)->mat->transparent) > 0)
+	{
+		glm::vec3 transparent = (*o)->mat->transparent;
+		contribution += transparent * handle_transmission(ray);
 	}
 
 	return contribution;

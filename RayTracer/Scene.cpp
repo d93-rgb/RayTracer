@@ -33,6 +33,9 @@ void Scene::init()
 		std::shared_ptr<Material>(new Material(glm::vec3(0, 0.f, 0.f), glm::vec3(1.0, 1.0, 1.0), glm::vec3(0.f, 0.f, 0)))
 	};
 
+	mats[2]->setShininess(10.f);
+	mats[3]->setShininess(5.f);
+
 	mats[4]->reflective = glm::vec3(0.8f); 
 	mats[5]->reflective = glm::vec3(1.0f); // ideal mirror
 	mats[7]->reflective = glm::vec3(0.4f); 
@@ -73,10 +76,10 @@ void Scene::init()
 
 	lights.emplace_back(std::unique_ptr<Light>(new PointLight(glm::vec3(-4, 24, -26.f),
 		glm::vec3(-2, -4, -2), 
-		glm::vec3(20.f))));
+		glm::vec3(40.f))));
+
 
 	cam.setCamToWorld(glm::rotate(glm::translate(glm::mat4(1.f), translation),
 		rot_y, glm::vec3(cam.getUpVec())));
-	
 	cam.update();
 }

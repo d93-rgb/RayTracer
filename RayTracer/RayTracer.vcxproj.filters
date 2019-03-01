@@ -31,7 +31,7 @@
       <Filter>Source Files\rt</Filter>
     </ClCompile>
     <ClCompile Include="camera.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\rt</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

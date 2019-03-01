@@ -57,6 +57,24 @@ struct PointLight : public Light
 	glm::vec3 phong_shade(const Scene & sc, const Ray & ray, const glm::vec3 & ob_pos, const Object * o);
 };
 
+struct PointLightShaped : public Light
+{
+	PointLightShaped(glm::vec3 p, glm::vec3 dir, glm::vec3 col) :
+		Light(p, dir, col) {}
+
+	// equal light emission in all directions
+	glm::vec3 getEmission(glm::vec3 dir) const
+	{
+		return emission;
+	}
+
+	glm::vec3 diff_shade(const Object & obj, const glm::vec3 & ob_pos);
+	glm::vec3 spec_shade(const Object & obj, const glm::vec3 & ob_pos, const glm::vec3 & view_dir);
+	bool calc_shadow(glm::vec3 p, const Scene &sc);
+	glm::vec3 phong_shade(const Scene & sc, const Ray & ray, const glm::vec3 & ob_pos, const Object * o);
+
+};
+
 struct SpotLight : public Light
 {
 
