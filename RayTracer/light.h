@@ -88,7 +88,7 @@ struct SpotLight : public Light
 struct DistantLight : public Light
 {
 	DistantLight(glm::vec3 dir, glm::vec3 col) :
-		Light(glm::vec3(INFINITY), dir, col)
+		Light(glm::vec3(INFINITY), glm::normalize(dir), col)
 	{}
 
 	glm::vec3 getEmission(glm::vec3 dir) const
