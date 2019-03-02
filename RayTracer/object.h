@@ -150,3 +150,8 @@ struct Rectangle : public Object
 		return normal;
 	}
 };
+
+class Cube : public Object
+{
+
+};

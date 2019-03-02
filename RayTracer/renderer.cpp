@@ -18,30 +18,44 @@ glm::vec3 reflect(glm::vec3 dir, glm::vec3 N)
 */
 bool refract(glm::vec3 V, glm::vec3 N, float refr_idx, glm::vec3 *refracted)
 {
-	float alpha = glm::dot(-V, N);
+	float cos_alpha = glm::dot(-V, N);
 
 	// TODO: calculate refracted ray when coming from a medium other than air
 	// refractive index of air = 1.f
 	float eta = 1.f / refr_idx;
 
-	if (alpha < 0.f)
+	if (cos_alpha < 0.f)
 	{
 		eta = 1.f / eta;
-		alpha *= -1;
+		cos_alpha *= -1;
 		N = -N;
 	}
 
-	float radicand = 1.f - eta * eta * (1.f - alpha * alpha);
+	float radicand = 1.f - eta * eta * (1.f - cos_alpha * cos_alpha);
 
 	// check for total internal reflection
 	if (radicand < 0.f)
 	{
-		*refracted = glm::vec3(0.f);
+		//*refracted = glm::vec3(0.f);
 		return false;
 	}
 
-	*refracted = eta * V - (eta * alpha + sqrt(radicand)) * N;
+	*refracted = eta * V - (eta * cos_alpha + sqrt(radicand)) * N;
 	return true;
+}
+
+/*
+	Compute the fresnel term, that is, the factor for reflective contribution
+	rel_eta: the relative refractive coefficient 
+	c: the cosine of the angle between incident and normal ray
+*/
+float fresnel(float rel_eta, float c)
+{
+	float r0 = (rel_eta - 1.f) / (rel_eta + 1.f);
+	r0 = r0 * r0;
+	c = 1.f - c;
+
+	return r0 - (1.f - r0) * powf(c, 5);
 }
 
 glm::vec3 handle_reflection(const Scene &s,
@@ -61,15 +75,23 @@ glm::vec3 handle_transmission(const Scene &s,
 	Object **o,
 	int depth)
 {
-	glm::vec3 refr_rd;
+	glm::vec3 refl_rd, refr_rd;
+	float f = fresnel(1.f / (*o)->mat->refr_indx, 
+		glm::dot(-ray.rd, (*o)->get_normal(isect_p)));
+
+	refl_rd = refl_rd = glm::normalize(reflect(ray.rd, (*o)->get_normal(isect_p)));
+
+	// check for total internal reflection
 	if (!refract(ray.rd, (*o)->get_normal(isect_p), (*o)->mat->refr_indx, &refr_rd))
 	{
-		refr_rd = glm::normalize(reflect(ray.rd, (*o)->get_normal(isect_p)));
-		return shoot_recursively(s, Ray(isect_p + eps * refr_rd, refr_rd), o, ++depth);
+		//refl_rd = glm::normalize(reflect(ray.rd, (*o)->get_normal(isect_p)));
+		return shoot_recursively(s, Ray(isect_p + eps * refl_rd, refl_rd), o, ++depth);
 	}
-	refr_rd = glm::normalize(refr_rd);
 
-	return shoot_recursively(s, Ray(isect_p + eps * refr_rd, refr_rd), o, ++depth);
+	refr_rd = glm::normalize(refr_rd);
+	++depth;
+	return f * shoot_recursively(s, Ray(isect_p + eps * refl_rd, refl_rd), o, depth) +
+		(1.f - f) * shoot_recursively(s, Ray(isect_p + eps * refr_rd, refr_rd), o, depth);
 }
 
 /*

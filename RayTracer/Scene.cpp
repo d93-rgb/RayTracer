@@ -15,7 +15,7 @@ void Scene::init()
 		glm::vec3(0, 12, -25),
 		glm::vec3(5, -2, -11),
 		glm::vec3(-6, -3, -4),
-		glm::vec3(4, 7, -2),
+		glm::vec3(-4, 3, -2),
 		//glm::vec3(-4, 20, -15.f)
 	};
 	std::unique_ptr<Object> cube_1[6], cube_2[6];
