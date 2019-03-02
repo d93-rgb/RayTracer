@@ -51,11 +51,19 @@ bool refract(glm::vec3 V, glm::vec3 N, float refr_idx, glm::vec3 *refracted)
 */
 float fresnel(float rel_eta, float c)
 {
+
+	if (c < 0.f)
+	{
+		c = -c;
+		rel_eta = 1.f / rel_eta;
+	}
+	// using Schlick's approximation
 	float r0 = (rel_eta - 1.f) / (rel_eta + 1.f);
 	r0 = r0 * r0;
+
 	c = 1.f - c;
 
-	return r0 - (1.f - r0) * powf(c, 5);
+	return r0 + (1.f - r0) * powf(c, 5);
 }
 
 glm::vec3 handle_reflection(const Scene &s,
@@ -79,7 +87,7 @@ glm::vec3 handle_transmission(const Scene &s,
 	float f = fresnel(1.f / (*o)->mat->refr_indx, 
 		glm::dot(-ray.rd, (*o)->get_normal(isect_p)));
 
-	refl_rd = refl_rd = glm::normalize(reflect(ray.rd, (*o)->get_normal(isect_p)));
+	refl_rd = glm::normalize(reflect(ray.rd, (*o)->get_normal(isect_p)));
 
 	// check for total internal reflection
 	if (!refract(ray.rd, (*o)->get_normal(isect_p), (*o)->mat->refr_indx, &refr_rd))
