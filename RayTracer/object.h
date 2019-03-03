@@ -5,6 +5,8 @@
 #include "material.h"
 #include "ray.h"
 
+#define DEBUG
+
 template <typename T> int sgn(T val) {
 	return (T(0) < val) - (val < T(0));
 }
@@ -160,33 +162,34 @@ class Cube : public Object
 {
 	glm::vec3 normal;
 	glm::vec3 boundaries;
-	glm::vec3 centers[6];
+	glm::vec3 moved_centers[6];
 	glm::vec3 v1[3], v2[3];
 	float v1_dots[3], v2_dots[3];
 
 public:
-	Cube(glm::vec3 b) : boundaries(b)
+	Cube(glm::vec3 b, std::shared_ptr<Material> mat) : boundaries(b)
 	{
 		assert(fmin(fmin(b.x, b.y), b.z) > 0);
+		this->mat = mat;
+
+		// sides
+		v1[0] = glm::vec3(0.f, 0.f, boundaries[2]);
+		v2[0] = glm::vec3(0.f, boundaries[1], 0.f);
+
+		v1[1] = glm::vec3(boundaries[0], 0.f, 0.f);
+		v2[1] = glm::vec3(0.f, 0.f, boundaries[2]);
+
+		v1[2] = glm::vec3(boundaries[0], 0.f, 0.f);
+		v2[2] = glm::vec3(0.f, boundaries[1], 0.f);
 
 		for (int i = 0; i < 6; ++i)
 		{
-			// too lazey to write out the six centers
+			// too lazy to write out the six moved_centers
 			int i_m = i % 3;
-			centers[i] = glm::vec3(1.f) *
+			moved_centers[i] = b[i % 3] / 2.f  * glm::vec3(1.f) *
 				glm::vec3(i_m == 0, i_m == 1, i_m == 2) *
-				(-1.f * (i > 3 ? 1.f : -1.f));
+				(-1.f * (i >= 3 ? 1.f : -1.f)) - 0.5f * (v1[i_m] + v2[i_m]);
 		}
-
-		// sides
-		v1[0] = glm::vec3(0.f, 0.f, 2 * boundaries[2]);
-		v2[0] = glm::vec3(0.f, 2 * boundaries[1], 0.f);
-
-		v1[1] = glm::vec3(2 * boundaries[0], 0.f, 0.f);
-		v2[1] = glm::vec3(0.f, 0.f, 2 * boundaries[2]);
-
-		v1[2] = glm::vec3(2 * boundaries[0], 0.f, 0.f);
-		v2[2] = glm::vec3(0.f, 2 * boundaries[1], 0.f);
 
 		for (int i = 0; i < 3; ++i)
 		{
@@ -199,17 +202,17 @@ public:
 	{
 		assert(abs(length(ray.rd)) > 0);
 
-		int nearest;
+		int nearest = 0;
 		float isec_t = INFINITY;
-		glm::vec3 t[2];
-		glm::vec3 m;
+		glm::vec3 t[2] = { glm::vec3(INFINITY), glm::vec3(INFINITY) };
 		glm::vec3 isec_p;
 
 
 		// calculate the 6 ray-plane intersections
-		t[0] = -(boundaries + ray.ro);
-		t[1] = (boundaries - ray.ro);
+		t[0] = (boundaries - ray.ro);
+		t[1] = -(boundaries + ray.ro);
 
+		
 		if (ray.rd.x != 0)
 		{
 			t[0].x /= ray.rd.x;
@@ -220,7 +223,7 @@ public:
 			t[0].x = (t[0].x == 0 ? 0.f : INFINITY);
 			t[1].x = (t[1].x == 0 ? 0.f : INFINITY);
 		}
-
+		
 		if (ray.rd.y != 0)
 		{
 			t[0].y /= ray.rd.y;
@@ -231,7 +234,7 @@ public:
 			t[0].y = (t[0].y == 0 ? 0.f : INFINITY);
 			t[1].y = (t[1].y == 0 ? 0.f : INFINITY);
 		}
-
+		
 		if (ray.rd.z != 0)
 		{
 			t[0].z /= ray.rd.z;
@@ -242,23 +245,23 @@ public:
 			t[0].z = (t[0].z == 0 ? 0.f : INFINITY);
 			t[1].z = (t[1].z == 0 ? 0.f : INFINITY);
 		}
-
+		
 		// get nearest plane
-		nearest = (t[0].x < t[0].y ?
-			(t[0].x < t[0].z ? 0 : 2) :
-			(t[0].y < t[0].z ? 1 : 2));
-
-		nearest = (t[1].x < t[1].y ?
-			(t[1].x < t[1].z ? 3 : 5) :
-			(t[1].y < t[1].z ? 4 : 5));
-
-		// get nearest intersection
-		m = glm::min(t[0], t[1]);
-
-		isec_t = fmin(fmin(m.x, m.y), m.z);
-
+		for (int i = 0; i < 3; ++i)
+		{
+			if (t[0][i] >= 0 && isec_t > t[0][i])
+			{
+				isec_t = t[0][i];
+				nearest = i;
+			}
+			if (t[1][i] >= 0 && isec_t > t[1][i])
+			{
+				isec_t = t[1][i];
+				nearest = i + 3;
+			}
+		}
 		// no intersection found
-		if (isec_t < 0.f)
+		if (isec_t < 0.f || isec_t == INFINITY)
 		{
 			return INFINITY;
 		}
@@ -267,9 +270,9 @@ public:
 
 		// test if inside
 		int tmp = nearest % 3;
-		float inside_1 = glm::dot(isec_p - centers[nearest], v1[tmp]) /
+		float inside_1 = glm::dot(isec_p - moved_centers[nearest], v1[tmp]) /
 			v1_dots[tmp];
-		float inside_2 = glm::dot(isec_p - centers[nearest], v2[tmp]) /
+		float inside_2 = glm::dot(isec_p - moved_centers[nearest], v2[tmp]) /
 			v2_dots[tmp];
 
 		bool test = (0 <= inside_1) && (inside_1 <= 1)
@@ -281,9 +284,17 @@ public:
 
 	glm::vec3 get_normal(glm::vec3 p) const
 	{
+#ifdef DEBUG
+		static int iter = 0;
+#endif
+#ifdef DEBUG
+		if ((iter++) % 150 == 0) {
+			bool stop = true;
+		}
+#endif
 		glm::vec3 a_p = glm::abs(p);
-		return a_p.x > a_p.y ? 
-			(a_p.x > a_p.z ? glm::vec3(sgn(p.x), 0.f, 0.f) :glm::vec3(0.f, 0.f, sgn(p.z))) :
+		return a_p.x > a_p.y ?
+			(a_p.x > a_p.z ? glm::vec3(sgn(p.x), 0.f, 0.f) : glm::vec3(0.f, 0.f, sgn(p.z))) :
 			(a_p.y > a_p.z ? glm::vec3(0.f, sgn(p.y), 0.f) : glm::vec3(0.f, 0.f, sgn(p.z)));
 	}
 };

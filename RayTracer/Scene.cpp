@@ -4,7 +4,7 @@
 void Scene::init()
 {
 	float rot_y = glm::radians(20.f);
-	float radius[] = { 1, 1.5, 3, 2, 4 , 4, 2, 3, 2 };
+	float radius[] = { 1, 1.5, 3, 2, 4 , 4, 2, 3, 2};
 
 	glm::vec3 translation = glm::vec3(6.f, 0.f, 20.f);
 	std::vector<glm::vec3> sph_origins = {
@@ -16,9 +16,9 @@ void Scene::init()
 		glm::vec3(5, -2, -11),
 		glm::vec3(-6, -3, -4),
 		glm::vec3(-4, 4, -2),
-		//glm::vec3(-4, 20, -15.f)
+		//glm::vec3(0.f, 0.f, 0.f)
 	};
-	std::unique_ptr<Object> cube_1[6], cube_2[6];
+	std::unique_ptr<Object> cube_1[6], cube_2[6], cube_3[6];
 
 	cam = Camera();
 
@@ -102,13 +102,19 @@ void Scene::init()
 		6.f,
 		cube_2,
 		cube_mat_2);
-
+	/*create_cube(glm::vec3(0.f, 0.f, 0.f),
+		glm::vec3(1.f, 0.f, 0.f),
+		glm::vec3(0.f, 1.f, 0.f),
+		5.f,
+		cube_3,
+		cube_mat_2);
+*/
 	// cube material for new cube class object
-	std::shared_ptr<Material>(new Material(glm::vec3(0, 0.f, 0.f),
+	auto new_cube_mat = std::shared_ptr<Material>(new Material(glm::vec3(0.1f, 0.1f, 0.1f),
 		glm::vec3(0.2f, 0.6f, 0.1f),
 		glm::vec3(0.2f, 0.6f, 0.1f)));
 
-	sc.emplace_back(std::unique_ptr<Object>(new Cube(glm::vec3(4.f))));
+	sc.emplace_back(std::unique_ptr<Object>(new Cube(glm::vec3(10.f), new_cube_mat)));
 
 	for (std::unique_ptr<Object> &p : cube_1)
 	{
@@ -118,7 +124,10 @@ void Scene::init()
 	{
 		sc.emplace_back(std::move(p));
 	}
-
+	/*for (std::unique_ptr<Object> &p : cube_3)
+	{
+		sc.emplace_back(std::move(p));
+	}*/
 	// add lights to the scene
 	//lights.emplace_back(std::unique_ptr<Light>(new DistantLight(glm::vec3(-2, -4, -2), glm::vec3(0.8f))));
 	//lights.emplace_back(std::unique_ptr<Light>(new DistantLight(glm::vec3(0, 0, -1), glm::vec3(0.8f))));

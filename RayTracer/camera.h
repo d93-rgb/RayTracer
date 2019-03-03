@@ -24,7 +24,7 @@ public:
 		return Ray(origin, glm::normalize(u * right + v * up - d * front));
 	}
 
-	glm::vec4 getOrigin() 
+	glm::vec4 getOrigin()
 	{
 		return origin;
 	}
