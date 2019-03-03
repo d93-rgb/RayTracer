@@ -173,20 +173,20 @@ public:
 		this->mat = mat;
 
 		// sides
-		v1[0] = glm::vec3(0.f, 0.f, boundaries[2]);
-		v2[0] = glm::vec3(0.f, boundaries[1], 0.f);
+		v1[0] = glm::vec3(0.f, 0.f, 2*boundaries[2]);
+		v2[0] = glm::vec3(0.f, 2*boundaries[1], 0.f);
 
-		v1[1] = glm::vec3(boundaries[0], 0.f, 0.f);
-		v2[1] = glm::vec3(0.f, 0.f, boundaries[2]);
+		v1[1] = glm::vec3(2*boundaries[0], 0.f, 0.f);
+		v2[1] = glm::vec3(0.f, 0.f, 2*boundaries[2]);
 
-		v1[2] = glm::vec3(boundaries[0], 0.f, 0.f);
-		v2[2] = glm::vec3(0.f, boundaries[1], 0.f);
+		v1[2] = glm::vec3(2*boundaries[0], 0.f, 0.f);
+		v2[2] = glm::vec3(0.f, 2*boundaries[1], 0.f);
 
 		for (int i = 0; i < 6; ++i)
 		{
 			// too lazy to write out the six moved_centers
 			int i_m = i % 3;
-			moved_centers[i] = b[i % 3] / 2.f  * glm::vec3(1.f) *
+			moved_centers[i] = b[i_m] * glm::vec3(1.f) *
 				glm::vec3(i_m == 0, i_m == 1, i_m == 2) *
 				(-1.f * (i >= 3 ? 1.f : -1.f)) - 0.5f * (v1[i_m] + v2[i_m]);
 		}
@@ -203,7 +203,11 @@ public:
 		assert(abs(length(ray.rd)) > 0);
 
 		int nearest = 0;
+		int tmp = 0;
 		float isec_t = INFINITY;
+		float inside_1;
+		float inside_2;
+		bool tests[6] = { false };
 		glm::vec3 t[2] = { glm::vec3(INFINITY), glm::vec3(INFINITY) };
 		glm::vec3 isec_p;
 
@@ -212,7 +216,7 @@ public:
 		t[0] = (boundaries - ray.ro);
 		t[1] = -(boundaries + ray.ro);
 
-		
+
 		if (ray.rd.x != 0)
 		{
 			t[0].x /= ray.rd.x;
@@ -223,7 +227,7 @@ public:
 			t[0].x = (t[0].x == 0 ? 0.f : INFINITY);
 			t[1].x = (t[1].x == 0 ? 0.f : INFINITY);
 		}
-		
+
 		if (ray.rd.y != 0)
 		{
 			t[0].y /= ray.rd.y;
@@ -234,7 +238,7 @@ public:
 			t[0].y = (t[0].y == 0 ? 0.f : INFINITY);
 			t[1].y = (t[1].y == 0 ? 0.f : INFINITY);
 		}
-		
+
 		if (ray.rd.z != 0)
 		{
 			t[0].z /= ray.rd.z;
@@ -245,41 +249,39 @@ public:
 			t[0].z = (t[0].z == 0 ? 0.f : INFINITY);
 			t[1].z = (t[1].z == 0 ? 0.f : INFINITY);
 		}
-		
-		// get nearest plane
-		for (int i = 0; i < 3; ++i)
+
+		// check if inside boundaries
+		for (int i = 0; i < 6; ++i)
 		{
-			if (t[0][i] >= 0 && isec_t > t[0][i])
+			tmp = i % 3;
+			if (t[i >= 3][tmp] >= 0.f)
 			{
-				isec_t = t[0][i];
-				nearest = i;
-			}
-			if (t[1][i] >= 0 && isec_t > t[1][i])
-			{
-				isec_t = t[1][i];
-				nearest = i + 3;
+				isec_t = t[i >= 3][tmp];
+				isec_p = ray.ro + isec_t * ray.rd;
+
+				inside_1 = glm::dot(isec_p - moved_centers[i], v1[tmp]) /
+					v1_dots[tmp];
+				inside_2 = glm::dot(isec_p - moved_centers[i], v2[tmp]) /
+					v2_dots[tmp];
+
+				tests[i] = (0 <= inside_1) && (inside_1 <= 1)
+					&& (0 <= inside_2) && (inside_2 <= 1);
 			}
 		}
-		// no intersection found
-		if (isec_t < 0.f || isec_t == INFINITY)
+
+		isec_t = INFINITY;
+		for (int i = 0; i < 6; ++i)
 		{
-			return INFINITY;
+			tmp = i % 3;
+			if (tests[i])
+			{
+				if (isec_t > t[i >= 3][tmp])
+				{
+					isec_t = t[i >= 3][tmp];
+				}
+			}
 		}
-
-		isec_p = ray.ro + isec_t * ray.rd;
-
-		// test if inside
-		int tmp = nearest % 3;
-		float inside_1 = glm::dot(isec_p - moved_centers[nearest], v1[tmp]) /
-			v1_dots[tmp];
-		float inside_2 = glm::dot(isec_p - moved_centers[nearest], v2[tmp]) /
-			v2_dots[tmp];
-
-		bool test = (0 <= inside_1) && (inside_1 <= 1)
-			&& (0 <= inside_2) && (inside_2 <= 1);
-
-		return (test ? isec_t : INFINITY);
-
+		return isec_t;
 	}
 
 	glm::vec3 get_normal(glm::vec3 p) const

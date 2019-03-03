@@ -109,12 +109,15 @@ void Scene::init()
 		cube_3,
 		cube_mat_2);
 */
+	////////////////////////////////
+	// NEW CUBE
+	////////////////////////////////
 	// cube material for new cube class object
 	auto new_cube_mat = std::shared_ptr<Material>(new Material(glm::vec3(0.1f, 0.1f, 0.1f),
 		glm::vec3(0.2f, 0.6f, 0.1f),
 		glm::vec3(0.2f, 0.6f, 0.1f)));
 
-	sc.emplace_back(std::unique_ptr<Object>(new Cube(glm::vec3(10.f), new_cube_mat)));
+	sc.emplace_back(std::unique_ptr<Object>(new Cube(glm::vec3(3.f), new_cube_mat)));
 
 	for (std::unique_ptr<Object> &p : cube_1)
 	{
@@ -129,7 +132,7 @@ void Scene::init()
 		sc.emplace_back(std::move(p));
 	}*/
 	// add lights to the scene
-	//lights.emplace_back(std::unique_ptr<Light>(new DistantLight(glm::vec3(-2, -4, -2), glm::vec3(0.8f))));
+	lights.emplace_back(std::unique_ptr<Light>(new DistantLight(glm::vec3(-2, -4, -2), glm::vec3(0.8f))));
 	//lights.emplace_back(std::unique_ptr<Light>(new DistantLight(glm::vec3(0, 0, -1), glm::vec3(0.8f))));
 
 	lights.emplace_back(std::unique_ptr<Light>(new PointLight(glm::vec3(-2.f, 4.f, -17.f),
