@@ -4,7 +4,7 @@
 void Scene::init()
 {
 	float rot_y = glm::radians(20.f);
-	float radius[] = { 1, 1.5, 3, 2, 4 , 4, 2, 3, 2};
+	float radius[] = { 1, 1.5, 3, 2, 4 , 4, 2, 3, 2 };
 
 	glm::vec3 translation = glm::vec3(6.f, 0.f, 20.f);
 	std::vector<glm::vec3> sph_origins = {
@@ -39,7 +39,7 @@ void Scene::init()
 
 	mats[4]->reflective = glm::vec3(0.8f);
 	mats[5]->reflective = glm::vec3(1.0f); // ideal mirror
-	
+
 	// glass sphere
 	mats[7]->transparent = glm::vec3(1.f);
 	mats[7]->setRefractiveIdx(1.5f);
@@ -77,8 +77,8 @@ void Scene::init()
 	// cube material
 	std::shared_ptr<Material> cube_mat_1 =
 		std::shared_ptr<Material>(new Material(
-			glm::vec3(0.02, 0.0, 0.02), 
-			glm::vec3(0.1, 0.0, 0.7f), 
+			glm::vec3(0.02, 0.0, 0.02),
+			glm::vec3(0.1, 0.0, 0.7f),
 			glm::vec3(0.6, 0.0, 0.6)));
 	std::shared_ptr<Material> cube_mat_2 =
 		std::shared_ptr<Material>(new Material(
@@ -95,7 +95,7 @@ void Scene::init()
 		cube_1,
 		cube_mat_1);
 	create_cube(glm::vec3(14.f, 8.f, -3.f),
-		glm::rotate(glm::mat4(1), -30.f, glm::vec3(1.f, 0.f, 0.f)) * 
+		glm::rotate(glm::mat4(1), -30.f, glm::vec3(1.f, 0.f, 0.f)) *
 		glm::vec4(0.f, 0.f, 1.f, 1.f),
 		glm::rotate(glm::mat4(1), -30.f, glm::vec3(1.f, 0.f, 0.f)) *
 		glm::vec4(1.f, 0.f, 0.f, 1.f),
@@ -107,8 +107,8 @@ void Scene::init()
 		glm::vec3(0.f, 1.f, 0.f),
 		5.f,
 		cube_3,
-		cube_mat_2);
-*/
+		cube_mat_2);	
+	*/
 	////////////////////////////////
 	// NEW CUBE
 	////////////////////////////////
@@ -118,7 +118,12 @@ void Scene::init()
 		glm::vec3(0.2f, 0.6f, 0.1f)));
 
 	sc.emplace_back(std::unique_ptr<Object>(new Cube(glm::vec3(3.f), new_cube_mat)));
-
+	sc.back()->obj_to_world = glm::translate(glm::scale(glm::mat4(1.f), glm::vec3(1.f, 0.5f, 1.f)), 
+		glm::vec3(2.f, 2.f, 4.f));
+	sc.back()->world_to_obj = glm::inverse(sc.back()->obj_to_world);
+	////////////////////////////////
+	// END
+	////////////////////////////////
 	for (std::unique_ptr<Object> &p : cube_1)
 	{
 		sc.emplace_back(std::move(p));
@@ -158,16 +163,16 @@ void Scene::create_cube(glm::vec3 center,
 	glm::vec3 n_front = glm::normalize(front);
 	glm::vec3 n_u_cross_f = glm::normalize(glm::cross(n_up, n_front));
 
-	glm::vec3 t_u	= tmp * n_up;
-	glm::vec3 t_f	= tmp * n_front;
-	glm::vec3 t_uf	= tmp * n_u_cross_f;
+	glm::vec3 t_u = tmp * n_up;
+	glm::vec3 t_f = tmp * n_front;
+	glm::vec3 t_uf = tmp * n_u_cross_f;
 
-	n_up			= s_len * n_up;
-	n_front			= s_len * n_front;
-	n_u_cross_f		= s_len * n_u_cross_f;
+	n_up = s_len * n_up;
+	n_front = s_len * n_front;
+	n_u_cross_f = s_len * n_u_cross_f;
 
 	//top
-	sides[0].reset(new Rectangle(center + t_u, -n_u_cross_f , n_front, mat));
+	sides[0].reset(new Rectangle(center + t_u, -n_u_cross_f, n_front, mat));
 	//bottom
 	sides[1].reset(new Rectangle(center - t_u, n_front, -n_u_cross_f, mat));
 	//front

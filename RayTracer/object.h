@@ -13,6 +13,7 @@ template <typename T> int sgn(T val) {
 
 struct Object
 {
+	glm::mat4 obj_to_world, world_to_obj;
 	std::shared_ptr<Material> mat;
 
 	Object() = default;
@@ -167,20 +168,20 @@ class Cube : public Object
 	float v1_dots[3], v2_dots[3];
 
 public:
-	Cube(glm::vec3 b, std::shared_ptr<Material> mat) : boundaries(b)
+	Cube(glm::vec3 b, std::shared_ptr<Material> mat) : boundaries(b / 2.f)
 	{
 		assert(fmin(fmin(b.x, b.y), b.z) > 0);
 		this->mat = mat;
 
 		// sides
-		v1[0] = glm::vec3(0.f, 0.f, 2*boundaries[2]);
-		v2[0] = glm::vec3(0.f, 2*boundaries[1], 0.f);
+		v1[0] = glm::vec3(0.f, 0.f, b[2]);
+		v2[0] = glm::vec3(0.f, b[1], 0.f);
 
-		v1[1] = glm::vec3(2*boundaries[0], 0.f, 0.f);
-		v2[1] = glm::vec3(0.f, 0.f, 2*boundaries[2]);
+		v1[1] = glm::vec3(b[0], 0.f, 0.f);
+		v2[1] = glm::vec3(0.f, 0.f, b[2]);
 
-		v1[2] = glm::vec3(2*boundaries[0], 0.f, 0.f);
-		v2[2] = glm::vec3(0.f, 2*boundaries[1], 0.f);
+		v1[2] = glm::vec3(b[0], 0.f, 0.f);
+		v2[2] = glm::vec3(0.f, b[1], 0.f);
 
 		for (int i = 0; i < 6; ++i)
 		{
@@ -202,6 +203,9 @@ public:
 	{
 		assert(abs(length(ray.rd)) > 0);
 
+		Ray transformed_ray{ world_to_obj * glm::vec4(ray.ro, 1.f), 
+			world_to_obj * glm::vec4(ray.rd, 0.f) };
+
 		int nearest = 0;
 		int tmp = 0;
 		float isec_t = INFINITY;
@@ -213,14 +217,14 @@ public:
 
 
 		// calculate the 6 ray-plane intersections
-		t[0] = (boundaries - ray.ro);
-		t[1] = -(boundaries + ray.ro);
+		t[0] = (boundaries - transformed_ray.ro);
+		t[1] = -(boundaries + transformed_ray.ro);
 
 
-		if (ray.rd.x != 0)
+		if (transformed_ray.rd.x != 0)
 		{
-			t[0].x /= ray.rd.x;
-			t[1].x /= ray.rd.x;
+			t[0].x /= transformed_ray.rd.x;
+			t[1].x /= transformed_ray.rd.x;
 		}
 		else
 		{
@@ -228,10 +232,10 @@ public:
 			t[1].x = (t[1].x == 0 ? 0.f : INFINITY);
 		}
 
-		if (ray.rd.y != 0)
+		if (transformed_ray.rd.y != 0)
 		{
-			t[0].y /= ray.rd.y;
-			t[1].y /= ray.rd.y;
+			t[0].y /= transformed_ray.rd.y;
+			t[1].y /= transformed_ray.rd.y;
 		}
 		else
 		{
@@ -239,10 +243,10 @@ public:
 			t[1].y = (t[1].y == 0 ? 0.f : INFINITY);
 		}
 
-		if (ray.rd.z != 0)
+		if (transformed_ray.rd.z != 0)
 		{
-			t[0].z /= ray.rd.z;
-			t[1].z /= ray.rd.z;
+			t[0].z /= transformed_ray.rd.z;
+			t[1].z /= transformed_ray.rd.z;
 		}
 		else
 		{
@@ -257,7 +261,7 @@ public:
 			if (t[i >= 3][tmp] >= 0.f)
 			{
 				isec_t = t[i >= 3][tmp];
-				isec_p = ray.ro + isec_t * ray.rd;
+				isec_p = transformed_ray.ro + isec_t * transformed_ray.rd;
 
 				inside_1 = glm::dot(isec_p - moved_centers[i], v1[tmp]) /
 					v1_dots[tmp];
