@@ -7,7 +7,8 @@
 
 #define DEBUG
 
-template <typename T> int sgn(T val) {
+template <typename T> int sgn(T val)
+{
 	return (T(0) < val) - (val < T(0));
 }
 
@@ -101,7 +102,8 @@ struct Plane : public Object
 	}
 };
 
-namespace RRECT {
+namespace RRECT
+{
 	struct Rectangle : public Object
 	{
 		glm::vec3 center;
@@ -204,7 +206,7 @@ public:
 	{
 		assert(abs(length(ray.rd)) > 0);
 
-		Ray transformed_ray{ world_to_obj * glm::vec4(ray.ro, 1.f), 
+		Ray transformed_ray{ world_to_obj * glm::vec4(ray.ro, 1.f),
 			world_to_obj * glm::vec4(ray.rd, 0.f) };
 
 		int nearest = 0;

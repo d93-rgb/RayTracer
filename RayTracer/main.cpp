@@ -47,6 +47,9 @@ void print_vec3(glm::vec3 v)
 	std::cout << "(" << v.x << ", " << v.y << ", " << v.z << ")" << std::endl;
 }
 
+/*
+	Starts rendering a scene and writes the pixels to a .ppm file
+*/
 void render()
 {
 	float fov = glm::radians(55.f);
@@ -137,8 +140,11 @@ int main(int argc, const char **agrv)
 	ofs.close();
 	*/
 	//getchar();
+
+	// launch rendering 
 	render();
 
+#ifdef DEBUG
 	// OPEN FILE IN GIMP
 	std::string gimp_path = "C:\\Program Files\\GIMP 2\\bin\\gimp-2.10.exe";
 	std::string image_path = "C:\\Users\\Dood\\source\\repos\\RayTracer\\RayTracer\\picture.ppm";
@@ -171,6 +177,7 @@ int main(int argc, const char **agrv)
 	// Close process and thread handles. 
 	CloseHandle(pi.hProcess);
 	CloseHandle(pi.hThread);
+#endif
 
 	return 0;
 }

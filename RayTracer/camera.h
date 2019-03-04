@@ -41,3 +41,9 @@ protected:
 	glm::vec4 up, right, front;
 	glm::mat4 camToWorld;
 };
+
+// Free flight camera
+class FFCamera
+{
+
+};
