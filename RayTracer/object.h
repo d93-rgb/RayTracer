@@ -298,9 +298,45 @@ public:
 			bool stop = true;
 		}
 #endif
+		p = world_to_obj * glm::vec4(p, 1.f);
 		glm::vec3 a_p = glm::abs(p);
 		return a_p.x > a_p.y ?
 			(a_p.x > a_p.z ? glm::vec3(sgn(p.x), 0.f, 0.f) : glm::vec3(0.f, 0.f, sgn(p.z))) :
 			(a_p.y > a_p.z ? glm::vec3(0.f, sgn(p.y), 0.f) : glm::vec3(0.f, 0.f, sgn(p.z)));
 	}
 };
+
+inline void create_cube(glm::vec3 center,
+	glm::vec3 up,
+	glm::vec3 front,
+	float s_len,
+	std::unique_ptr<Object> sides[],
+	std::shared_ptr<Material> mat)
+{
+	float tmp = s_len / 2;
+
+	glm::vec3 n_up = glm::normalize(up);
+	glm::vec3 n_front = glm::normalize(front);
+	glm::vec3 n_u_cross_f = glm::normalize(glm::cross(n_up, n_front));
+
+	glm::vec3 t_u = tmp * n_up;
+	glm::vec3 t_f = tmp * n_front;
+	glm::vec3 t_uf = tmp * n_u_cross_f;
+
+	n_up = s_len * n_up;
+	n_front = s_len * n_front;
+	n_u_cross_f = s_len * n_u_cross_f;
+
+	//top
+	sides[0].reset(new Rectangle(center + t_u, -n_u_cross_f, n_front, mat));
+	//bottom
+	sides[1].reset(new Rectangle(center - t_u, n_front, -n_u_cross_f, mat));
+	//front
+	sides[2].reset(new Rectangle(center + t_f, n_up, -n_u_cross_f, mat));
+	//back
+	sides[3].reset(new Rectangle(center - t_f, -n_u_cross_f, n_up, mat));
+	//left
+	sides[4].reset(new Rectangle(center + t_uf, n_up, n_front, mat));
+	//right
+	sides[5].reset(new Rectangle(center - t_uf, n_front, n_up, mat));
+}

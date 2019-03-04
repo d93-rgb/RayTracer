@@ -32,13 +32,10 @@ struct Scene
 
 	void init();
 
-	void create_cube(glm::vec3 center, 
-		glm::vec3 up,
-		glm::vec3 front,
-		float s_len,
-		std::unique_ptr<Object> sides[],
-		std::shared_ptr<Material> mat);
-
 	~Scene() = default;
 };
 
+class GatheringScene : public Scene
+{
+
+};

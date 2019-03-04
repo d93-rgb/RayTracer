@@ -3,10 +3,11 @@
 
 void Scene::init()
 {
-	float rot_y = glm::radians(20.f);
+	float rot_y = glm::radians(0.f);
 	float radius[] = { 1, 1.5, 3, 2, 4 , 4, 2, 3, 2 };
 
-	glm::vec3 translation = glm::vec3(6.f, 0.f, 20.f);
+	glm::vec3 translation = glm::vec3(0.f, 3.f, 20.f);
+	
 	std::vector<glm::vec3> sph_origins = {
 		glm::vec3(-10, -2, -5),
 		glm::vec3(-9, 21, -22),
@@ -15,7 +16,7 @@ void Scene::init()
 		glm::vec3(0, 12, -25),
 		glm::vec3(5, -2, -11),
 		glm::vec3(-6, -3, -4),
-		glm::vec3(-4, 4, -2),
+		glm::vec3(-8, 4, -2),
 		//glm::vec3(0.f, 0.f, 0.f)
 	};
 	std::unique_ptr<Object> cube_1[6], cube_2[6], cube_3[6];
@@ -109,21 +110,28 @@ void Scene::init()
 		cube_3,
 		cube_mat_2);	
 	*/
+
 	////////////////////////////////
 	// NEW CUBE
 	////////////////////////////////
 	// cube material for new cube class object
-	auto new_cube_mat = std::shared_ptr<Material>(new Material(glm::vec3(0.1f, 0.1f, 0.1f),
+	auto new_cube_mat = std::shared_ptr<Material>(new Material(glm::vec3(0.01f, 0.02f, 0.005f),
 		glm::vec3(0.2f, 0.6f, 0.1f),
 		glm::vec3(0.2f, 0.6f, 0.1f)));
 
 	sc.emplace_back(std::unique_ptr<Object>(new Cube(glm::vec3(3.f), new_cube_mat)));
-	sc.back()->obj_to_world = glm::translate(glm::scale(glm::mat4(1.f), glm::vec3(1.f, 0.5f, 1.f)), 
-		glm::vec3(2.f, 2.f, 4.f));
+	sc.back()->obj_to_world = glm::rotate(glm::scale(glm::translate(
+		glm::mat4(1.f),
+		glm::vec3(0.f,-1.f, 10.f)),
+		glm::vec3(1.25f, 0.5f, 1.f)),
+		glm::radians(60.f),
+		glm::vec3(1.f, 0.f, 0.f));
+		
 	sc.back()->world_to_obj = glm::inverse(sc.back()->obj_to_world);
 	////////////////////////////////
 	// END
 	////////////////////////////////
+
 	for (std::unique_ptr<Object> &p : cube_1)
 	{
 		sc.emplace_back(std::move(p));
@@ -137,7 +145,7 @@ void Scene::init()
 		sc.emplace_back(std::move(p));
 	}*/
 	// add lights to the scene
-	lights.emplace_back(std::unique_ptr<Light>(new DistantLight(glm::vec3(-2, -4, -2), glm::vec3(0.8f))));
+	//lights.emplace_back(std::unique_ptr<Light>(new DistantLight(glm::vec3(-2, -4, -2), glm::vec3(0.8f))));
 	//lights.emplace_back(std::unique_ptr<Light>(new DistantLight(glm::vec3(0, 0, -1), glm::vec3(0.8f))));
 
 	lights.emplace_back(std::unique_ptr<Light>(new PointLight(glm::vec3(-2.f, 4.f, -17.f),
@@ -148,39 +156,4 @@ void Scene::init()
 	cam.setCamToWorld(glm::rotate(glm::translate(glm::mat4(1.f), translation),
 		rot_y, glm::vec3(cam.getUpVec())));
 	cam.update();
-}
-
-void Scene::create_cube(glm::vec3 center,
-	glm::vec3 up,
-	glm::vec3 front,
-	float s_len,
-	std::unique_ptr<Object> sides[],
-	std::shared_ptr<Material> mat)
-{
-	float tmp = s_len / 2;
-
-	glm::vec3 n_up = glm::normalize(up);
-	glm::vec3 n_front = glm::normalize(front);
-	glm::vec3 n_u_cross_f = glm::normalize(glm::cross(n_up, n_front));
-
-	glm::vec3 t_u = tmp * n_up;
-	glm::vec3 t_f = tmp * n_front;
-	glm::vec3 t_uf = tmp * n_u_cross_f;
-
-	n_up = s_len * n_up;
-	n_front = s_len * n_front;
-	n_u_cross_f = s_len * n_u_cross_f;
-
-	//top
-	sides[0].reset(new Rectangle(center + t_u, -n_u_cross_f, n_front, mat));
-	//bottom
-	sides[1].reset(new Rectangle(center - t_u, n_front, -n_u_cross_f, mat));
-	//front
-	sides[2].reset(new Rectangle(center + t_f, n_up, -n_u_cross_f, mat));
-	//back
-	sides[3].reset(new Rectangle(center - t_f, -n_u_cross_f, n_up, mat));
-	//left
-	sides[4].reset(new Rectangle(center + t_uf, n_up, n_front, mat));
-	//right
-	sides[5].reset(new Rectangle(center - t_uf, n_front, n_up, mat));
 }
