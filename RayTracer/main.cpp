@@ -1,7 +1,10 @@
+#define WIN32_LEAN_AND_MEAN
 #define _USE_MATH_DEFINES
 
 // use for debugging
 #define DEBUG
+
+#include <Windows.h>
 
 #include <iostream>
 #include <fstream>
@@ -52,7 +55,7 @@ void render()
 	// distance to view plane
 	float d = 1.f;
 	std::vector<glm::vec3> col(WIDTH * HEIGHT);
-	
+
 	Object *ob = nullptr;
 
 	/***************************************/
@@ -69,7 +72,7 @@ void render()
 		{
 			u = (2 * (float)(x + 0.5) - WIDTH) / HEIGHT * fov_tan;
 			v = (-2 * (float)(y + 0.5) + HEIGHT) / HEIGHT * fov_tan;
-			
+
 			col[i++] = shoot_recursively(sc, sc.cam.getPrimaryRay(u, v, d), &ob, 0);
 		}
 	}
@@ -93,8 +96,8 @@ void write_file(const char *file, std::vector<glm::vec3> &col)
 	for (int i = 0; i < WIDTH * HEIGHT; ++i)
 	{
 		// gamma correction and mapping to [0;255]
-		col[i] = glm::pow(glm::min(glm::vec3(1), col[i]), 
-			glm::vec3(1/2.2f)) * 255.f;
+		col[i] = glm::pow(glm::min(glm::vec3(1), col[i]),
+			glm::vec3(1 / 2.2f)) * 255.f;
 
 		// prevent sign extension by cating to unsigned int
 		unsigned char r = (unsigned int)round(col[i].x);
@@ -135,6 +138,39 @@ int main(int argc, const char **agrv)
 	*/
 	//getchar();
 	render();
+
+	// OPEN FILE IN GIMP
+	std::string gimp_path = "C:\\Program Files\\GIMP 2\\bin\\gimp-2.10.exe";
+	std::string image_path = "C:\\Users\\Dood\\source\\repos\\RayTracer\\RayTracer\\picture.ppm";
+	std::string szCmdline = gimp_path + " " + image_path;
+
+	// additional information
+	STARTUPINFO si;
+	PROCESS_INFORMATION pi;
+
+	// set the size of the structures
+	ZeroMemory(&si, sizeof(si));
+	si.cb = sizeof(si);
+	ZeroMemory(&pi, sizeof(pi));
+
+	// start the program up
+	if (!CreateProcess(nullptr,   // the path
+		&szCmdline[0],        // Command line
+		NULL,           // Process handle not inheritable
+		NULL,           // Thread handle not inheritable
+		FALSE,          // Set handle inheritance to FALSE
+		0,              // No creation flags
+		NULL,           // Use parent's environment block
+		NULL,           // Use parent's starting directory 
+		&si,            // Pointer to STARTUPINFO structure
+		&pi))            // Pointer to PROCESS_INFORMATION structure (removed extra parentheses)
+	{
+		printf("CreateProcess failed (%d).\n%s\n",
+			GetLastError(), szCmdline.c_str());
+	}
+	// Close process and thread handles. 
+	CloseHandle(pi.hProcess);
+	CloseHandle(pi.hThread);
 
 	return 0;
 }

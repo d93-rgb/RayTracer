@@ -63,7 +63,7 @@ void Scene::init()
 	}
 
 	//bottom
-	sc.emplace_back(std::unique_ptr<Object>(new Rectangle(glm::vec3(-4, 2, -18),
+	sc.emplace_back(std::unique_ptr<Object>(new RRECT::Rectangle(glm::vec3(-4, 2, -18),
 		glm::vec3(150, 0, 0), glm::vec3(0, 150, -150), wall_bot)));
 	//front
 	//sc.emplace_back(std::unique_ptr<Object>(new Rectangle(glm::vec3(-4, 11, -27),
