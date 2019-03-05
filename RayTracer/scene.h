@@ -1,8 +1,12 @@
 #pragma once
+
+#define GLM_ENABLE_EXPERIMENTAL
+
 #include <vector>
 #include <memory>
 
 #include <gtc\matrix_transform.hpp>
+#include <gtx\perpendicular.hpp>
 
 #include "object.h"
 #include "light.h"
@@ -17,7 +21,6 @@ struct Scene
 
 	Scene() 
 	{
-		init();
 	}
 
 	/*void emplace_back(std::unique_ptr<Object> o)
@@ -30,12 +33,29 @@ struct Scene
 		return sc;
 	}
 
-	void init();
+	virtual void init() = 0;
 
 	~Scene() = default;
 };
 
 class GatheringScene : public Scene
 {
+public:
+	GatheringScene()
+	{
+		init();
+	}
 
+	void init();
+};
+
+class SingleCubeScene : public Scene
+{
+public:
+	SingleCubeScene()
+	{
+		init();
+	}
+
+	void init();
 };

@@ -135,6 +135,10 @@ struct Plane : public Object
 	}
 };
 
+/*
+	windows.h has already occupied the names RECT and Rectangle, so a namespace is needed 
+	here. The name of the namespace is subject to change.
+*/
 namespace RRECT
 {
 	struct Rectangle : public Object
@@ -187,7 +191,7 @@ namespace RRECT
 		/*
 		TODO: Check boundaries
 		*/
-		glm::vec4 getRectPos(float v, float w, int coordinate)
+		glm::vec4 getRectPos(float v, float w, char coordinate)
 		{
 			glm::vec4 c;
 			float a;
@@ -195,15 +199,15 @@ namespace RRECT
 
 			switch (coordinate)
 			{
-			case 0:
+			case 'x':
 				a = (tmp - (normal.y * v + normal.z * w)) / normal.x;
 				c = glm::vec4(a, v, w, 1.f);
 				break;
-			case 1:
+			case 'y':
 				a = (tmp - (normal.x * v + normal.z * w)) / normal.y;
 				c = glm::vec4(v, a, w, 1.f);
 				break;
-			case 2:
+			case 'z':
 				a = (tmp - (normal.x * v + normal.y * w)) / normal.z;
 				c = glm::vec4(v, w, a, 1.f);
 				break;

@@ -64,7 +64,8 @@ void render()
 	/***************************************/
 	// CREATING SCENE
 	/***************************************/
-	Scene sc;
+	//GatheringScene sc;
+	SingleCubeScene sc;
 
 	/***************************************/
 	// LOOPING OVER PIXELS
