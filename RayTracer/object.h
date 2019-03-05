@@ -96,6 +96,39 @@ struct Plane : public Object
 		return t >= 0 ? t : INFINITY;
 	}
 
+	/*
+		Get the missing coordinate of the point P, so that it lies on the plane.
+
+		coordinate = 0: get the missing x-coordinate => v = y and w = z
+		coordinate = 1: get the missing y-coordinate => v = x and w = z
+		coordinate = 2: get the missing z-coordinate => v = x and w = y
+	*/
+	glm::vec4 getPlanePos(float v, float w, int coordinate)
+	{
+		glm::vec4 c;
+		float a;
+		float tmp = glm::dot(normal, pos);
+
+		switch (coordinate)
+		{
+		case 0:
+			a = (tmp - (normal.y * v + normal.z * w)) / normal.x;
+			c = glm::vec4(a, v, w, 1.f);
+			break;
+		case 1:
+			a = (tmp - (normal.x * v + normal.z * w)) / normal.y;
+			c = glm::vec4(v, a, w, 1.f);
+			break;
+		case 2:
+			a = (tmp - (normal.x * v + normal.y * w)) / normal.z;
+			c = glm::vec4(v, w, a, 1.f);
+			break;
+		default:
+			return glm::vec4(INFINITY);
+		}
+		return c;
+	}
+
 	glm::vec3 get_normal(glm::vec3 p) const
 	{
 		return normal;
@@ -149,6 +182,35 @@ namespace RRECT
 				(0 <= inside_2) && (inside_2 <= 1);
 
 			return test ? t : INFINITY;
+		}
+
+		/*
+		TODO: Check boundaries
+		*/
+		glm::vec4 getRectPos(float v, float w, int coordinate)
+		{
+			glm::vec4 c;
+			float a;
+			float tmp = glm::dot(normal, center);
+
+			switch (coordinate)
+			{
+			case 0:
+				a = (tmp - (normal.y * v + normal.z * w)) / normal.x;
+				c = glm::vec4(a, v, w, 1.f);
+				break;
+			case 1:
+				a = (tmp - (normal.x * v + normal.z * w)) / normal.y;
+				c = glm::vec4(v, a, w, 1.f);
+				break;
+			case 2:
+				a = (tmp - (normal.x * v + normal.y * w)) / normal.z;
+				c = glm::vec4(v, w, a, 1.f);
+				break;
+			default:
+				return glm::vec4(INFINITY);
+			}
+			return c;
 		}
 
 		glm::vec3 get_normal(glm::vec3 p) const

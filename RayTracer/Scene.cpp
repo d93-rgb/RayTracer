@@ -65,6 +65,10 @@ void Scene::init()
 	//bottom
 	sc.emplace_back(std::unique_ptr<Object>(new RRECT::Rectangle(glm::vec3(-4, 2, -18),
 		glm::vec3(150, 0, 0), glm::vec3(0, 150, -150), wall_bot)));
+	l 
+	// get pointer to the floor
+	RRECT::Rectangle *floor = dynamic_cast<RRECT::Rectangle*>(sc.back().get());
+
 	//front
 	//sc.emplace_back(std::unique_ptr<Object>(new Rectangle(glm::vec3(-4, 11, -27),
 	//	glm::vec3(50, 0, 0), glm::vec3(0, 70, 0), wall_right)));
@@ -89,7 +93,10 @@ void Scene::init()
 	cube_mat_1->setShininess(10.f);
 	cube_mat_2->setShininess(10.f);
 
-	create_cube(glm::vec3(13.f, 10.f, -20.f),
+
+	glm::vec4 cube_position = floor->getRectPos(13.f, -20.f, 2);
+
+	create_cube(cube_position,
 		glm::vec3(0.f, 0.f, 1.f),
 		glm::vec3(1.f, 0.f, 0.f),
 		4.f,
