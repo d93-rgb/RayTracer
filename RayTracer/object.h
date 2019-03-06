@@ -2,10 +2,14 @@
 #include <memory>
 #include <glm.hpp>
 
+#include "rt.h"
 #include "material.h"
 #include "ray.h"
 
 #define DEBUG
+
+namespace rt
+{
 
 template <typename T> int sgn(T val)
 {
@@ -136,98 +140,97 @@ struct Plane : public Object
 };
 
 /*
-	windows.h has already occupied the names RECT and Rectangle, so a namespace is needed 
+	windows.h has already occupied the names RECT and Rectangle, so a namespace is needed
 	here. The name of the namespace is subject to change.
 */
-namespace RRECT
+
+struct Rectangle : public Object
 {
-	struct Rectangle : public Object
+	glm::vec3 center;
+	glm::vec3 v1;
+	glm::vec3 v2;
+	// normal of the plane the rectangle resides in
+	glm::vec3 normal;
+
+	float v1_dot;
+	float v2_dot;
+
+	Rectangle() {};
+
+	Rectangle(glm::vec3 center, glm::vec3 u, glm::vec3 v, std::shared_ptr<Material> m) :
+		center(center - 0.5f * (u + v))
 	{
-		glm::vec3 center;
-		glm::vec3 v1;
-		glm::vec3 v2;
-		// normal of the plane the rectangle resides in
-		glm::vec3 normal;
+		this->mat = m;
+		this->v1 = u;
+		this->v2 = v;
+		this->normal = glm::normalize(glm::cross(u, v));
+		v1_dot = glm::dot(v1, v1);
+		v2_dot = glm::dot(v2, v2);
+	}
 
-		float v1_dot;
-		float v2_dot;
+	float intersect(const Ray &ray) const
+	{
+		float denom = glm::dot(ray.rd, normal);
 
-		Rectangle() {};
+		if (abs(denom) < 1e-6) return INFINITY;
 
-		Rectangle(glm::vec3 center, glm::vec3 u, glm::vec3 v, std::shared_ptr<Material> m) :
-			center(center - 0.5f * (u + v))
+		float num = glm::dot(normal, center - ray.ro);
+
+		float t = num / denom;
+
+		if (t < 0) return INFINITY;
+
+		glm::vec3 isec_p = ray.ro + t * ray.rd;
+
+		float inside_1 = glm::dot(isec_p - center, v1) / v1_dot;
+		float inside_2 = glm::dot(isec_p - center, v2) / v2_dot;
+
+		bool test = (0 <= inside_1) && (inside_1 <= 1) &&
+			(0 <= inside_2) && (inside_2 <= 1);
+
+		return test ? t : INFINITY;
+	}
+
+	/*
+	TODO: Check boundaries
+	*/
+	glm::vec4 getRectPos(float v, float w, char coordinate)
+	{
+		glm::vec4 c;
+		float a;
+		float tmp = glm::dot(normal, center);
+
+		switch (coordinate)
 		{
-			this->mat = m;
-			this->v1 = u;
-			this->v2 = v;
-			this->normal = glm::normalize(glm::cross(u, v));
-			v1_dot = glm::dot(v1, v1);
-			v2_dot = glm::dot(v2, v2);
+		case 'x':
+			a = (tmp - (normal.y * v + normal.z * w)) / normal.x;
+			c = glm::vec4(a, v, w, 1.f);
+			break;
+		case 'y':
+			a = (tmp - (normal.x * v + normal.z * w)) / normal.y;
+			c = glm::vec4(v, a, w, 1.f);
+			break;
+		case 'z':
+			a = (tmp - (normal.x * v + normal.y * w)) / normal.z;
+			c = glm::vec4(v, w, a, 1.f);
+			break;
+		default:
+			return glm::vec4(INFINITY);
 		}
+		return c;
+	}
 
-		float intersect(const Ray &ray) const
-		{
-			float denom = glm::dot(ray.rd, normal);
+	glm::vec3 get_normal(glm::vec3 p) const
+	{
+		return normal;
+	}
 
-			if (abs(denom) < 1e-6) return INFINITY;
+	glm::vec3 get_normal() const
+	{
+		return normal;
+	}
+};
 
-			float num = glm::dot(normal, center - ray.ro);
-
-			float t = num / denom;
-
-			if (t < 0) return INFINITY;
-
-			glm::vec3 isec_p = ray.ro + t * ray.rd;
-
-			float inside_1 = glm::dot(isec_p - center, v1) / v1_dot;
-			float inside_2 = glm::dot(isec_p - center, v2) / v2_dot;
-
-			bool test = (0 <= inside_1) && (inside_1 <= 1) &&
-				(0 <= inside_2) && (inside_2 <= 1);
-
-			return test ? t : INFINITY;
-		}
-
-		/*
-		TODO: Check boundaries
-		*/
-		glm::vec4 getRectPos(float v, float w, char coordinate)
-		{
-			glm::vec4 c;
-			float a;
-			float tmp = glm::dot(normal, center);
-
-			switch (coordinate)
-			{
-			case 'x':
-				a = (tmp - (normal.y * v + normal.z * w)) / normal.x;
-				c = glm::vec4(a, v, w, 1.f);
-				break;
-			case 'y':
-				a = (tmp - (normal.x * v + normal.z * w)) / normal.y;
-				c = glm::vec4(v, a, w, 1.f);
-				break;
-			case 'z':
-				a = (tmp - (normal.x * v + normal.y * w)) / normal.z;
-				c = glm::vec4(v, w, a, 1.f);
-				break;
-			default:
-				return glm::vec4(INFINITY);
-			}
-			return c;
-		}
-
-		glm::vec3 get_normal(glm::vec3 p) const
-		{
-			return normal;
-		}
-
-		glm::vec3 get_normal() const
-		{
-			return normal;
-		}
-	};
-}
 class Cube : public Object
 {
 	glm::vec3 normal;
@@ -397,15 +400,16 @@ inline void create_cube(glm::vec3 center,
 	n_u_cross_f = s_len * n_u_cross_f;
 
 	//top
-	sides[0].reset(new RRECT::Rectangle(center + t_u, -n_u_cross_f, n_front, mat));
+	sides[0].reset(new Rectangle(center + t_u, -n_u_cross_f, n_front, mat));
 	//bottom
-	sides[1].reset(new RRECT::Rectangle(center - t_u, n_front, -n_u_cross_f, mat));
+	sides[1].reset(new Rectangle(center - t_u, n_front, -n_u_cross_f, mat));
 	//front
-	sides[2].reset(new RRECT::Rectangle(center + t_f, n_up, -n_u_cross_f, mat));
+	sides[2].reset(new Rectangle(center + t_f, n_up, -n_u_cross_f, mat));
 	//back
-	sides[3].reset(new RRECT::Rectangle(center - t_f, -n_u_cross_f, n_up, mat));
+	sides[3].reset(new Rectangle(center - t_f, -n_u_cross_f, n_up, mat));
 	//left
-	sides[4].reset(new RRECT::Rectangle(center + t_uf, n_up, n_front, mat));
+	sides[4].reset(new Rectangle(center + t_uf, n_up, n_front, mat));
 	//right
-	sides[5].reset(new RRECT::Rectangle(center - t_uf, n_front, n_up, mat));
+	sides[5].reset(new Rectangle(center - t_uf, n_front, n_up, mat));
+}
 }

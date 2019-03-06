@@ -1,6 +1,8 @@
 #pragma once
 #include "renderer.h"
 
+//#define DEBUG_NORMALS
+
 /*
 	Calculate the normalized reflection vector.
 	dir	: the incident ray
@@ -158,6 +160,12 @@ glm::vec3 shoot_recursively(const Scene &s,
 
 	//if ((glm::length((*o)->mat->ambient) > 0) || (glm::length((*o)->mat->specular) > 0))
 		// accumulate all light contribution
+
+	// map direction of normals to a color for debugging
+#ifdef DEBUG_NORMALS
+	return contribution = (glm::vec3(1.f) + (*o)->get_normal(isect_p)) * 0.5f;
+#endif
+
 	for (auto &l : s.lights)
 	{
 		contribution += l->phong_shade(s,

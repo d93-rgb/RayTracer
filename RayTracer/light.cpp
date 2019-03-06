@@ -81,7 +81,7 @@ glm::vec3 PointLight::phong_shade(const Scene &sc,
 	glm::vec3 color(0);
 
 	glm::vec3 dir = p - ob_pos;
-	float sqd_dist = glm::dot(dir, dir);
+	float inv_sqd_dist = 1.f / glm::dot(dir, dir);
 
 	//if (sqd_dist > 1.f) sqd_dist *= 0.1f;
 
@@ -90,7 +90,7 @@ glm::vec3 PointLight::phong_shade(const Scene &sc,
 
 	if (visible) {
 		color += (diff_shade(*o, ob_pos) +
-			spec_shade(*o, ob_pos, ray.rd)) / sqd_dist;
+			spec_shade(*o, ob_pos, ray.rd)) * inv_sqd_dist;
 	}
 	return color;
 }

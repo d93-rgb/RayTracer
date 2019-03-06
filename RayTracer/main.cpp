@@ -17,12 +17,15 @@
 
 #include <glm.hpp>
 
+#include "rt.h"
 #include "object.h"
 #include "renderer.h"
 #include "light.h"
 #include "scene.h"
 #include "gui.h"
 #include "camera.h"
+
+using namespace rt;
 
 constexpr auto WIDTH = 1024;
 constexpr auto HEIGHT = 768;
@@ -64,8 +67,8 @@ void render()
 	/***************************************/
 	// CREATING SCENE
 	/***************************************/
-	//GatheringScene sc;
-	SingleCubeScene sc;
+	GatheringScene sc;
+	//SingleCubeScene sc;
 
 	/***************************************/
 	// LOOPING OVER PIXELS
@@ -74,6 +77,7 @@ void render()
 	{
 		for (int x = 0; x < WIDTH; ++x)
 		{
+			// map pixel coordinates to [-1,1]x[-1,1]
 			u = (2 * (float)(x + 0.5) - WIDTH) / HEIGHT * fov_tan;
 			v = (-2 * (float)(y + 0.5) + HEIGHT) / HEIGHT * fov_tan;
 
@@ -103,7 +107,7 @@ void write_file(const char *file, std::vector<glm::vec3> &col)
 		col[i] = glm::pow(glm::min(glm::vec3(1), col[i]),
 			glm::vec3(1 / 2.2f)) * 255.f;
 
-		// prevent sign extension by cating to unsigned int
+		// prevent sign extension by casting to unsigned int
 		unsigned char r = (unsigned int)round(col[i].x);
 		unsigned char g = (unsigned int)round(col[i].y);
 		unsigned char b = (unsigned int)round(col[i].z);

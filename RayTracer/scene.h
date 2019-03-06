@@ -12,6 +12,8 @@
 #include "light.h"
 #include "camera.h"
 
+using namespace rt;
+
 struct Scene
 {
 	std::vector<std::unique_ptr<Object>> sc;

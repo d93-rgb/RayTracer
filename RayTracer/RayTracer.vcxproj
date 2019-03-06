@@ -139,6 +139,7 @@
     <ClInclude Include="object.h" />
     <ClInclude Include="ray.h" />
     <ClInclude Include="renderer.h" />
+    <ClInclude Include="rt.h" />
     <ClInclude Include="scene.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
