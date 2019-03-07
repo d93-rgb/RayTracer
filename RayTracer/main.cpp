@@ -65,6 +65,7 @@ std::ostream &operator<<(std::ostream &os, glm::vec3 v)
 */
 void render()
 {
+	int i = 0;
 	float fov = glm::radians(55.f);
 	float fov_tan = tan(fov / 2);
 	float u = 0.f, v = 0.f;
@@ -90,25 +91,32 @@ void render()
 	std::random_device rd;
 	std::default_random_engine eng(rd());
 	std::uniform_real_distribution<> dist(0, 1);
-	int i = 0;
 #pragma omp parallel for
 	for (int y = 0; y < HEIGHT; ++y)
 	{
 		Object *ob = nullptr;
 		for (int x = 0; x < WIDTH; ++x)
 		{
-			// hackery needed for omp pragma
-			// the index i will be distributed among all threads
-			// by omp automatically
-			for (int k = 0, i = y*WIDTH + x; k < SPP; ++k)
+			for (int m = 0; m < 2; ++m)
 			{
-				float u_rnd = 2 * float(dist(eng)) - 1;
-				float v_rnd = 2 * float(dist(eng)) - 1;
-				// map pixel coordinates to[-1, 1]x[-1, 1]
-				float u = (2 * (float)(x + 0.5 + u_rnd) - WIDTH) / HEIGHT * fov_tan;
-				float v = (-2 * (float)(y + 0.5 + v_rnd) + HEIGHT) / HEIGHT * fov_tan;
+				for (int n = 0; n < 2; ++n)
+				{
+					// hackery needed for omp pragma
+					// the index i will be distributed among all threads
+					// by omp automatically
+					for (int k = 0, i = y * WIDTH + x; k < SPP; ++k)
+					{
+						float u_rnd = 2 * float(dist(eng)) - 1;
+						float v_rnd = 2 * float(dist(eng)) - 1;
+						// map pixel coordinates to[-1, 1]x[-1, 1]
+						float u = (2.f * (x + (m + 0.5f + u_rnd) / 2.f) - WIDTH) / HEIGHT * fov_tan;
+						float v = (-2.f * (y + (n + 0.5f + v_rnd) / 2.f) + HEIGHT)  / HEIGHT * fov_tan;
 
-				col[i] += clamp(shoot_recursively(sc, sc.cam.getPrimaryRay(u, v, d), &ob, 0)) * inv_spp;
+						// this can not be split up and needs to be in one line, otherwise
+						// omp will not take the average
+						col[i] += clamp(shoot_recursively(sc, sc.cam.getPrimaryRay(u, v, d), &ob, 0)) * inv_spp * 0.25f;
+					}
+				}
 			}
 		}
 	}
