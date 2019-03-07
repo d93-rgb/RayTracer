@@ -79,8 +79,14 @@ struct Plane : public Object
 	glm::vec3 color;
 	float k;
 
-	Plane(glm::vec3 p, glm::vec3 n, glm::vec3 c, std::shared_ptr<Material> m) :
-		pos(p), normal(glm::normalize(n)), color(c)
+	Plane(glm::vec3 p, glm::vec3 n) :
+		pos(p), normal(glm::normalize(n))
+	{
+		k = glm::dot(normal, pos);
+	}
+
+	Plane(glm::vec3 p, glm::vec3 n, glm::vec3 color, std::shared_ptr<Material> m) :
+		pos(p), normal(glm::normalize(n)), color(color)
 	{
 		this->mat = m;
 		k = glm::dot(normal, pos);
@@ -138,11 +144,6 @@ struct Plane : public Object
 		return normal;
 	}
 };
-
-/*
-	windows.h has already occupied the names RECT and Rectangle, so a namespace is needed
-	here. The name of the namespace is subject to change.
-*/
 
 struct Rectangle : public Object
 {
@@ -412,4 +413,56 @@ inline void create_cube(glm::vec3 center,
 	//right
 	sides[5].reset(new Rectangle(center - t_uf, n_front, n_up, mat));
 }
+
+class Triangle : public Object
+{
+	// vertices
+	glm::vec3 p1, p2, p3;
+	// normal
+	glm::vec3 n;
+	glm::mat4 objToWorld;
+	glm::mat3 m_inv;
+
+public:
+	Triangle(glm::vec3 p1,
+		glm::vec3 p2,
+		glm::vec3 p3,
+		glm::vec3 n,
+		glm::mat4 objToWorld,
+		std::shared_ptr<Material> mat) :
+		p1(p1), p2(p2), p3(p3), n(n), objToWorld(objToWorld)
+	{
+		this->mat = mat;
+		m_inv = glm::inverse(glm::mat3(p1, p2, p3));
+	}
+
+	float intersect(const Ray &ray) const
+	{
+		float t_plane = INFINITY;
+		Plane plane{ p1, n };
+
+		t_plane = plane.intersect(ray);
+
+		glm::vec3 t_vec = m_inv * (ray.ro + t_plane * ray.rd);
+
+		if (t_vec.y + t_vec.z <= 1 &&  
+			t_vec.y >= 0 && 
+			t_vec.z >= 0)
+		{
+			return t_plane;
+		}
+		return INFINITY;
+	}
+
+	glm::vec3 get_normal(glm::vec3 p) const
+	{
+		return n;
+	}
+
+	glm::vec3 get_normal() const
+	{
+		return n;
+	}
+};
+
 }

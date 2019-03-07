@@ -1,5 +1,7 @@
 #include "scene.h"
 
+namespace rt
+{
 
 void GatheringScene::init()
 {
@@ -9,7 +11,7 @@ void GatheringScene::init()
 	float radius[] = { 1, 1.5, 3, 2, 4 , 4, 2, 3, 2 };
 
 	glm::vec3 translation = glm::vec3(0.f, 3.f, 20.f);
-	
+
 	std::vector<glm::vec3> sph_origins = {
 		glm::vec3(-10, -2, -5),
 		glm::vec3(-9, 21, -22),
@@ -119,7 +121,7 @@ void GatheringScene::init()
 		glm::vec3(0.f, 1.f, 0.f),
 		5.f,
 		cube_3,
-		cube_mat_2);	
+		cube_mat_2);
 	*/
 
 	////////////////////////////////
@@ -133,11 +135,11 @@ void GatheringScene::init()
 	sc.emplace_back(std::unique_ptr<Object>(new Cube(glm::vec3(3.f), new_cube_mat)));
 	sc.back()->obj_to_world = glm::rotate(glm::scale(glm::translate(
 		glm::mat4(1.f),
-		glm::vec3(0.f,-1.f, 10.f)),
+		glm::vec3(0.f, -1.f, 10.f)),
 		glm::vec3(1.25f, 0.5f, 1.f)),
 		glm::radians(60.f),
 		glm::vec3(1.f, 0.f, 0.f));
-		
+
 	sc.back()->world_to_obj = glm::inverse(sc.back()->obj_to_world);
 	////////////////////////////////
 	// END
@@ -172,16 +174,21 @@ void GatheringScene::init()
 void SingleCubeScene::init()
 {
 	float rot_x = glm::radians(0.f);
+	float deb;
 	glm::vec3 translation = glm::vec3(0.f, -3.f, 20.f);
+	glm::vec4 cube_position;
+	glm::vec3 cube_normal;
 
-	cam = Camera();
+	Rectangle *floor;
+
 	std::unique_ptr<Object> cube_2[6];
+	cam = Camera();
 
 	// material for walls
 	std::shared_ptr<Material> wall_bot =
 		std::shared_ptr<Material>(
-			new Material(glm::vec3(0.02, 0.02, 0.02), 
-				glm::vec3(0.4, 0.4, 0.4), 
+			new Material(glm::vec3(0.02, 0.02, 0.02),
+				glm::vec3(0.4, 0.4, 0.4),
 				glm::vec3(0.0, 0.0, 0.0)));
 	wall_bot->reflective = glm::vec3(0.f);
 
@@ -190,13 +197,18 @@ void SingleCubeScene::init()
 		glm::vec3(150, 0, 0), glm::vec3(0, 150, -150), wall_bot)));
 
 	// get pointer to the floor
-	Rectangle *floor = dynamic_cast<Rectangle*>(sc.back().get());
+	floor = dynamic_cast<Rectangle*>(sc.back().get());
 
-	glm::vec4 cube_position = floor->getRectPos(1.5f, -27.f, 'y');
-	glm::vec3 cube_normal = floor->get_normal();
+	cube_position = floor->getRectPos(1.5f, -27.f, 'y');
+	cube_normal = floor->get_normal();
 
-	float deb = glm::dot(cube_normal, glm::vec3(-2.f, 4.f, -17.f) - floor->center);
+	deb = glm::dot(cube_normal, glm::vec3(-2.f, 4.f, -17.f) - floor->center);
 
+	std::shared_ptr<Material> triangle_mat_1 =
+		std::shared_ptr<Material>(new Material(
+			glm::vec3(0.02, 0.02, 0.0),
+			glm::vec3(0.9, 0.9, 0.0f),
+			glm::vec3(0.f, 0.f, 0.f)));
 	std::shared_ptr<Material> cube_mat_2 =
 		std::shared_ptr<Material>(new Material(
 			glm::vec3(0.02, 0.02, 0.0),
@@ -214,11 +226,18 @@ void SingleCubeScene::init()
 		6.f,
 		cube_2,
 		cube_mat_2);
-	
+
 	for (std::unique_ptr<Object> &p : cube_2)
 	{
 		sc.emplace_back(std::move(p));
 	}
+
+	sc.emplace_back(std::unique_ptr<Object>(new Triangle(glm::vec3(0.f, 0.f, -4.f),
+		glm::vec3(4.f, 0.f, -4.f),
+		glm::vec3(4.f, 4.f, -4.f),
+		glm::vec3(0.f, 0.f, 1.f),
+		glm::mat4(1.f),
+		triangle_mat_1)));
 
 	lights.emplace_back(std::unique_ptr<Light>(new PointLight(glm::vec3(-2.f, 4.f, -17.f),
 		glm::vec3(-2, -4, -2),
@@ -228,4 +247,5 @@ void SingleCubeScene::init()
 	cam.setCamToWorld(glm::rotate(glm::translate(glm::mat4(1.f), translation),
 		rot_x, glm::vec3(1.f, 0.f, 0.f)));
 	cam.update();
+}
 }

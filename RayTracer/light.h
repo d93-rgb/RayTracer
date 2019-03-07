@@ -3,9 +3,9 @@
 
 #include "object.h"
 
+namespace rt
+{
 struct Scene;
-
-extern float eps;
 
 struct Light
 {
@@ -32,9 +32,9 @@ struct Light
 
 	virtual bool calc_shadow(glm::vec3 p, const Scene &sc) = 0;
 
-	virtual glm::vec3 phong_shade(const Scene & sc, 
-		const Ray & ray, 
-		const glm::vec3 & ob_pos, 
+	virtual glm::vec3 phong_shade(const Scene & sc,
+		const Ray & ray,
+		const glm::vec3 & ob_pos,
 		const Object * o) = 0;
 
 };
@@ -43,7 +43,9 @@ struct Light
 struct PointLight : public Light
 {
 	PointLight(glm::vec3 p, glm::vec3 dir, glm::vec3 col) :
-		Light(p, dir, col) {}
+		Light(p, dir, col)
+	{
+	}
 
 	// equal light emission in all directions
 	glm::vec3 getEmission(glm::vec3 dir) const
@@ -60,7 +62,9 @@ struct PointLight : public Light
 struct PointLightShaped : public Light
 {
 	PointLightShaped(glm::vec3 p, glm::vec3 dir, glm::vec3 col) :
-		Light(p, dir, col) {}
+		Light(p, dir, col)
+	{
+	}
 
 	// equal light emission in all directions
 	glm::vec3 getEmission(glm::vec3 dir) const
@@ -89,7 +93,8 @@ struct DistantLight : public Light
 {
 	DistantLight(glm::vec3 dir, glm::vec3 col) :
 		Light(glm::vec3(INFINITY), glm::normalize(dir), col)
-	{}
+	{
+	}
 
 	glm::vec3 getEmission(glm::vec3 dir) const
 	{
@@ -100,3 +105,4 @@ struct DistantLight : public Light
 	bool calc_shadow(glm::vec3 p, const Scene &sc);
 	glm::vec3 phong_shade(const Scene & sc, const Ray & ray, const glm::vec3 & ob_pos, const Object * o);
 };
+}

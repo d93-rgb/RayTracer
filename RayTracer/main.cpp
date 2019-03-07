@@ -1,9 +1,6 @@
 #define WIN32_LEAN_AND_MEAN
 #define _USE_MATH_DEFINES
 
-// use for debugging
-#define DEBUG
-
 #include <Windows.h>
 
 #include <iostream>
@@ -12,8 +9,10 @@
 #include <vector>
 #include <chrono>
 #include <thread>
+#include <random>
 
 #include <math.h>
+#include <omp.h>
 
 #include <glm.hpp>
 
@@ -25,12 +24,17 @@
 #include "gui.h"
 #include "camera.h"
 
+// use for debugging
+#undef DEBUG
+//#define OPEN_WITH_GIMP
+
 using namespace rt;
+
+constexpr auto SPP = 4;
 
 constexpr auto WIDTH = 1024;
 constexpr auto HEIGHT = 768;
 
-float eps = 7e-3f;
 int MAX_DEPTH = 4;
 
 std::vector<float> debug_vec;
@@ -40,14 +44,20 @@ float clamp(float f)
 	return f < 0.f ? 0.f : (f > 1.f ? 1.f : f);
 }
 
+glm::vec3 clamp(glm::vec3 v)
+{
+	return glm::min(glm::vec3(1.f), glm::max(glm::vec3(0.f), v));
+}
+
 void write_file(const char *file, std::vector<glm::vec3> &col);
 
 //float deg2rad(float deg) { return deg * (float)M_PI / 180; }
 //float rad2deg(float rad) { return rad * 180 / (float)M_PI; }
 
-void print_vec3(glm::vec3 v)
+std::ostream &operator<<(std::ostream &os, glm::vec3 v)
 {
-	std::cout << "(" << v.x << ", " << v.y << ", " << v.z << ")" << std::endl;
+	os << "(" << v.x << ", " << v.y << ", " << v.z << ")" << std::endl;
+	return os;
 }
 
 /*
@@ -60,30 +70,55 @@ void render()
 	float u = 0.f, v = 0.f;
 	// distance to view plane
 	float d = 1.f;
-	std::vector<glm::vec3> col(WIDTH * HEIGHT);
+	float inv_spp = 1.f / SPP;
+
+	glm::vec3 radiance = glm::vec3(0.f);
+
+	std::vector<glm::vec3> col(WIDTH * HEIGHT, glm::vec3(0.f));
 
 	Object *ob = nullptr;
 
 	/***************************************/
 	// CREATING SCENE
 	/***************************************/
-	GatheringScene sc;
-	//SingleCubeScene sc;
+	//GatheringScene sc;
+	SingleCubeScene sc;
 
 	/***************************************/
 	// LOOPING OVER PIXELS
 	/***************************************/
-	for (int y = 0, i = 0; y < HEIGHT; ++y)
+	std::random_device rd;
+	std::default_random_engine eng(rd());
+	std::uniform_real_distribution<> dist(0, 1);
+	int i = 0;
+#pragma omp parallel for
+	for (int y = 0; y < HEIGHT; ++y)
 	{
+		Object *ob = nullptr;
 		for (int x = 0; x < WIDTH; ++x)
 		{
-			// map pixel coordinates to [-1,1]x[-1,1]
-			u = (2 * (float)(x + 0.5) - WIDTH) / HEIGHT * fov_tan;
-			v = (-2 * (float)(y + 0.5) + HEIGHT) / HEIGHT * fov_tan;
+			// hackery needed for omp pragma
+			// the index i will be distributed among all threads
+			// by omp automatically
+			for (int k = 0, i = y*WIDTH + x; k < SPP; ++k)
+			{
+				float u_rnd = 2 * float(dist(eng)) - 1;
+				float v_rnd = 2 * float(dist(eng)) - 1;
+				// map pixel coordinates to[-1, 1]x[-1, 1]
+				float u = (2 * (float)(x + 0.5 + u_rnd) - WIDTH) / HEIGHT * fov_tan;
+				float v = (-2 * (float)(y + 0.5 + v_rnd) + HEIGHT) / HEIGHT * fov_tan;
 
-			col[i++] = shoot_recursively(sc, sc.cam.getPrimaryRay(u, v, d), &ob, 0);
+				col[i] += clamp(shoot_recursively(sc, sc.cam.getPrimaryRay(u, v, d), &ob, 0)) * inv_spp;
+			}
 		}
 	}
+
+	//#pragma omp parallel for
+	//	for (int i = 0; i < 10; ++i)
+	//	{
+	//		std::this_thread::sleep_for(std::chrono::seconds(1));
+	//		std::cout << " thread: " << omp_get_thread_num() << std::endl;
+	//	}
 
 	write_file("picture.ppm", col);
 
@@ -91,6 +126,7 @@ void render()
 
 void write_file(const char *file, std::vector<glm::vec3> &col)
 {
+	static int i_debug = 0;
 	std::ofstream ofs;
 
 	/***************************************/
@@ -106,6 +142,10 @@ void write_file(const char *file, std::vector<glm::vec3> &col)
 		// gamma correction and mapping to [0;255]
 		col[i] = glm::pow(glm::min(glm::vec3(1), col[i]),
 			glm::vec3(1 / 2.2f)) * 255.f;
+
+#ifdef DEBUG
+		i_debug = (++i_debug) % 3000;
+#endif
 
 		// prevent sign extension by casting to unsigned int
 		unsigned char r = (unsigned int)round(col[i].x);
@@ -149,7 +189,7 @@ int main(int argc, const char **agrv)
 	// launch rendering 
 	render();
 
-#ifdef DEBUG
+#ifdef OPEN_WITH_GIMP
 	// OPEN FILE IN GIMP
 	std::string gimp_path = "C:\\Program Files\\GIMP 2\\bin\\gimp-2.10.exe";
 	std::string image_path = "C:\\Users\\Dood\\source\\repos\\RayTracer\\RayTracer\\picture.ppm";

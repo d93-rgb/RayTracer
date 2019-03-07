@@ -12,7 +12,8 @@
 #include "light.h"
 #include "camera.h"
 
-using namespace rt;
+namespace rt
+{
 
 struct Scene
 {
@@ -21,7 +22,7 @@ struct Scene
 
 	Camera cam;
 
-	Scene() 
+	Scene()
 	{
 	}
 
@@ -61,3 +62,4 @@ public:
 
 	void init();
 };
+}

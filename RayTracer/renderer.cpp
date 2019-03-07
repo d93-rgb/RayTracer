@@ -3,6 +3,8 @@
 
 //#define DEBUG_NORMALS
 
+namespace rt
+{
 /*
 	Calculate the normalized reflection vector.
 	dir	: the incident ray
@@ -48,7 +50,7 @@ bool refract(glm::vec3 V, glm::vec3 N, float refr_idx, glm::vec3 *refracted)
 
 /*
 	Compute the fresnel term, that is, the factor for reflective contribution
-	rel_eta: the relative refractive coefficient 
+	rel_eta: the relative refractive coefficient
 	c: the cosine of the angle between incident and normal ray
 */
 float fresnel(float rel_eta, float c)
@@ -76,7 +78,7 @@ glm::vec3 handle_reflection(const Scene &s,
 {
 	glm::vec3 reflected = reflect(ray.rd, (*o)->get_normal(isect_p));
 
-	return shoot_recursively(s, Ray(isect_p + eps * reflected, reflected), o, ++depth);
+	return shoot_recursively(s, Ray(isect_p + shadowEpsilon * reflected, reflected), o, ++depth);
 }
 
 glm::vec3 handle_transmission(const Scene &s,
@@ -94,15 +96,15 @@ glm::vec3 handle_transmission(const Scene &s,
 	if (!refract(ray.rd, (*o)->get_normal(isect_p), (*o)->mat->refr_indx, &refracted))
 	{
 		//reflected = glm::normalize(reflect(ray.rd, (*o)->get_normal(isect_p)));
-		return shoot_recursively(s, Ray(isect_p + eps * reflected, reflected), o, ++depth);
+		return shoot_recursively(s, Ray(isect_p + shadowEpsilon * reflected, reflected), o, ++depth);
 	}
 
 	f = fresnel(1.f / (*o)->mat->refr_indx,
 		glm::dot(-ray.rd, (*o)->get_normal(isect_p)));
 	++depth;
 
-	return f * shoot_recursively(s, Ray(isect_p + eps * reflected, reflected), o, depth) +
-		(1.f - f) * shoot_recursively(s, Ray(isect_p + eps * refracted, refracted), o, depth);
+	return f * shoot_recursively(s, Ray(isect_p + shadowEpsilon * reflected, reflected), o, depth) +
+		(1.f - f) * shoot_recursively(s, Ray(isect_p + shadowEpsilon * refracted, refracted), o, depth);
 }
 
 /*
@@ -169,7 +171,7 @@ glm::vec3 shoot_recursively(const Scene &s,
 	for (auto &l : s.lights)
 	{
 		contribution += l->phong_shade(s,
-			ray/*Ray(ray.ro + eps * ray.rd, ray.rd)*/,
+			ray/*Ray(ray.ro + shadowEpsilon * ray.rd, ray.rd)*/,
 			isect_p,
 			*o);
 	}
@@ -187,4 +189,5 @@ glm::vec3 shoot_recursively(const Scene &s,
 	}
 
 	return contribution;
+}
 }
