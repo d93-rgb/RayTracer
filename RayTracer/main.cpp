@@ -106,6 +106,7 @@ void render()
 					// by omp automatically
 					for (int k = 0, i = y * WIDTH + x; k < SPP; ++k)
 					{
+						// TODO: Consider changing random values to the range [0,1)
 						float u_rnd = 2 * float(dist(eng)) - 1;
 						float v_rnd = 2 * float(dist(eng)) - 1;
 						// map pixel coordinates to[-1, 1]x[-1, 1]
