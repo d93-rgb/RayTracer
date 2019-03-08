@@ -33,6 +33,9 @@
     <ClCompile Include="camera.cpp">
       <Filter>Source Files\rt</Filter>
     </ClCompile>
+    <ClCompile Include="progressreporter.cpp">
+      <Filter>Source Files\rt</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="picture.ppm">
@@ -68,6 +71,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="loader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="progressreporter.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

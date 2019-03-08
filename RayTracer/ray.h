@@ -1,6 +1,8 @@
 #pragma once
-#include <glm.hpp>
+#include "rt.h"
 
+namespace rt
+{
 struct Ray
 {
 	glm::vec3 ro;
@@ -9,5 +11,8 @@ struct Ray
 	Ray() : ro(0), rd(0) {}
 
 	Ray(glm::vec3 ro, glm::vec3 rd) :
-		ro(ro), rd(rd) {}
+		ro(ro), rd(rd)
+	{
+	}
 };
+}

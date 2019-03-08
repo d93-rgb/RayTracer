@@ -1,5 +1,8 @@
 #pragma once
 #include "renderer.h"
+#include "ray.h"
+#include "scene.h"
+#include "object.h"
 
 #define DEBUG_NORMALS
 

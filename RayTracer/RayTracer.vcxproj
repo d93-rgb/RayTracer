@@ -126,6 +126,7 @@
     <ClCompile Include="camera.cpp" />
     <ClCompile Include="light.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="progressreporter.cpp" />
     <ClCompile Include="renderer.cpp" />
     <ClCompile Include="scene.cpp" />
   </ItemGroup>
@@ -139,6 +140,7 @@
     <ClInclude Include="loader.h" />
     <ClInclude Include="material.h" />
     <ClInclude Include="object.h" />
+    <ClInclude Include="progressreporter.h" />
     <ClInclude Include="ray.h" />
     <ClInclude Include="renderer.h" />
     <ClInclude Include="rt.h" />

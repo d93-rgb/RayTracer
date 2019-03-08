@@ -1,12 +1,8 @@
 #pragma once
-#include <glm.hpp>
-
-#include "object.h"
+#include "rt.h"
 
 namespace rt
 {
-struct Scene;
-
 struct Light
 {
 	glm::vec3 p;

@@ -1,27 +1,6 @@
-#define WIN32_LEAN_AND_MEAN
-#define _USE_MATH_DEFINES
-
-#include <Windows.h>
-
-#include <iostream>
-#include <fstream>
-#include <string>
-#include <vector>
-#include <chrono>
-#include <thread>
-#include <random>
-
-#include <math.h>
-#include <omp.h>
-
-#include <glm.hpp>
-
 #include "rt.h"
-#include "object.h"
 #include "renderer.h"
-#include "light.h"
 #include "scene.h"
-#include "gui.h"
 #include "camera.h"
 
 // use for debugging
@@ -87,16 +66,21 @@ void render()
 	SingleCubeScene sc;
 
 	/***************************************/
+	// START PROGRESSREPORTER
+	/***************************************/
+	pbrt::ProgressReporter reporter(HEIGHT * WIDTH, "Rendering:");
+	/***************************************/
 	// LOOPING OVER PIXELS
 	/***************************************/
 	std::random_device rd;
 	std::default_random_engine eng(rd());
 	std::uniform_real_distribution<> dist(0, 1);
 	// dynamic schedule for proper I/O progress update
-#pragma omp parallel for schedule(dynamic, 1)
+//#pragma omp parallel for schedule(dynamic, 1)
 	for (int y = 0; y < HEIGHT; ++y)
 	{
-		fprintf(stderr, "\rRendering %5.2f%%", 100.*y / (HEIGHT - 1));
+		//fprintf(stderr, "\rRendering %5.2f%%", 100.*y / (HEIGHT - 1));
+		reporter.Update();
 		Object *ob = nullptr;
 		for (int x = 0; x < WIDTH; ++x)
 		{
@@ -118,12 +102,13 @@ void render()
 
 						// this can not be split up and needs to be in one line, otherwise
 						// omp will not take the average
-						col[i] += clamp(shoot_recursively(sc, sc.cam.getPrimaryRay(u, v, d), &ob, 0)) * inv_spp * 0.25f;
+						col[i] += clamp(shoot_recursively(sc, sc.cam->getPrimaryRay(u, v, d), &ob, 0)) * inv_spp * 0.25f;
 					}
 				}
 			}
 		}
 	}
+	reporter.Done();
 
 	//#pragma omp parallel for
 	//	for (int i = 0; i < 10; ++i)

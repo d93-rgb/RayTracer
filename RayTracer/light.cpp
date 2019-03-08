@@ -1,5 +1,7 @@
 #pragma once
+#include "rt.h"
 #include "light.h"
+#include "object.h"
 #include "scene.h"
 
 namespace rt

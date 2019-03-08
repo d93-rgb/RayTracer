@@ -2,26 +2,21 @@
 
 #define GLM_ENABLE_EXPERIMENTAL
 
-#include <vector>
-#include <memory>
-
 #include <gtc\matrix_transform.hpp>
 #include <gtx\perpendicular.hpp>
 
-#include "object.h"
-#include "light.h"
-#include "camera.h"
-#include "loader.h"
+#include "rt.h"
 
 namespace rt
 {
 
-struct Scene
+class Scene
 {
+public:
 	std::vector<std::unique_ptr<Object>> sc;
 	std::vector<std::unique_ptr<Light>> lights;
 
-	Camera cam;
+	std::unique_ptr<Camera> cam;
 
 	Scene()
 	{

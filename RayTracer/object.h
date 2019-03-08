@@ -1,7 +1,4 @@
 #pragma once
-#include <memory>
-#include <glm.hpp>
-
 #include "rt.h"
 #include "material.h"
 #include "ray.h"

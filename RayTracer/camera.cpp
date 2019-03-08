@@ -1,5 +1,7 @@
 #include "camera.h"
 
+namespace rt
+{
 Camera::~Camera()
 {
 }
@@ -15,4 +17,5 @@ void Camera::update()
 	up = camToWorld * up;
 	right = camToWorld * right;
 	front = camToWorld * front;
+}
 }

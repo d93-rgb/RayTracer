@@ -1,11 +1,16 @@
 #include "scene.h"
+#include "camera.h"
+#include "loader.h"
+#include "material.h"
+#include "object.h"
+#include "light.h"
 
 namespace rt
 {
 
 void GatheringScene::init()
 {
-	cam = Camera();
+	cam.reset(new Camera());
 
 	float rot_y = glm::radians(0.f);
 	float radius[] = { 1, 1.5, 3, 2, 4 , 4, 2, 3, 2 };
@@ -166,9 +171,9 @@ void GatheringScene::init()
 		glm::vec3(100.f))));
 
 
-	cam.setCamToWorld(glm::rotate(glm::translate(glm::mat4(1.f), translation),
-		rot_y, glm::vec3(cam.getUpVec())));
-	cam.update();
+	cam->setCamToWorld(glm::rotate(glm::translate(glm::mat4(1.f), translation),
+		rot_y, glm::vec3(cam->getUpVec())));
+	cam->update();
 }
 
 void SingleCubeScene::init()
@@ -186,14 +191,15 @@ void SingleCubeScene::init()
 	glm::vec3 p1, p2, p3, tr_normal;
 	glm::mat4 teapot_to_world = glm::rotate(
 		glm::scale(
-		glm::translate(glm::mat4(1.f), glm::vec3(-2.f, 4.f, 3.f)),
-		glm::vec3(2.f)),
-		glm::radians(-20.f),
+		glm::translate(glm::mat4(1.f), glm::vec3(-2.f, -3.f, 5.f)),
+		//glm::mat4(1.f),
+			glm::vec3(1.5f)),
+		glm::radians(-110.f),
 		glm::vec3(0.f, 1.f, 0.f));
 	Rectangle *floor;
 
 	std::unique_ptr<Object> cube_2[6];
-	cam = Camera();
+	cam.reset(new Camera());
 
 	loadObjFile(teapot, &vertices, &indices);
 
@@ -204,28 +210,28 @@ void SingleCubeScene::init()
 				glm::vec3(0.4, 0.f, 0.4),
 				glm::vec3(0.0, 0.0, 0.0)));
 
-	//for (size_t i = 0; i < indices.size() / 3; i += 3)
-	//{
-	//	int tmp = indices[i] * 3;
-	//	p1 = glm::vec3(vertices[tmp],
-	//		vertices[tmp + 1],
-	//		vertices[tmp + 2]);
-	//	tmp = indices[i + 1] * 3;
-	//	p2 = glm::vec3(vertices[tmp],
-	//		vertices[tmp + 1],
-	//		vertices[tmp + 2]);
-	//	tmp = indices[i + 2] * 3;
-	//	p3 = glm::vec3(vertices[tmp],
-	//		vertices[tmp + 1],
-	//		vertices[tmp + 2]);
-	//	tr_normal = glm::normalize(glm::cross(p2 - p1, p3 - p2));
-	//	sc.push_back(std::unique_ptr<Object>(new Triangle(p1,
-	//		p2,
-	//		p3,
-	//		tr_normal,
-	//		teapot_to_world,
-	//		teapot_mat)));
-	//}
+	for (size_t i = 0; i < indices.size() / 3; i += 3)
+	{
+		int tmp = indices[i] * 3;
+		p1 = glm::vec3(vertices[tmp],
+			vertices[tmp + 1],
+			vertices[tmp + 2]);
+		tmp = indices[i + 1] * 3;
+		p2 = glm::vec3(vertices[tmp],
+			vertices[tmp + 1],
+			vertices[tmp + 2]);
+		tmp = indices[i + 2] * 3;
+		p3 = glm::vec3(vertices[tmp],
+			vertices[tmp + 1],
+			vertices[tmp + 2]);
+		tr_normal = glm::normalize(glm::cross(p2 - p1, p3 - p2));
+		sc.push_back(std::unique_ptr<Object>(new Triangle(p1,
+			p2,
+			p3,
+			tr_normal,
+			teapot_to_world,
+			teapot_mat)));
+	}
 
 	// material for walls
 	std::shared_ptr<Material> wall_bot =
@@ -279,7 +285,7 @@ void SingleCubeScene::init()
 		glm::vec3(4.f, 0.f, -4.f),
 		glm::vec3(4.f, 4.f, -4.f),
 		glm::vec3(0.f, 0.f, 1.f),
-		teapot_to_world,
+		glm::mat4(1.f),
 		triangle_mat_1)));
 
 	lights.emplace_back(std::unique_ptr<Light>(new PointLight(glm::vec3(-2.f, 4.f, -17.f),
@@ -287,8 +293,8 @@ void SingleCubeScene::init()
 		glm::vec3(20.f))));
 
 
-	cam.setCamToWorld(glm::rotate(glm::translate(glm::mat4(1.f), translation),
+	cam->setCamToWorld(glm::rotate(glm::translate(glm::mat4(1.f), translation),
 		rot_x, glm::vec3(1.f, 0.f, 0.f)));
-	cam.update();
+	cam->update();
 }
 }
