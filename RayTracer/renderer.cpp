@@ -1,7 +1,7 @@
 #pragma once
 #include "renderer.h"
 
-//#define DEBUG_NORMALS
+#define DEBUG_NORMALS
 
 namespace rt
 {

@@ -11,6 +11,7 @@
 #include "object.h"
 #include "light.h"
 #include "camera.h"
+#include "loader.h"
 
 namespace rt
 {

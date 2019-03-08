@@ -26,14 +26,15 @@
 
 // use for debugging
 #undef DEBUG
-//#define OPEN_WITH_GIMP
+#define OPEN_WITH_GIMP
 
 using namespace rt;
 
-constexpr auto SPP = 4;
+constexpr auto SPP = 1;
+constexpr auto GRID_DIM = 1;
 
-constexpr auto WIDTH = 1024;
-constexpr auto HEIGHT = 768;
+constexpr auto WIDTH = 533;
+constexpr auto HEIGHT = 400;
 
 int MAX_DEPTH = 4;
 
@@ -91,15 +92,17 @@ void render()
 	std::random_device rd;
 	std::default_random_engine eng(rd());
 	std::uniform_real_distribution<> dist(0, 1);
-#pragma omp parallel for
+	// dynamic schedule for proper I/O progress update
+#pragma omp parallel for schedule(dynamic, 1)
 	for (int y = 0; y < HEIGHT; ++y)
 	{
+		fprintf(stderr, "\rRendering %5.2f%%", 100.*y / (HEIGHT - 1));
 		Object *ob = nullptr;
 		for (int x = 0; x < WIDTH; ++x)
 		{
-			for (int m = 0; m < 2; ++m)
+			for (int m = 0; m < GRID_DIM; ++m)
 			{
-				for (int n = 0; n < 2; ++n)
+				for (int n = 0; n < GRID_DIM; ++n)
 				{
 					// hackery needed for omp pragma
 					// the index i will be distributed among all threads
@@ -111,7 +114,7 @@ void render()
 						float v_rnd = 2 * float(dist(eng)) - 1;
 						// map pixel coordinates to[-1, 1]x[-1, 1]
 						float u = (2.f * (x + (m + 0.5f + u_rnd) / 2.f) - WIDTH) / HEIGHT * fov_tan;
-						float v = (-2.f * (y + (n + 0.5f + v_rnd) / 2.f) + HEIGHT)  / HEIGHT * fov_tan;
+						float v = (-2.f * (y + (n + 0.5f + v_rnd) / 2.f) + HEIGHT) / HEIGHT * fov_tan;
 
 						// this can not be split up and needs to be in one line, otherwise
 						// omp will not take the average
@@ -172,30 +175,30 @@ void write_file(const char *file, std::vector<glm::vec3> &col)
 int main(int argc, const char **agrv)
 {
 	//for (int i = 0; i < 3; ++i)
-	//{
-	//	for (int j = 0; j < 3; ++j)
-	//	{
-	//		std::cout << mat3[i][j] << " ";
-	//	}
-	//	std::cout << std::endl;
-	//}	
+//{
+//	for (int j = 0; j < 3; ++j)
+//	{
+//		std::cout << mat3[i][j] << " ";
+//	}
+//	std::cout << std::endl;
+//}	
 
-	/*
-		Gui g = Gui();
-		g.init();
-	*/
+/*
+	Gui g = Gui();
+	g.init();
+*/
 
-	/*
-	ofs.open("debug.txt");
-	for (float f : debug_vec)
-	{
-		ofs << f << std::endl;
-	}
-	ofs.close();
-	*/
-	//getchar();
+/*
+ofs.open("debug.txt");
+for (float f : debug_vec)
+{
+	ofs << f << std::endl;
+}
+ofs.close();
+*/
+//getchar();
 
-	// launch rendering 
+// launch rendering 
 	render();
 
 #ifdef OPEN_WITH_GIMP
@@ -227,7 +230,7 @@ int main(int argc, const char **agrv)
 	{
 		printf("CreateProcess failed (%d).\n%s\n",
 			GetLastError(), szCmdline.c_str());
-	}
+}
 	// Close process and thread handles. 
 	CloseHandle(pi.hProcess);
 	CloseHandle(pi.hThread);

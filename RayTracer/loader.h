@@ -8,7 +8,7 @@
 	Read an .obj file and store the vertices and normals into two seperate containers.
 	Return true, if everything went succesfully, false if file could not be read.
 */
-bool loadObjFile(const std::string &file,
+inline bool loadObjFile(const std::string &file,
 	std::vector<float> *vertices,
 	std::vector<int> *indices)
 {
@@ -39,11 +39,15 @@ bool loadObjFile(const std::string &file,
 				}
 				else if (type == 'f')
 				{
-					indices->push_back(std::stoi(v1));
-					indices->push_back(std::stoi(v2));
-					indices->push_back(std::stoi(v3));
+					indices->push_back(std::stoi(v1) - 1);
+					indices->push_back(std::stoi(v2) - 1);
+					indices->push_back(std::stoi(v3) - 1);
 				}
 			}
 		}
 	}
+	else {
+		return false;
+	}
+	return true;
 }

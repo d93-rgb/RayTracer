@@ -6,7 +6,7 @@
 #include "material.h"
 #include "ray.h"
 
-#define DEBUG
+//#define DEBUG
 
 namespace rt
 {
@@ -430,10 +430,18 @@ public:
 		glm::vec3 n,
 		glm::mat4 objToWorld,
 		std::shared_ptr<Material> mat) :
-		p1(p1), p2(p2), p3(p3), n(n), objToWorld(objToWorld)
+		objToWorld(objToWorld)
 	{
 		this->mat = mat;
-		m_inv = glm::inverse(glm::mat3(p1, p2, p3));
+
+		this->p1 = objToWorld * glm::vec4(p1, 1.f);
+		this->p2 = objToWorld * glm::vec4(p2, 1.f);
+		this->p3 = objToWorld * glm::vec4(p3, 1.f);
+
+		this->n = objToWorld * glm::vec4(n, 0.f);
+
+		this->m_inv = glm::inverse(glm::mat3(this->p1, this->p2, this->p3));
+
 	}
 
 	float intersect(const Ray &ray) const
