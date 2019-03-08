@@ -18,9 +18,7 @@ public:
 
 	std::unique_ptr<Camera> cam;
 
-	Scene()
-	{
-	}
+	Scene();
 
 	/*void emplace_back(std::unique_ptr<Object> o)
 	{
@@ -32,9 +30,10 @@ public:
 		return sc;
 	}
 
+	~Scene();
+
 	virtual void init() = 0;
 
-	~Scene() = default;
 };
 
 class GatheringScene : public Scene

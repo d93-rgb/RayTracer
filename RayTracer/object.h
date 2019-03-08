@@ -18,9 +18,7 @@ struct Object
 	glm::mat4 obj_to_world, world_to_obj;
 	std::shared_ptr<Material> mat;
 
-	Object() = default;
-
-	virtual float intersect(const Ray &ray) const = 0;
+	virtual float intersect(const Ray &ray, Object **o) const = 0;
 
 	virtual glm::vec3 get_normal(glm::vec3 p) const = 0;
 };
@@ -44,7 +42,7 @@ struct Sphere : public Object
 		return glm::normalize(p - origin);
 	}
 
-	float intersect(const Ray &ray) const
+	float intersect(const Ray &ray, Object **o) const
 	{
 		float t1 = INFINITY, t2 = t1;
 		float tmp;
@@ -89,7 +87,7 @@ struct Plane : public Object
 		k = glm::dot(normal, pos);
 	}
 
-	float intersect(const Ray &ray) const
+	float intersect(const Ray &ray, Object **o) const
 	{
 		float denom = glm::dot(normal, ray.rd);
 
@@ -166,7 +164,7 @@ struct Rectangle : public Object
 		v2_dot = glm::dot(v2, v2);
 	}
 
-	float intersect(const Ray &ray) const
+	float intersect(const Ray &ray, Object **o) const
 	{
 		float denom = glm::dot(ray.rd, normal);
 
@@ -238,26 +236,27 @@ class Cube : public Object
 	float v1_dots[3], v2_dots[3];
 
 public:
-	Cube(glm::vec3 b, std::shared_ptr<Material> mat) : boundaries(b / 2.f)
+	Cube(glm::vec3 side_length, std::shared_ptr<Material> mat) :
+		boundaries(side_length / 2.f)
 	{
-		assert(fmin(fmin(b.x, b.y), b.z) > 0);
+		assert(fmin(fmin(side_length.x, side_length.y), side_length.z) > 0);
 		this->mat = mat;
 
 		// sides
-		v1[0] = glm::vec3(0.f, 0.f, b[2]);
-		v2[0] = glm::vec3(0.f, b[1], 0.f);
+		v1[0] = glm::vec3(0.f, 0.f, side_length[2]);
+		v2[0] = glm::vec3(0.f, side_length[1], 0.f);
 
-		v1[1] = glm::vec3(b[0], 0.f, 0.f);
-		v2[1] = glm::vec3(0.f, 0.f, b[2]);
+		v1[1] = glm::vec3(side_length[0], 0.f, 0.f);
+		v2[1] = glm::vec3(0.f, 0.f, side_length[2]);
 
-		v1[2] = glm::vec3(b[0], 0.f, 0.f);
-		v2[2] = glm::vec3(0.f, b[1], 0.f);
+		v1[2] = glm::vec3(side_length[0], 0.f, 0.f);
+		v2[2] = glm::vec3(0.f, side_length[1], 0.f);
 
 		for (int i = 0; i < 6; ++i)
 		{
 			// too lazy to write out the six moved_centers
 			int i_m = i % 3;
-			moved_centers[i] = b[i_m] * glm::vec3(1.f) *
+			moved_centers[i] = side_length[i_m] * glm::vec3(1.f) *
 				glm::vec3(i_m == 0, i_m == 1, i_m == 2) *
 				(-1.f * (i >= 3 ? 1.f : -1.f)) - 0.5f * (v1[i_m] + v2[i_m]);
 		}
@@ -269,7 +268,7 @@ public:
 		}
 	}
 
-	float intersect(const Ray &ray) const
+	float intersect(const Ray &ray, Object **o) const
 	{
 		assert(abs(length(ray.rd)) > 0);
 
@@ -441,17 +440,17 @@ public:
 
 	}
 
-	float intersect(const Ray &ray) const
+	float intersect(const Ray &ray, Object **o) const
 	{
 		float t_plane = INFINITY;
 		Plane plane{ p1, n };
 
-		t_plane = plane.intersect(ray);
+		t_plane = plane.intersect(ray, o);
 
 		glm::vec3 t_vec = m_inv * (ray.ro + t_plane * ray.rd);
 
-		if (t_vec.y + t_vec.z <= 1 &&  
-			t_vec.y >= 0 && 
+		if (t_vec.y + t_vec.z <= 1 &&
+			t_vec.y >= 0 &&
 			t_vec.z >= 0)
 		{
 			return t_plane;
@@ -468,6 +467,50 @@ public:
 	{
 		return n;
 	}
+};
+
+class TriangleMesh : public Object
+{
+public:
+	std::unique_ptr<Cube> boundary;
+	std::vector<std::unique_ptr<Triangle>> tr_mesh;
+
+	TriangleMesh(std::unique_ptr<Cube> &cube)
+	{
+		boundary.swap(cube);
+	}
+
+	TriangleMesh() {}
+
+	float intersect(const Ray &ray, Object **o) const
+	{
+		float t_int = INFINITY;
+		float tmp = INFINITY;
+
+		tmp = boundary->intersect(ray, o);
+		if (tmp < 0 || tmp == INFINITY) {
+			return INFINITY;
+		}
+
+		// get nearest intersection point
+		for (auto &objs : tr_mesh)
+		{
+			tmp = objs->intersect(ray, o);
+
+			if (tmp >= 0 && t_int > tmp)
+			{
+				t_int = tmp;
+				*o = objs.get();
+			}
+		}
+		return t_int;
+	}
+
+	glm::vec3 get_normal(glm::vec3 p) const
+	{
+		return glm::vec3(0.f);
+	}
+
 };
 
 }

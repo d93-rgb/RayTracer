@@ -23,6 +23,7 @@ public:
 	}
 
 	~Camera();
+	
 	void setCamToWorld(glm::mat4);
 
 	Ray getPrimaryRay(float u, float v, float d)

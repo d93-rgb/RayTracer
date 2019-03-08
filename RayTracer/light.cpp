@@ -3,9 +3,13 @@
 #include "light.h"
 #include "object.h"
 #include "scene.h"
+#include "camera.h"
 
 namespace rt
 {
+
+Light::~Light() {}
+
 
 glm::vec3 PointLight::diff_shade(const Object & obj, const glm::vec3 & ob_pos)
 {
@@ -57,10 +61,14 @@ bool PointLight::calc_shadow(glm::vec3 p, const Scene &sc)
 	dist = glm::length(dist_v);
 	ray.ro += ray.rd * shadowEpsilon;
 
+	// HACKS!
+	Object **o = nullptr;
+	// TODO: REMOVE ABOVE!!!
+
 	// send shadow rays
 	for (auto &objs : sc.get_scene())
 	{
-		tmp = objs->intersect(ray);
+		tmp = objs->intersect(ray, o);
 
 		if (tmp >= 0 && t_int > tmp)
 		{
@@ -143,10 +151,14 @@ bool DistantLight::calc_shadow(glm::vec3 p, const Scene &sc)
 	Ray ray = Ray(p, -this->dir);
 	ray.ro += ray.rd * shadowEpsilon;
 
+	// HACKS!
+	Object **o = nullptr;
+	// TODO: REMOVE ABOVE!!!
+
 	// send shadow rays
 	for (auto &objs : sc.get_scene())
 	{
-		tmp = objs->intersect(ray);
+		tmp = objs->intersect(ray, o);
 
 		if (tmp >= 0 && t_int > tmp)
 		{

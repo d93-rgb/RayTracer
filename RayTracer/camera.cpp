@@ -2,9 +2,8 @@
 
 namespace rt
 {
-Camera::~Camera()
-{
-}
+
+Camera::~Camera() {}
 
 void Camera::setCamToWorld(glm::mat4 m)
 {

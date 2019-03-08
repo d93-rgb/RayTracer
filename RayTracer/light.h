@@ -17,6 +17,8 @@ struct Light
 		this->emission = col;
 	}
 
+	~Light();
+
 	virtual glm::vec3 getEmission(glm::vec3 dir) const = 0;
 
 	virtual glm::vec3 diff_shade(const Object &obj,

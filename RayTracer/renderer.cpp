@@ -3,6 +3,7 @@
 #include "ray.h"
 #include "scene.h"
 #include "object.h"
+#include "light.h"
 
 #define DEBUG_NORMALS
 
@@ -126,7 +127,7 @@ float shoot_ray(const Scene &s, const Ray &ray, Object **o)
 	// get nearest intersection point
 	for (auto &objs : s.get_scene())
 	{
-		tmp = objs->intersect(ray);
+		tmp = objs->intersect(ray, o);
 
 		if (tmp >= 0 && t_int > tmp)
 		{

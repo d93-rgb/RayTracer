@@ -8,6 +8,10 @@
 namespace rt
 {
 
+Scene::Scene() = default;
+
+Scene::~Scene() = default;
+
 void GatheringScene::init()
 {
 	cam.reset(new Camera());
@@ -184,23 +188,30 @@ void SingleCubeScene::init()
 	glm::vec4 cube_position;
 	glm::vec3 cube_normal;
 
-	std::string teapot = 
+	std::string teapot =
 		"C:\\Users\\Dood\\Documents\\ComputerGraphics\\models\\teapot.obj";
 	std::vector<float> vertices;
 	std::vector<int> indices;
 	glm::vec3 p1, p2, p3, tr_normal;
 	glm::mat4 teapot_to_world = glm::rotate(
 		glm::scale(
-		glm::translate(glm::mat4(1.f), glm::vec3(-2.f, -3.f, 5.f)),
-		//glm::mat4(1.f),
+			glm::mat4(1.f),
+			//glm::translate(glm::mat4(1.f), glm::vec3(-2.f, -3.f, 5.f)),
+			//glm::mat4(1.f),
 			glm::vec3(1.5f)),
-		glm::radians(-110.f),
+		glm::radians(20.f),
 		glm::vec3(0.f, 1.f, 0.f));
 	Rectangle *floor;
 
 	std::unique_ptr<Object> cube_2[6];
 	cam.reset(new Camera());
 
+	/////////////////////////////////////
+	// Triangle mesh
+	/////////////////////////////////////
+	std::unique_ptr<TriangleMesh> t_pot{ new TriangleMesh() };
+	glm::vec3 b_min = glm::vec3(INFINITY), b_max = glm::vec3(-INFINITY);
+	glm::vec3 b_abs_max;
 	loadObjFile(teapot, &vertices, &indices);
 
 	// material for walls
@@ -210,7 +221,7 @@ void SingleCubeScene::init()
 				glm::vec3(0.4, 0.f, 0.4),
 				glm::vec3(0.0, 0.0, 0.0)));
 
-	for (size_t i = 0; i < indices.size() / 3; i += 3)
+	for (size_t i = 0; i < indices.size(); i += 3)
 	{
 		int tmp = indices[i] * 3;
 		p1 = glm::vec3(vertices[tmp],
@@ -225,13 +236,41 @@ void SingleCubeScene::init()
 			vertices[tmp + 1],
 			vertices[tmp + 2]);
 		tr_normal = glm::normalize(glm::cross(p2 - p1, p3 - p2));
-		sc.push_back(std::unique_ptr<Object>(new Triangle(p1,
+
+		// get boundaries of the triangle mesh
+		b_min = glm::min(b_min, glm::min(glm::min(p1, p2), p3));
+		b_max = glm::max(b_max, glm::max(glm::max(p1, p2), p3));
+
+		t_pot->tr_mesh.push_back(std::unique_ptr<Triangle>(new Triangle(p1,
 			p2,
 			p3,
 			tr_normal,
 			teapot_to_world,
 			teapot_mat)));
 	}
+	b_abs_max = glm::max(glm::abs(b_min), b_max);
+
+
+	////////////////////////////////
+	// BOUNDARY FOR THE TEAPOT
+	////////////////////////////////
+// cube material for new cube class object
+	auto new_cube_mat = std::shared_ptr<Material>(new Material(glm::vec3(0.01f, 0.02f, 0.005f),
+		glm::vec3(0.2f, 0.6f, 0.1f),
+		glm::vec3(0.2f, 0.6f, 0.1f)));
+
+	t_pot->boundary.reset(new Cube(glm::vec3(1.f), new_cube_mat));
+	t_pot->boundary->obj_to_world = teapot_to_world * glm::scale(glm::mat4(1.f), 
+		2.f * glm::vec3(b_abs_max.x, b_abs_max.y, b_abs_max.z));
+
+	t_pot->boundary->world_to_obj = glm::inverse(t_pot->boundary->obj_to_world);
+	
+	// put triangle mesh into scene
+	sc.emplace_back(std::move(t_pot));
+	////////////////////////////////
+	// END
+	////////////////////////////////
+
 
 	// material for walls
 	std::shared_ptr<Material> wall_bot =

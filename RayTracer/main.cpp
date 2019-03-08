@@ -68,7 +68,7 @@ void render()
 	/***************************************/
 	// START PROGRESSREPORTER
 	/***************************************/
-	pbrt::ProgressReporter reporter(HEIGHT * WIDTH, "Rendering:");
+	pbrt::ProgressReporter reporter(HEIGHT, "Rendering:");
 	/***************************************/
 	// LOOPING OVER PIXELS
 	/***************************************/
@@ -76,7 +76,7 @@ void render()
 	std::default_random_engine eng(rd());
 	std::uniform_real_distribution<> dist(0, 1);
 	// dynamic schedule for proper I/O progress update
-//#pragma omp parallel for schedule(dynamic, 1)
+#pragma omp parallel for schedule(dynamic, 1)
 	for (int y = 0; y < HEIGHT; ++y)
 	{
 		//fprintf(stderr, "\rRendering %5.2f%%", 100.*y / (HEIGHT - 1));
