@@ -36,7 +36,7 @@ struct Material
 		n = exp;
 	}
 
-	float getShininess()
+	float getShininess() const
 	{
 		return n;
 	}

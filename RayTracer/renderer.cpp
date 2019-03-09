@@ -77,10 +77,10 @@ float fresnel(float rel_eta, float c)
 glm::vec3 handle_reflection(const Scene &s,
 	const Ray &ray,
 	const glm::vec3 &isect_p,
-	Object **o,
+	const SurfaceInteraction &isect,
 	int depth)
 {
-	glm::vec3 reflected = reflect(ray.rd, (*o)->get_normal(isect_p));
+	glm::vec3 reflected = reflect(ray.rd, isect.normal);
 
 	return shoot_recursively(s, Ray(isect_p + shadowEpsilon * reflected, reflected), o, ++depth);
 }
@@ -88,27 +88,27 @@ glm::vec3 handle_reflection(const Scene &s,
 glm::vec3 handle_transmission(const Scene &s,
 	const Ray &ray,
 	const glm::vec3 &isect_p,
-	Object **o,
+	const SurfaceInteraction &isect,
 	int depth)
 {
 	glm::vec3 reflected, refracted;
 	float f;
 
-	reflected = reflect(ray.rd, (*o)->get_normal(isect_p));
+	reflected = reflect(ray.rd, isect.normal);
 
 	// check for total internal reflection
-	if (!refract(ray.rd, (*o)->get_normal(isect_p), (*o)->mat->refr_indx, &refracted))
+	if (!refract(ray.rd, (*isect)->get_normal(isect_p), isect.mat.refr_indx, &refracted))
 	{
 		//reflected = glm::normalize(reflect(ray.rd, (*o)->get_normal(isect_p)));
-		return shoot_recursively(s, Ray(isect_p + shadowEpsilon * reflected, reflected), o, ++depth);
+		return shoot_recursively(s, Ray(isect_p + shadowEpsilon * reflected, reflected), isect, ++depth);
 	}
 
-	f = fresnel(1.f / (*o)->mat->refr_indx,
-		glm::dot(-ray.rd, (*o)->get_normal(isect_p)));
+	f = fresnel(1.f / isect.mat.refr_indx,
+		glm::dot(-ray.rd, isect.normal);
 	++depth;
 
-	return f * shoot_recursively(s, Ray(isect_p + shadowEpsilon * reflected, reflected), o, depth) +
-		(1.f - f) * shoot_recursively(s, Ray(isect_p + shadowEpsilon * refracted, refracted), o, depth);
+	return f * shoot_recursively(s, Ray(isect_p + shadowEpsilon * reflected, reflected), isect, depth) +
+		(1.f - f) * shoot_recursively(s, Ray(isect_p + shadowEpsilon * refracted, refracted), isect, depth);
 }
 
 /*
@@ -119,7 +119,7 @@ glm::vec3 handle_transmission(const Scene &s,
 	ray: the next ray to trace
 	o: the object that was hit
 */
-float shoot_ray(const Scene &s, const Ray &ray, Object **o)
+float shoot_ray(const Scene &s, const Ray &ray, SurfaceInteraction *isect)
 {
 	float t_int = INFINITY;
 	float tmp = INFINITY;
@@ -127,12 +127,11 @@ float shoot_ray(const Scene &s, const Ray &ray, Object **o)
 	// get nearest intersection point
 	for (auto &objs : s.get_scene())
 	{
-		tmp = objs->intersect(ray, o);
+		tmp = objs->intersect(ray, isect);
 
 		if (tmp >= 0 && t_int > tmp)
 		{
 			t_int = tmp;
-			*o = objs.get();
 			//col[i] = sphs.color * glm::max(0.f, glm::dot(-rd, sphs.get_normal(inters_p)));
 			//std::cout << col[i].x << " " << col[i].y << " " << col[i].z << std::endl;
 		}
@@ -142,7 +141,7 @@ float shoot_ray(const Scene &s, const Ray &ray, Object **o)
 
 glm::vec3 shoot_recursively(const Scene &s,
 	const Ray &ray,
-	Object **o,
+	SurfaceInteraction *isect,
 	int depth)
 {
 	if (depth == MAX_DEPTH)
@@ -154,7 +153,7 @@ glm::vec3 shoot_recursively(const Scene &s,
 	glm::vec3 contribution = glm::vec3(0);
 	glm::vec3 isect_p;
 
-	distance = shoot_ray(s, ray, o);
+	distance = shoot_ray(s, ray, isect);
 
 	// check for no intersection
 	if (distance < 0 || distance == INFINITY)
@@ -169,7 +168,7 @@ glm::vec3 shoot_recursively(const Scene &s,
 
 	// map direction of normals to a color for debugging
 #ifdef DEBUG_NORMALS
-	return contribution = (glm::vec3(1.f) + (*o)->get_normal(isect_p)) * 0.5f;
+	return contribution = (glm::vec3(1.f) + isect->normal) * 0.5f;
 #endif
 
 	for (auto &l : s.lights)
@@ -177,19 +176,19 @@ glm::vec3 shoot_recursively(const Scene &s,
 		contribution += l->phong_shade(s,
 			ray/*Ray(ray.ro + shadowEpsilon * ray.rd, ray.rd)*/,
 			isect_p,
-			*o);
+			isect);
 	}
 
-	if (glm::length((*o)->mat->reflective) > 0)
+	if (glm::length(isect->mat.reflective) > 0)
 	{
-		glm::vec3 reflective = (*o)->mat->reflective;
-		contribution += reflective * handle_reflection(s, ray, isect_p, o, depth);
+		glm::vec3 reflective = isect->mat.reflective;
+		contribution += reflective * handle_reflection(s, ray, isect_p, *isect, depth);
 	}
 
-	if (glm::length((*o)->mat->transparent) > 0)
+	if (glm::length(isect->mat.transparent) > 0)
 	{
-		glm::vec3 transparent = (*o)->mat->transparent;
-		contribution += transparent * handle_transmission(s, ray, isect_p, o, depth);
+		glm::vec3 transparent = isect->mat.transparent;
+		contribution += transparent * handle_transmission(s, ray, isect_p, *isect, depth);
 	}
 
 	return contribution;

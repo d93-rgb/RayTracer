@@ -76,5 +76,8 @@
     <ClInclude Include="progressreporter.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="interaction.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

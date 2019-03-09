@@ -2,6 +2,7 @@
 #include "rt.h"
 #include "material.h"
 #include "ray.h"
+#include "interaction.h"
 
 //#define DEBUG
 
@@ -18,7 +19,7 @@ struct Object
 	glm::mat4 obj_to_world, world_to_obj;
 	std::shared_ptr<Material> mat;
 
-	virtual float intersect(const Ray &ray, Object **o) const = 0;
+	virtual float intersect(const Ray &ray, SurfaceInteraction *isect) = 0;
 
 	virtual glm::vec3 get_normal(glm::vec3 p) const = 0;
 };
@@ -42,7 +43,7 @@ struct Sphere : public Object
 		return glm::normalize(p - origin);
 	}
 
-	float intersect(const Ray &ray, Object **o) const
+	float intersect(const Ray &ray, SurfaceInteraction *isect)
 	{
 		float t1 = INFINITY, t2 = t1;
 		float tmp;
@@ -87,7 +88,7 @@ struct Plane : public Object
 		k = glm::dot(normal, pos);
 	}
 
-	float intersect(const Ray &ray, Object **o) const
+	float intersect(const Ray &ray, SurfaceInteraction * isect)
 	{
 		float denom = glm::dot(normal, ray.rd);
 
@@ -164,7 +165,7 @@ struct Rectangle : public Object
 		v2_dot = glm::dot(v2, v2);
 	}
 
-	float intersect(const Ray &ray, Object **o) const
+	float intersect(const Ray &ray, SurfaceInteraction * isect)
 	{
 		float denom = glm::dot(ray.rd, normal);
 
@@ -268,7 +269,7 @@ public:
 		}
 	}
 
-	float intersect(const Ray &ray, Object **o) const
+	float intersect(const Ray &ray, SurfaceInteraction *isect)
 	{
 		assert(abs(length(ray.rd)) > 0);
 
@@ -440,12 +441,12 @@ public:
 
 	}
 
-	float intersect(const Ray &ray, Object **o) const
+	float intersect(const Ray &ray, SurfaceInteraction * isect) const
 	{
 		float t_plane = INFINITY;
 		Plane plane{ p1, n };
 
-		t_plane = plane.intersect(ray, o);
+		t_plane = plane.intersect(ray, isect);
 
 		glm::vec3 t_vec = m_inv * (ray.ro + t_plane * ray.rd);
 
@@ -482,12 +483,12 @@ public:
 
 	TriangleMesh() {}
 
-	float intersect(const Ray &ray, Object **o) const
+	float intersect(const Ray &ray, SurfaceInteraction * isect)
 	{
 		float t_int = INFINITY;
 		float tmp = INFINITY;
 
-		tmp = boundary->intersect(ray, o);
+		tmp = boundary->intersect(ray, isect);
 		if (tmp < 0 || tmp == INFINITY) {
 			return INFINITY;
 		}
@@ -495,12 +496,11 @@ public:
 		// get nearest intersection point
 		for (auto &objs : tr_mesh)
 		{
-			tmp = objs->intersect(ray, o);
+			tmp = objs->intersect(ray, isect);
 
 			if (tmp >= 0 && t_int > tmp)
 			{
 				t_int = tmp;
-				*o = objs.get();
 			}
 		}
 		return t_int;

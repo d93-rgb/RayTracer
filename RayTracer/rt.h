@@ -46,6 +46,8 @@ struct Ray;
 class Scene;
 struct Object;
 struct Material;
+class Interaction;
+class SurfaceInteraction;
 struct Light;
 class Camera;
 

@@ -11,15 +11,15 @@ namespace rt
 Light::~Light() {}
 
 
-glm::vec3 PointLight::diff_shade(const Object & obj, const glm::vec3 & ob_pos)
+glm::vec3 PointLight::diff_shade(const SurfaceInteraction & isect, const glm::vec3 & ob_pos)
 {
 	glm::vec3 dir = ob_pos - this->p;
 
 	//float sq_dist = glm::dot(dir, dir); // attenuation
 
-	glm::vec3 col = getEmission(dir) * obj.mat->diffuse *
+	glm::vec3 col = getEmission(dir) * isect.mat.diffuse *
 		glm::max(0.f,
-			glm::dot(obj.get_normal(ob_pos),
+			glm::dot(isect.normal,
 				-glm::normalize(dir)));
 
 	return col; // sq_dist;
@@ -28,7 +28,7 @@ glm::vec3 PointLight::diff_shade(const Object & obj, const glm::vec3 & ob_pos)
 /*
 	Calculate specular shading of an object.
 */
-glm::vec3 PointLight::spec_shade(const Object &obj,
+glm::vec3 PointLight::spec_shade(const SurfaceInteraction & isect,
 	const glm::vec3 &ob_pos,
 	const glm::vec3 &view_dir)
 {
@@ -40,9 +40,9 @@ glm::vec3 PointLight::spec_shade(const Object &obj,
 	//refl = glm::normalize(refl);
 
 	return getEmission(view_dir) *
-		obj.mat->specular *
-		powf(glm::max(0.f, glm::dot(half, obj.get_normal(ob_pos))),
-			obj.mat->getShininess());
+		isect.mat.specular *
+		powf(glm::max(0.f, glm::dot(half, isect.normal)),
+			isect.mat.getShininess());
 }
 
 /*
@@ -87,8 +87,8 @@ bool PointLight::calc_shadow(glm::vec3 p, const Scene &sc)
 
 glm::vec3 PointLight::phong_shade(const Scene &sc,
 	const Ray &ray,
-	const glm::vec3 &ob_pos,
-	const Object *o)
+	const glm::vec3 &ob_pos, 
+	const SurfaceInteraction & isect)
 {
 	bool visible = true;
 	glm::vec3 color(0);
@@ -99,38 +99,40 @@ glm::vec3 PointLight::phong_shade(const Scene &sc,
 	//if (sqd_dist > 1.f) sqd_dist *= 0.1f;
 
 	visible = calc_shadow(ob_pos, sc);
-	color = 0.01f * o->mat->ambient * getEmission(ray.rd);
+	color = 0.01f * isect.mat.ambient * getEmission(ray.rd);
 
 	if (visible) {
-		color += (diff_shade(*o, ob_pos) +
-			spec_shade(*o, ob_pos, ray.rd)) / sqd_dist;
+		color += (diff_shade(isect, ob_pos) +
+			spec_shade(isect, ob_pos, ray.rd)) / sqd_dist;
 	}
 	return color;
 }
 
-glm::vec3 DistantLight::diff_shade(const Object &obj,
+glm::vec3 DistantLight::diff_shade(const SurfaceInteraction & isect,
+
 	const glm::vec3 &ob_pos)
 {
 	float angle = glm::max(0.f,
-		glm::dot(obj.get_normal(ob_pos), -this->dir));
+		glm::dot(isect.normal, -this->dir));
 
 	if (angle <= 0)
 	{
 		return glm::vec3(0.f);
 	}
 
-	return getEmission(this->p - ob_pos) * obj.mat->diffuse *
+	return getEmission(this->p - ob_pos) * isect.mat.diffuse *
 		angle;
 }
 
 
-glm::vec3 DistantLight::spec_shade(const Object &obj,
+glm::vec3 DistantLight::spec_shade(const SurfaceInteraction & isect,
+
 	const glm::vec3 &ob_pos,
 	const glm::vec3 &view_dir)
 {
-	glm::vec3 refl = reflect(this->dir, obj.get_normal(ob_pos));
+	glm::vec3 refl = reflect(this->dir, isect.normal);
 	float angle = glm::max(0.f,
-		glm::dot(obj.get_normal(ob_pos), -this->dir));
+		glm::dot(isect.normal, -this->dir));
 
 	if (angle <= 0)
 	{
@@ -139,8 +141,8 @@ glm::vec3 DistantLight::spec_shade(const Object &obj,
 
 	refl = glm::normalize(refl);
 
-	return getEmission(view_dir) * obj.mat->specular *
-		powf(angle, obj.mat->getShininess());
+	return getEmission(view_dir) * isect.mat.specular *
+		powf(angle, isect.mat.getShininess());
 }
 
 bool DistantLight::calc_shadow(glm::vec3 p, const Scene &sc)
@@ -174,18 +176,18 @@ bool DistantLight::calc_shadow(glm::vec3 p, const Scene &sc)
 
 glm::vec3 DistantLight::phong_shade(const Scene &sc,
 	const Ray &ray,
-	const glm::vec3 &ob_pos,
-	const Object *o)
+	const glm::vec3 &ob_pos, 
+	const SurfaceInteraction & isect)
 {
 	bool visible = true;
 	glm::vec3 color(0);
 
 	visible = calc_shadow(ob_pos, sc);
-	color = o->mat->ambient * getEmission(ray.rd);
+	color = isect.mat.ambient * getEmission(ray.rd);
 
 	if (visible) {
-		color += diff_shade(*o, ob_pos) +
-			spec_shade(*o, ob_pos, ray.rd);
+		color += diff_shade(isect, ob_pos) +
+			spec_shade(isect, ob_pos, ray.rd);
 
 	}
 	return color;
