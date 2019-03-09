@@ -89,7 +89,7 @@ ProgressReporter::~ProgressReporter()
 		workDone = totalWork;
 		exitThread = true;
 		updateThread.join();
-		printf("\n");
+		printf("\nRendering finished.\n");
 	}
 }
 
@@ -126,8 +126,8 @@ void ProgressReporter::PrintBar()
 		else if (iterCount == 70)
 			// Up to 1s after an additional ~30s have elapsed.
 			sleepDuration *= 2;
-		else if (iterCount == 520)
-			// After 15m, jump up to 5s intervals
+		else if (iterCount == 480)
+			// After 13m, jump up to 5s intervals
 			sleepDuration *= 5;
 
 		float percentDone = float(workDone) / float(totalWork);

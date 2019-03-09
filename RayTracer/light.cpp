@@ -62,13 +62,13 @@ bool PointLight::calc_shadow(glm::vec3 p, const Scene &sc)
 	ray.ro += ray.rd * shadowEpsilon;
 
 	// HACKS!
-	Object **o = nullptr;
+	SurfaceInteraction isect;
 	// TODO: REMOVE ABOVE!!!
 
 	// send shadow rays
 	for (auto &objs : sc.get_scene())
 	{
-		tmp = objs->intersect(ray, o);
+		tmp = objs->intersect(ray, &isect);
 
 		if (tmp >= 0 && t_int > tmp)
 		{
@@ -154,13 +154,13 @@ bool DistantLight::calc_shadow(glm::vec3 p, const Scene &sc)
 	ray.ro += ray.rd * shadowEpsilon;
 
 	// HACKS!
-	Object **o = nullptr;
+	SurfaceInteraction isect;
 	// TODO: REMOVE ABOVE!!!
 
 	// send shadow rays
 	for (auto &objs : sc.get_scene())
 	{
-		tmp = objs->intersect(ray, o);
+		tmp = objs->intersect(ray, &isect);
 
 		if (tmp >= 0 && t_int > tmp)
 		{
@@ -177,7 +177,7 @@ bool DistantLight::calc_shadow(glm::vec3 p, const Scene &sc)
 glm::vec3 DistantLight::phong_shade(const Scene &sc,
 	const Ray &ray,
 	const glm::vec3 &ob_pos, 
-	const SurfaceInteraction & isect)
+	const SurfaceInteraction &isect)
 {
 	bool visible = true;
 	glm::vec3 color(0);

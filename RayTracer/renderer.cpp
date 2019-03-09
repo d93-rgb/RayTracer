@@ -77,34 +77,34 @@ float fresnel(float rel_eta, float c)
 glm::vec3 handle_reflection(const Scene &s,
 	const Ray &ray,
 	const glm::vec3 &isect_p,
-	const SurfaceInteraction &isect,
+	SurfaceInteraction *isect,
 	int depth)
 {
-	glm::vec3 reflected = reflect(ray.rd, isect.normal);
+	glm::vec3 reflected = reflect(ray.rd, isect->normal);
 
-	return shoot_recursively(s, Ray(isect_p + shadowEpsilon * reflected, reflected), o, ++depth);
+	return shoot_recursively(s, Ray(isect_p + shadowEpsilon * reflected, reflected), isect, ++depth);
 }
 
 glm::vec3 handle_transmission(const Scene &s,
 	const Ray &ray,
 	const glm::vec3 &isect_p,
-	const SurfaceInteraction &isect,
+	SurfaceInteraction *isect,
 	int depth)
 {
 	glm::vec3 reflected, refracted;
 	float f;
 
-	reflected = reflect(ray.rd, isect.normal);
+	reflected = reflect(ray.rd, isect->normal);
 
 	// check for total internal reflection
-	if (!refract(ray.rd, (*isect)->get_normal(isect_p), isect.mat.refr_indx, &refracted))
+	if (!refract(ray.rd, isect->normal, isect->mat.refr_indx, &refracted))
 	{
 		//reflected = glm::normalize(reflect(ray.rd, (*o)->get_normal(isect_p)));
 		return shoot_recursively(s, Ray(isect_p + shadowEpsilon * reflected, reflected), isect, ++depth);
 	}
 
-	f = fresnel(1.f / isect.mat.refr_indx,
-		glm::dot(-ray.rd, isect.normal);
+	f = fresnel(1.f / isect->mat.refr_indx,
+		glm::dot(-ray.rd, isect->normal));
 	++depth;
 
 	return f * shoot_recursively(s, Ray(isect_p + shadowEpsilon * reflected, reflected), isect, depth) +
@@ -129,14 +129,15 @@ float shoot_ray(const Scene &s, const Ray &ray, SurfaceInteraction *isect)
 	{
 		tmp = objs->intersect(ray, isect);
 
-		if (tmp >= 0 && t_int > tmp)
-		{
-			t_int = tmp;
-			//col[i] = sphs.color * glm::max(0.f, glm::dot(-rd, sphs.get_normal(inters_p)));
-			//std::cout << col[i].x << " " << col[i].y << " " << col[i].z << std::endl;
-		}
+		//if (tmp >= 0 && t_int > tmp)
+		//{
+		//	t_int = tmp;
+		//	// update intersection data with the properties of the closer object
+		//	//col[i] = sphs.color * glm::max(0.f, glm::dot(-rd, sphs.get_normal(inters_p)));
+		//	//std::cout << col[i].x << " " << col[i].y << " " << col[i].z << std::endl;
+		//}
 	}
-	return t_int;
+	return ray.tNearest;
 }
 
 glm::vec3 shoot_recursively(const Scene &s,
@@ -176,19 +177,19 @@ glm::vec3 shoot_recursively(const Scene &s,
 		contribution += l->phong_shade(s,
 			ray/*Ray(ray.ro + shadowEpsilon * ray.rd, ray.rd)*/,
 			isect_p,
-			isect);
+			*isect);
 	}
 
 	if (glm::length(isect->mat.reflective) > 0)
 	{
 		glm::vec3 reflective = isect->mat.reflective;
-		contribution += reflective * handle_reflection(s, ray, isect_p, *isect, depth);
+		contribution += reflective * handle_reflection(s, ray, isect_p, isect, depth);
 	}
 
 	if (glm::length(isect->mat.transparent) > 0)
 	{
 		glm::vec3 transparent = isect->mat.transparent;
-		contribution += transparent * handle_transmission(s, ray, isect_p, *isect, depth);
+		contribution += transparent * handle_transmission(s, ray, isect_p, isect, depth);
 	}
 
 	return contribution;

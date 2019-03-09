@@ -29,6 +29,11 @@ glm::vec3 clamp(glm::vec3 v)
 	return glm::min(glm::vec3(1.f), glm::max(glm::vec3(0.f), v));
 }
 
+void crop(float hor, float ver)
+{
+
+}
+
 void write_file(const char *file, std::vector<glm::vec3> &col);
 
 //float deg2rad(float deg) { return deg * (float)M_PI / 180; }
@@ -57,59 +62,58 @@ void render()
 
 	std::vector<glm::vec3> col(WIDTH * HEIGHT, glm::vec3(0.f));
 
-	Object *ob = nullptr;
-
 	/***************************************/
 	// CREATING SCENE
 	/***************************************/
 	//GatheringScene sc;
 	SingleCubeScene sc;
-
-	/***************************************/
-	// START PROGRESSREPORTER
-	/***************************************/
-	pbrt::ProgressReporter reporter(HEIGHT, "Rendering:");
-	/***************************************/
-	// LOOPING OVER PIXELS
-	/***************************************/
-	std::random_device rd;
-	std::default_random_engine eng(rd());
-	std::uniform_real_distribution<> dist(0, 1);
-	// dynamic schedule for proper I/O progress update
-#pragma omp parallel for schedule(dynamic, 1)
-	for (int y = 0; y < HEIGHT; ++y)
+	// enclose with braces for destructor of ProgressReporter at the end of rendering
 	{
-		//fprintf(stderr, "\rRendering %5.2f%%", 100.*y / (HEIGHT - 1));
-		reporter.Update();
-		Object *ob = nullptr;
-		for (int x = 0; x < WIDTH; ++x)
+		/***************************************/
+		// START PROGRESSREPORTER
+		/***************************************/
+		pbrt::ProgressReporter reporter(HEIGHT, "Rendering:");
+		/***************************************/
+		// LOOPING OVER PIXELS
+		/***************************************/
+		std::random_device rd;
+		std::default_random_engine eng(rd());
+		std::uniform_real_distribution<> dist(0, 1);
+		// dynamic schedule for proper I/O progress update
+	#pragma omp parallel for schedule(dynamic, 1)
+		for (int y = 0; y < HEIGHT; ++y)
 		{
-			for (int m = 0; m < GRID_DIM; ++m)
+			//fprintf(stderr, "\rRendering %5.2f%%", 100.*y / (HEIGHT - 1));
+			reporter.Update();
+			SurfaceInteraction isect;
+			for (int x = 0; x < WIDTH; ++x)
 			{
-				for (int n = 0; n < GRID_DIM; ++n)
+				for (int m = 0; m < GRID_DIM; ++m)
 				{
-					// hackery needed for omp pragma
-					// the index i will be distributed among all threads
-					// by omp automatically
-					for (int k = 0, i = y * WIDTH + x; k < SPP; ++k)
+					for (int n = 0; n < GRID_DIM; ++n)
 					{
-						// TODO: Consider changing random values to the range [0,1)
-						float u_rnd = 2 * float(dist(eng)) - 1;
-						float v_rnd = 2 * float(dist(eng)) - 1;
-						// map pixel coordinates to[-1, 1]x[-1, 1]
-						float u = (2.f * (x + (m + 0.5f + u_rnd) / 2.f) - WIDTH) / HEIGHT * fov_tan;
-						float v = (-2.f * (y + (n + 0.5f + v_rnd) / 2.f) + HEIGHT) / HEIGHT * fov_tan;
+						// hackery needed for omp pragma
+						// the index i will be distributed among all threads
+						// by omp automatically
+						for (int k = 0, i = y * WIDTH + x; k < SPP; ++k)
+						{
+							// TODO: Consider changing random values to the range [0,1)
+							float u_rnd = 2 * float(dist(eng)) - 1;
+							float v_rnd = 2 * float(dist(eng)) - 1;
+							// map pixel coordinates to[-1, 1]x[-1, 1]
+							float u = (2.f * (x + (m + 0.5f + u_rnd) / 2.f) - WIDTH) / HEIGHT * fov_tan;
+							float v = (-2.f * (y + (n + 0.5f + v_rnd) / 2.f) + HEIGHT) / HEIGHT * fov_tan;
 
-						// this can not be split up and needs to be in one line, otherwise
-						// omp will not take the average
-						col[i] += clamp(shoot_recursively(sc, sc.cam->getPrimaryRay(u, v, d), &ob, 0)) * inv_spp * 0.25f;
+							// this can not be split up and needs to be in one line, otherwise
+							// omp will not take the average
+							col[i] += clamp(shoot_recursively(sc, sc.cam->getPrimaryRay(u, v, d), &isect, 0)) * inv_spp * 0.25f;
+						}
 					}
 				}
 			}
 		}
+		reporter.Done();
 	}
-	reporter.Done();
-
 	//#pragma omp parallel for
 	//	for (int i = 0; i < 10; ++i)
 	//	{
@@ -154,7 +158,7 @@ void write_file(const char *file, std::vector<glm::vec3> &col)
 
 	ofs.close();
 
-	std::cout << "Done creating image." << std::endl;
+	std::cout << "Writing to file finished." << std::endl;
 }
 
 int main(int argc, const char **agrv)

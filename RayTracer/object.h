@@ -62,9 +62,20 @@ struct Sphere : public Object
 		t1 = (-term_2 + sqrt(disc)) / (2 * term_1);
 		t2 = (-term_2 - sqrt(disc)) / (2 * term_1);
 
-		tmp = fmin(t1, t2);
+		tmp = std::fmin(t1, t2);
 		tmp = tmp >= 0 ? tmp : fmax(t1, t2);
-		return tmp >= 0 ? tmp : INFINITY;
+		tmp = tmp >= 0 ? tmp : INFINITY;
+
+		if (tmp >= 0 && tmp < INFINITY)
+		{
+			if (tmp < ray.tNearest)
+			{
+				ray.tNearest = tmp;
+				isect->p = ray.ro + ray.rd * tmp;
+				isect->normal = get_normal(isect->p);
+			}
+		}
+		return tmp;
 	}
 };
 
@@ -89,6 +100,32 @@ struct Plane : public Object
 	}
 
 	float intersect(const Ray &ray, SurfaceInteraction * isect)
+	{
+		float denom = glm::dot(normal, ray.rd);
+
+		if (abs(denom) < 1e-6) return INFINITY;
+
+		float num = k - glm::dot(normal, ray.ro);
+
+		float t = num / denom;
+
+		//if(t >= 0) std::cout << t << std::endl;
+		t = t >= 0 ? t : INFINITY;
+
+		if (t >= 0 && t < INFINITY)
+		{
+			if (t < ray.tNearest)
+			{
+				ray.tNearest = t;
+				isect->p = ray.ro + ray.rd * t;
+				isect->normal = get_normal(isect->p);
+			}
+		}
+
+		return t;
+	}
+
+	float intersect(const Ray &ray)
 	{
 		float denom = glm::dot(normal, ray.rd);
 
@@ -165,6 +202,10 @@ struct Rectangle : public Object
 		v2_dot = glm::dot(v2, v2);
 	}
 
+	/*
+		Intersection routine for the ray-triangle intersection test.
+		The nearest intersection parameter of Ray will not be updated
+	*/
 	float intersect(const Ray &ray, SurfaceInteraction * isect)
 	{
 		float denom = glm::dot(ray.rd, normal);
@@ -185,7 +226,17 @@ struct Rectangle : public Object
 		bool test = (0 <= inside_1) && (inside_1 <= 1) &&
 			(0 <= inside_2) && (inside_2 <= 1);
 
-		return test ? t : INFINITY;
+		if (test)
+		{
+			if (t < ray.tNearest)
+			{
+				ray.tNearest = t;
+				isect->p = isec_p;
+				isect->normal = get_normal(isect->p);
+			}
+		}
+		return test ? t : INFINITY;;
+
 	}
 
 	/*
@@ -270,6 +321,111 @@ public:
 	}
 
 	float intersect(const Ray &ray, SurfaceInteraction *isect)
+	{
+		assert(abs(length(ray.rd)) > 0);
+
+		Ray transformed_ray{ world_to_obj * glm::vec4(ray.ro, 1.f),
+			world_to_obj * glm::vec4(ray.rd, 0.f) };
+
+		int nearest = 0;
+		int tmp = 0;
+		float isec_t = INFINITY;
+		float inside_1;
+		float inside_2;
+		bool tests[6] = { false };
+		glm::vec3 t[2] = { glm::vec3(INFINITY), glm::vec3(INFINITY) };
+		glm::vec3 isec_p;
+
+
+		// calculate the 6 ray-plane intersections
+		t[0] = (boundaries - transformed_ray.ro);
+		t[1] = -(boundaries + transformed_ray.ro);
+
+
+		if (transformed_ray.rd.x != 0)
+		{
+			t[0].x /= transformed_ray.rd.x;
+			t[1].x /= transformed_ray.rd.x;
+		}
+		else
+		{
+			t[0].x = (t[0].x == 0 ? 0.f : INFINITY);
+			t[1].x = (t[1].x == 0 ? 0.f : INFINITY);
+		}
+
+		if (transformed_ray.rd.y != 0)
+		{
+			t[0].y /= transformed_ray.rd.y;
+			t[1].y /= transformed_ray.rd.y;
+		}
+		else
+		{
+			t[0].y = (t[0].y == 0 ? 0.f : INFINITY);
+			t[1].y = (t[1].y == 0 ? 0.f : INFINITY);
+		}
+
+		if (transformed_ray.rd.z != 0)
+		{
+			t[0].z /= transformed_ray.rd.z;
+			t[1].z /= transformed_ray.rd.z;
+		}
+		else
+		{
+			t[0].z = (t[0].z == 0 ? 0.f : INFINITY);
+			t[1].z = (t[1].z == 0 ? 0.f : INFINITY);
+		}
+
+		// check if inside boundaries
+		for (int i = 0; i < 6; ++i)
+		{
+			tmp = i % 3;
+			if (t[i >= 3][tmp] >= 0.f)
+			{
+				isec_t = t[i >= 3][tmp];
+				isec_p = transformed_ray.ro + isec_t * transformed_ray.rd;
+
+				inside_1 = glm::dot(isec_p - moved_centers[i], v1[tmp]) /
+					v1_dots[tmp];
+				inside_2 = glm::dot(isec_p - moved_centers[i], v2[tmp]) /
+					v2_dots[tmp];
+
+				tests[i] = (0 <= inside_1) && (inside_1 <= 1)
+					&& (0 <= inside_2) && (inside_2 <= 1);
+			}
+		}
+
+		isec_t = INFINITY;
+		for (int i = 0; i < 6; ++i)
+		{
+			tmp = i % 3;
+			if (tests[i])
+			{
+				if (isec_t > t[i >= 3][tmp])
+				{
+					isec_t = t[i >= 3][tmp];
+				}
+			}
+		}
+
+		if (isec_t >= 0 && isec_t < INFINITY)
+		{
+			if (isec_t < ray.tNearest)
+			{
+				ray.tNearest = isec_t;
+				isect->p = ray.ro + ray.rd * isec_t;
+				isect->normal = get_normal(isect->p);
+			}
+		}
+
+		return isec_t;
+	}
+
+
+	/*
+		Intersection test without updating the nearest intersection parameter for Ray.
+		This routine will be used for the ray-bounding box intersection test.
+	*/
+	float intersect(const Ray &ray)
 	{
 		assert(abs(length(ray.rd)) > 0);
 
@@ -441,12 +597,13 @@ public:
 
 	}
 
-	float intersect(const Ray &ray, SurfaceInteraction * isect) const
+	float intersect(const Ray &ray, SurfaceInteraction * isect)
 	{
 		float t_plane = INFINITY;
 		Plane plane{ p1, n };
 
-		t_plane = plane.intersect(ray, isect);
+		// intersect without updating nearest intersection parameter
+		t_plane = plane.intersect(ray);
 
 		glm::vec3 t_vec = m_inv * (ray.ro + t_plane * ray.rd);
 
@@ -454,6 +611,13 @@ public:
 			t_vec.y >= 0 &&
 			t_vec.z >= 0)
 		{
+			if (t_plane < ray.tNearest)
+			{
+				ray.tNearest = t_plane;
+				isect->p = ray.ro + ray.rd * t_plane;
+				isect->normal = get_normal(isect->p);
+			}
+
 			return t_plane;
 		}
 		return INFINITY;
@@ -483,12 +647,12 @@ public:
 
 	TriangleMesh() {}
 
-	float intersect(const Ray &ray, SurfaceInteraction * isect)
+	float intersect(const Ray &ray, SurfaceInteraction *isect)
 	{
 		float t_int = INFINITY;
 		float tmp = INFINITY;
 
-		tmp = boundary->intersect(ray, isect);
+		tmp = boundary->intersect(ray);
 		if (tmp < 0 || tmp == INFINITY) {
 			return INFINITY;
 		}

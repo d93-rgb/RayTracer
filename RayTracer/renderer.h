@@ -16,12 +16,12 @@ glm::vec3 shoot_recursively(const Scene &s,
 glm::vec3 handle_transmission(const Scene &s,
 	const Ray &ray,
 	const glm::vec3 &isect_p,
-	const SurfaceInteraction &isect,
+	SurfaceInteraction *isect,
 	int depth);
 
 glm::vec3 handle_reflection(const Scene &s,
 	const Ray &ray,
 	const glm::vec3 &isect_p,
-	const SurfaceInteraction &isect,
+	SurfaceInteraction *isect,
 	int depth);
 }

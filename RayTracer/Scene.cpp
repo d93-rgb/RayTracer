@@ -5,6 +5,10 @@
 #include "object.h"
 #include "light.h"
 
+// DEBUGGING
+// divide the triangle mesh of the teapot to reduce rendering time
+constexpr auto TEAPOTSIZE = 1;
+
 namespace rt
 {
 
@@ -195,11 +199,10 @@ void SingleCubeScene::init()
 	glm::vec3 p1, p2, p3, tr_normal;
 	glm::mat4 teapot_to_world = glm::rotate(
 		glm::scale(
-			glm::mat4(1.f),
-			//glm::translate(glm::mat4(1.f), glm::vec3(-2.f, -3.f, 5.f)),
 			//glm::mat4(1.f),
+			glm::translate(glm::mat4(1.f), glm::vec3(-5.f, -5.f, 5.f)),
 			glm::vec3(1.5f)),
-		glm::radians(20.f),
+		glm::radians(30.f),
 		glm::vec3(0.f, 1.f, 0.f));
 	Rectangle *floor;
 
@@ -221,7 +224,7 @@ void SingleCubeScene::init()
 				glm::vec3(0.4, 0.f, 0.4),
 				glm::vec3(0.0, 0.0, 0.0)));
 
-	for (size_t i = 0; i < indices.size(); i += 3)
+	for (size_t i = 0; i < indices.size() / TEAPOTSIZE; i += 3)
 	{
 		int tmp = indices[i] * 3;
 		p1 = glm::vec3(vertices[tmp],
