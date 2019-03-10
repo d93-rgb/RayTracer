@@ -15,5 +15,9 @@ struct Ray
 		ro(ro), rd(rd), tNearest(INFINITY)
 	{
 	}
+	Ray(glm::vec3 ro, glm::vec3 rd, float tNearest) :
+		ro(ro), rd(rd), tNearest(tNearest)
+	{
+	}
 };
 }

@@ -70,8 +70,8 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>C:\ThirdParty\AntTweakBar_116\AntTweakBar\include;C:\ThirdParty\headers\glm-0.9.9.3\glm;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\ThirdParty\AntTweakBar_116\AntTweakBar\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>C:\ThirdParty\libraries\glm-0.9.9.3;C:\ThirdParty\libraries\assimp\include;C:\ThirdParty\libraries\AntTweakBar\include;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\ThirdParty\libraries\assimp\lib;C:\ThirdParty\libraries\AntTweakBar\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -82,8 +82,8 @@
       <OpenMPSupport>true</OpenMPSupport>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>AntTweakBar64.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <ImportLibrary>AntTweakBar64.lib</ImportLibrary>
+      <AdditionalDependencies>AntTweakBar64.lib;assimp-vc140-mt.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <ImportLibrary>AntTweakBar64.lib;assimp-vc140-mt.lib</ImportLibrary>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">

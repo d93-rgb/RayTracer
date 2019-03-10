@@ -1,3 +1,8 @@
+// obj file loader stuff
+#include <assimp/Importer.hpp>      // C++ importer interface
+#include <assimp/scene.h>           // Output data structure
+#include <assimp/postprocess.h>     // Post processing flags
+
 #include "scene.h"
 #include "camera.h"
 #include "loader.h"
@@ -200,7 +205,7 @@ void SingleCubeScene::init()
 	glm::mat4 teapot_to_world = glm::rotate(
 		glm::scale(
 			//glm::mat4(1.f),
-			glm::translate(glm::mat4(1.f), glm::vec3(-5.f, -5.f, 5.f)),
+			glm::translate(glm::mat4(1.f), glm::vec3(-6.f, 0.f, 2.f)),
 			glm::vec3(1.5f)),
 		glm::radians(30.f),
 		glm::vec3(0.f, 1.f, 0.f));
@@ -222,7 +227,8 @@ void SingleCubeScene::init()
 		std::shared_ptr<Material>(
 			new Material(glm::vec3(0.02, 0.f, 0.02),
 				glm::vec3(0.4, 0.f, 0.4),
-				glm::vec3(0.0, 0.0, 0.0)));
+				glm::vec3(0.4, 0.0, 0.4)));
+	teapot_mat->setShininess(20.f);
 
 	for (size_t i = 0; i < indices.size() / TEAPOTSIZE; i += 3)
 	{
@@ -252,6 +258,9 @@ void SingleCubeScene::init()
 			teapot_mat)));
 	}
 	b_abs_max = glm::max(glm::abs(b_min), b_max);
+	/////////////////////////////////////
+	// Triangle mesh END
+	/////////////////////////////////////
 
 
 	////////////////////////////////
@@ -263,11 +272,11 @@ void SingleCubeScene::init()
 		glm::vec3(0.2f, 0.6f, 0.1f)));
 
 	t_pot->boundary.reset(new Cube(glm::vec3(1.f), new_cube_mat));
-	t_pot->boundary->obj_to_world = teapot_to_world * glm::scale(glm::mat4(1.f), 
+	t_pot->boundary->obj_to_world = teapot_to_world * glm::scale(glm::mat4(1.f),
 		2.f * glm::vec3(b_abs_max.x, b_abs_max.y, b_abs_max.z));
 
 	t_pot->boundary->world_to_obj = glm::inverse(t_pot->boundary->obj_to_world);
-	
+
 	// put triangle mesh into scene
 	sc.emplace_back(std::move(t_pot));
 	////////////////////////////////
@@ -281,7 +290,7 @@ void SingleCubeScene::init()
 			new Material(glm::vec3(0.02, 0.02, 0.02),
 				glm::vec3(0.4, 0.4, 0.4),
 				glm::vec3(0.0, 0.0, 0.0)));
-	wall_bot->reflective = glm::vec3(0.f);
+	wall_bot->reflective = glm::vec3(0.2f);
 
 	//bottom
 	sc.emplace_back(std::unique_ptr<Object>(new Rectangle(glm::vec3(-4, 2, -18),
@@ -330,10 +339,19 @@ void SingleCubeScene::init()
 		glm::mat4(1.f),
 		triangle_mat_1)));
 
-	lights.emplace_back(std::unique_ptr<Light>(new PointLight(glm::vec3(-2.f, 4.f, -17.f),
+	/////////////////////////////////////
+	// Lights
+	/////////////////////////////////////
+	lights.emplace_back(std::unique_ptr<Light>(new PointLight(glm::vec3(-2.f, 2.f, -15.f),
 		glm::vec3(-2, -4, -2),
-		glm::vec3(20.f))));
-
+		glm::vec3(40.f))));
+	/*lights.emplace_back(std::unique_ptr<Light>(new PointLight(glm::vec3(0.f, 0.f, 10.f),
+		glm::vec3(0.f, 0.f, -1.f),
+		glm::vec3(30.f))));
+*/
+	/////////////////////////////////////
+	// Lights END
+	/////////////////////////////////////
 
 	cam->setCamToWorld(glm::rotate(glm::translate(glm::mat4(1.f), translation),
 		rot_x, glm::vec3(1.f, 0.f, 0.f)));

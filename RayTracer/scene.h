@@ -2,8 +2,8 @@
 
 #define GLM_ENABLE_EXPERIMENTAL
 
-#include <gtc\matrix_transform.hpp>
-#include <gtx\perpendicular.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtx/perpendicular.hpp>
 
 #include "rt.h"
 

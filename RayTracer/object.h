@@ -9,7 +9,7 @@
 namespace rt
 {
 
-template <typename T> int sgn(T val)
+template <typename T> inline int sgn(T val)
 {
 	return (T(0) < val) - (val < T(0));
 }
@@ -73,6 +73,7 @@ struct Sphere : public Object
 				ray.tNearest = tmp;
 				isect->p = ray.ro + ray.rd * tmp;
 				isect->normal = get_normal(isect->p);
+				isect->mat = mat;
 			}
 		}
 		return tmp;
@@ -119,6 +120,7 @@ struct Plane : public Object
 				ray.tNearest = t;
 				isect->p = ray.ro + ray.rd * t;
 				isect->normal = get_normal(isect->p);
+				isect->mat = mat;
 			}
 		}
 
@@ -233,6 +235,7 @@ struct Rectangle : public Object
 				ray.tNearest = t;
 				isect->p = isec_p;
 				isect->normal = get_normal(isect->p);
+				isect->mat = mat;
 			}
 		}
 		return test ? t : INFINITY;;
@@ -414,6 +417,7 @@ public:
 				ray.tNearest = isec_t;
 				isect->p = ray.ro + ray.rd * isec_t;
 				isect->normal = get_normal(isect->p);
+				isect->mat = mat;
 			}
 		}
 
@@ -616,6 +620,7 @@ public:
 				ray.tNearest = t_plane;
 				isect->p = ray.ro + ray.rd * t_plane;
 				isect->normal = get_normal(isect->p);
+				isect->mat = mat;
 			}
 
 			return t_plane;

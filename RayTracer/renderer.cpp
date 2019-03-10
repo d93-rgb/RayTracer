@@ -5,7 +5,7 @@
 #include "object.h"
 #include "light.h"
 
-#define DEBUG_NORMALS
+//#define DEBUG_NORMALS
 
 namespace rt
 {
@@ -82,7 +82,10 @@ glm::vec3 handle_reflection(const Scene &s,
 {
 	glm::vec3 reflected = reflect(ray.rd, isect->normal);
 
-	return shoot_recursively(s, Ray(isect_p + shadowEpsilon * reflected, reflected), isect, ++depth);
+	return shoot_recursively(s, 
+		Ray(isect_p + shadowEpsilon * reflected, reflected), 
+		isect, 
+		++depth);
 }
 
 glm::vec3 handle_transmission(const Scene &s,
@@ -97,18 +100,27 @@ glm::vec3 handle_transmission(const Scene &s,
 	reflected = reflect(ray.rd, isect->normal);
 
 	// check for total internal reflection
-	if (!refract(ray.rd, isect->normal, isect->mat.refr_indx, &refracted))
+	if (!refract(ray.rd, isect->normal, isect->mat->refr_indx, &refracted))
 	{
 		//reflected = glm::normalize(reflect(ray.rd, (*o)->get_normal(isect_p)));
-		return shoot_recursively(s, Ray(isect_p + shadowEpsilon * reflected, reflected), isect, ++depth);
+		return shoot_recursively(s, 
+			Ray(isect_p + shadowEpsilon * reflected, reflected), 
+			isect, 
+			++depth);
 	}
 
-	f = fresnel(1.f / isect->mat.refr_indx,
+	f = fresnel(1.f / isect->mat->refr_indx,
 		glm::dot(-ray.rd, isect->normal));
 	++depth;
 
-	return f * shoot_recursively(s, Ray(isect_p + shadowEpsilon * reflected, reflected), isect, depth) +
-		(1.f - f) * shoot_recursively(s, Ray(isect_p + shadowEpsilon * refracted, refracted), isect, depth);
+	return f * shoot_recursively(s, 
+		Ray(isect_p + shadowEpsilon * reflected, reflected), 
+		isect,
+		depth) +
+		(1.f - f) * shoot_recursively(s, 
+			Ray(isect_p + shadowEpsilon * refracted, refracted), 
+			isect, 
+			depth);
 }
 
 /*
@@ -180,15 +192,15 @@ glm::vec3 shoot_recursively(const Scene &s,
 			*isect);
 	}
 
-	if (glm::length(isect->mat.reflective) > 0)
+	if (glm::length(isect->mat->reflective) > 0)
 	{
-		glm::vec3 reflective = isect->mat.reflective;
+		glm::vec3 reflective = isect->mat->reflective;
 		contribution += reflective * handle_reflection(s, ray, isect_p, isect, depth);
 	}
 
-	if (glm::length(isect->mat.transparent) > 0)
+	if (glm::length(isect->mat->transparent) > 0)
 	{
-		glm::vec3 transparent = isect->mat.transparent;
+		glm::vec3 transparent = isect->mat->transparent;
 		contribution += transparent * handle_transmission(s, ray, isect_p, isect, depth);
 	}
 

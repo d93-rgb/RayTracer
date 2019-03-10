@@ -17,7 +17,7 @@ glm::vec3 PointLight::diff_shade(const SurfaceInteraction & isect, const glm::ve
 
 	//float sq_dist = glm::dot(dir, dir); // attenuation
 
-	glm::vec3 col = getEmission(dir) * isect.mat.diffuse *
+	glm::vec3 col = getEmission(dir) * isect.mat->diffuse *
 		glm::max(0.f,
 			glm::dot(isect.normal,
 				-glm::normalize(dir)));
@@ -40,9 +40,9 @@ glm::vec3 PointLight::spec_shade(const SurfaceInteraction & isect,
 	//refl = glm::normalize(refl);
 
 	return getEmission(view_dir) *
-		isect.mat.specular *
+		isect.mat->specular *
 		powf(glm::max(0.f, glm::dot(half, isect.normal)),
-			isect.mat.getShininess());
+			isect.mat->getShininess());
 }
 
 /*
@@ -99,7 +99,7 @@ glm::vec3 PointLight::phong_shade(const Scene &sc,
 	//if (sqd_dist > 1.f) sqd_dist *= 0.1f;
 
 	visible = calc_shadow(ob_pos, sc);
-	color = 0.01f * isect.mat.ambient * getEmission(ray.rd);
+	color = 0.01f * isect.mat->ambient * getEmission(ray.rd);
 
 	if (visible) {
 		color += (diff_shade(isect, ob_pos) +
@@ -120,7 +120,7 @@ glm::vec3 DistantLight::diff_shade(const SurfaceInteraction & isect,
 		return glm::vec3(0.f);
 	}
 
-	return getEmission(this->p - ob_pos) * isect.mat.diffuse *
+	return getEmission(this->p - ob_pos) * isect.mat->diffuse *
 		angle;
 }
 
@@ -141,8 +141,8 @@ glm::vec3 DistantLight::spec_shade(const SurfaceInteraction & isect,
 
 	refl = glm::normalize(refl);
 
-	return getEmission(view_dir) * isect.mat.specular *
-		powf(angle, isect.mat.getShininess());
+	return getEmission(view_dir) * isect.mat->specular *
+		powf(angle, isect.mat->getShininess());
 }
 
 bool DistantLight::calc_shadow(glm::vec3 p, const Scene &sc)
@@ -183,7 +183,7 @@ glm::vec3 DistantLight::phong_shade(const Scene &sc,
 	glm::vec3 color(0);
 
 	visible = calc_shadow(ob_pos, sc);
-	color = isect.mat.ambient * getEmission(ray.rd);
+	color = isect.mat->ambient * getEmission(ray.rd);
 
 	if (visible) {
 		color += diff_shade(isect, ob_pos) +

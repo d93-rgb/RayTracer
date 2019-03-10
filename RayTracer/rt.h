@@ -19,9 +19,9 @@
 #include <memory>
 
 #include <math.h>
-#include <omp.h>
+//#include <omp.h>
 
-#include <glm.hpp>
+#include <glm/glm.hpp>
 
 //#include "ray.h"
 //#include "material.h"

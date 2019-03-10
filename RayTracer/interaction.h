@@ -14,6 +14,8 @@ class SurfaceInteraction : public Interaction
 public:
 	glm::vec3 p;
 	glm::vec3 normal;
-	Material mat;
+	std::shared_ptr<Material> mat;
+
+	SurfaceInteraction() = default;
 };
 }
