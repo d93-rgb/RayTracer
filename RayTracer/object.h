@@ -3,6 +3,7 @@
 #include "material.h"
 #include "ray.h"
 #include "interaction.h"
+#include "texture.h"
 
 //#define DEBUG
 
@@ -22,6 +23,97 @@ struct Object
 	virtual float intersect(const Ray &ray, SurfaceInteraction *isect) = 0;
 
 	virtual glm::vec3 get_normal(glm::vec3 p) const = 0;
+};
+
+class Bounds3
+{
+	glm::vec3 normal;
+	glm::vec3 boundaries[2];
+
+public:
+	Bounds3(glm::vec3 min_bounds, glm::vec3 max_bounds)
+	{
+		boundaries[0] = (min_bounds);
+		boundaries[1] = (max_bounds);
+	}
+
+	bool intersect(const Ray &ray)
+	{
+		assert(abs(length(ray.rd)) > 0);
+
+		glm::vec3 t[2] = { glm::vec3(INFINITY), glm::vec3(INFINITY) };
+
+		// calculate the 6 ray-plane intersections
+		t[0] = boundaries[0] - ray.ro;
+		t[1] = boundaries[1] - ray.ro;
+
+		if (ray.rd.x != 0)
+		{
+			t[0].x /= ray.rd.x;
+			t[1].x /= ray.rd.x;
+		}
+		else
+		{
+			t[0].x = (t[0].x == 0 ? 0.f : INFINITY);
+			t[1].x = (t[1].x == 0 ? 0.f : INFINITY);
+		}
+
+		if (ray.rd.y != 0)
+		{
+			t[0].y /= ray.rd.y;
+			t[1].y /= ray.rd.y;
+		}
+		else
+		{
+			t[0].y = (t[0].y == 0 ? 0.f : INFINITY);
+			t[1].y = (t[1].y == 0 ? 0.f : INFINITY);
+		}
+
+		if (ray.rd.z != 0)
+		{
+			t[0].z /= ray.rd.z;
+			t[1].z /= ray.rd.z;
+		}
+		else
+		{
+			t[0].z = (t[0].z == 0 ? 0.f : INFINITY);
+			t[1].z = (t[1].z == 0 ? 0.f : INFINITY);
+		}
+
+		if (t[0].x > t[1].x)
+		{
+			std::swap(t[0].x, t[1].x);
+		}
+
+		if (t[0].y > t[1].y)
+		{
+			std::swap(t[0].y, t[1].y);
+		}
+
+		// no overlap found => no intersection
+		if (t[1].x < t[0].y || t[0].x > t[1].y)
+		{
+			return false;
+		}
+
+		if (t[0].z > t[1].z)
+		{
+			std::swap(t[0].z, t[1].z);
+		}
+
+		// no overlap found => no intersection
+		if (t[1].x < t[0].z || t[0].x > t[1].z || t[1].y < t[0].z || t[0].y > t[1].z)
+		{
+			return false;
+		}
+
+		return true;
+	}
+
+	glm::vec3 get_normal(glm::vec3 p) const
+	{
+		return glm::vec3(0.f);
+	}
 };
 
 struct Sphere : public Object
@@ -73,10 +165,22 @@ struct Sphere : public Object
 				ray.tNearest = tmp;
 				isect->p = ray.ro + ray.rd * tmp;
 				isect->normal = get_normal(isect->p);
+				isect->uv = getTextureCoordinates(isect->p);
 				isect->mat = mat;
+
 			}
 		}
 		return tmp;
+	}
+
+	glm::vec2 getTextureCoordinates(glm::vec3 pos)
+	{
+		glm::vec3 pos_shift = glm::normalize(pos - origin);
+		//float radius = glm::length(pos_shift);
+		float u = (1 + atan2f(pos_shift.y, pos_shift.x) / M_PI) * 0.5f;
+		float v = acosf(pos_shift.z) / M_PI;
+		
+		return glm::vec2(u, v);
 	}
 };
 
@@ -654,9 +758,10 @@ public:
 	{
 		float t_int = INFINITY;
 		float tmp = INFINITY;
+		bool hit = false;
 
-		tmp = boundary->intersect(ray);
-		if (tmp < 0 || tmp == INFINITY) {
+		hit = boundary->intersect(ray);
+		if (!hit) {
 			return INFINITY;
 		}
 
@@ -678,97 +783,6 @@ public:
 		return glm::vec3(0.f);
 	}
 
-};
-
-class Bounds3
-{
-	glm::vec3 normal;
-	glm::vec3 boundaries[2];
-
-public:
-	Bounds3(glm::vec3 min_bounds, glm::vec3 max_bounds)
-	{
-		boundaries[0] = (min_bounds);
-		boundaries[1] = (max_bounds);
-	}
-
-	bool intersect(const Ray &ray)
-	{
-		assert(abs(length(ray.rd)) > 0);
-
-		glm::vec3 t[2] = { glm::vec3(INFINITY), glm::vec3(INFINITY) };
-
-		// calculate the 6 ray-plane intersections
-		t[0] = boundaries[0] - ray.ro;
-		t[1] = boundaries[1] - ray.ro;
-
-		if (ray.rd.x != 0)
-		{
-			t[0].x /= ray.rd.x;
-			t[1].x /= ray.rd.x;
-		}
-		else
-		{
-			t[0].x = (t[0].x == 0 ? 0.f : INFINITY);
-			t[1].x = (t[1].x == 0 ? 0.f : INFINITY);
-		}
-
-		if (ray.rd.y != 0)
-		{
-			t[0].y /= ray.rd.y;
-			t[1].y /= ray.rd.y;
-		}
-		else
-		{
-			t[0].y = (t[0].y == 0 ? 0.f : INFINITY);
-			t[1].y = (t[1].y == 0 ? 0.f : INFINITY);
-		}
-
-		if (ray.rd.z != 0)
-		{
-			t[0].z /= ray.rd.z;
-			t[1].z /= ray.rd.z;
-		}
-		else
-		{
-			t[0].z = (t[0].z == 0 ? 0.f : INFINITY);
-			t[1].z = (t[1].z == 0 ? 0.f : INFINITY);
-		}
-
-		if (t[0].x > t[1].x)
-		{
-			std::swap(t[0].x, t[1].x);
-		}
-
-		if (t[0].y > t[1].y)
-		{
-			std::swap(t[0].y, t[1].y);
-		}
-
-		// no overlap found => no intersection
-		if (t[1].x < t[0].y || t[0].x > t[1].y) 
-		{
-			return false;
-		}
-
-		if (t[0].z > t[1].z)
-		{
-			std::swap(t[0].z, t[1].z);
-		}
-
-		// no overlap found => no intersection
-		if (t[1].x < t[0].z || t[0].x > t[1].z || t[1].y < t[0].z || t[0].y > t[1].z)
-		{
-			return false;
-		}
-
-		return true;
-	}
-
-	glm::vec3 get_normal(glm::vec3 p) const
-	{
-		return glm::vec3(0.f);
-	}
 };
 
 }

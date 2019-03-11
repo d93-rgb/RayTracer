@@ -58,8 +58,13 @@ class Cube;
 
 class Bounds3;
 
+
+class Texture;
+class CheckerBoardTexture;
+
 class SingleCubeScene;
 class GatheringScene;
+
 
 static constexpr bool QUIET = false;
 
