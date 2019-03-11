@@ -642,13 +642,11 @@ public:
 class TriangleMesh : public Object
 {
 public:
-	std::unique_ptr<Cube> boundary;
+	std::unique_ptr<Bounds3> boundary;
 	std::vector<std::unique_ptr<Triangle>> tr_mesh;
 
-	TriangleMesh(std::unique_ptr<Cube> &cube)
-	{
-		boundary.swap(cube);
-	}
+	TriangleMesh(std::unique_ptr<Bounds3> &bounds) : boundary(std::move(bounds))
+	{}
 
 	TriangleMesh() {}
 
@@ -680,6 +678,97 @@ public:
 		return glm::vec3(0.f);
 	}
 
+};
+
+class Bounds3
+{
+	glm::vec3 normal;
+	glm::vec3 boundaries[2];
+
+public:
+	Bounds3(glm::vec3 min_bounds, glm::vec3 max_bounds)
+	{
+		boundaries[0] = (min_bounds);
+		boundaries[1] = (max_bounds);
+	}
+
+	bool intersect(const Ray &ray)
+	{
+		assert(abs(length(ray.rd)) > 0);
+
+		glm::vec3 t[2] = { glm::vec3(INFINITY), glm::vec3(INFINITY) };
+
+		// calculate the 6 ray-plane intersections
+		t[0] = boundaries[0] - ray.ro;
+		t[1] = boundaries[1] - ray.ro;
+
+		if (ray.rd.x != 0)
+		{
+			t[0].x /= ray.rd.x;
+			t[1].x /= ray.rd.x;
+		}
+		else
+		{
+			t[0].x = (t[0].x == 0 ? 0.f : INFINITY);
+			t[1].x = (t[1].x == 0 ? 0.f : INFINITY);
+		}
+
+		if (ray.rd.y != 0)
+		{
+			t[0].y /= ray.rd.y;
+			t[1].y /= ray.rd.y;
+		}
+		else
+		{
+			t[0].y = (t[0].y == 0 ? 0.f : INFINITY);
+			t[1].y = (t[1].y == 0 ? 0.f : INFINITY);
+		}
+
+		if (ray.rd.z != 0)
+		{
+			t[0].z /= ray.rd.z;
+			t[1].z /= ray.rd.z;
+		}
+		else
+		{
+			t[0].z = (t[0].z == 0 ? 0.f : INFINITY);
+			t[1].z = (t[1].z == 0 ? 0.f : INFINITY);
+		}
+
+		if (t[0].x > t[1].x)
+		{
+			std::swap(t[0].x, t[1].x);
+		}
+
+		if (t[0].y > t[1].y)
+		{
+			std::swap(t[0].y, t[1].y);
+		}
+
+		// no overlap found => no intersection
+		if (t[1].x < t[0].y || t[0].x > t[1].y) 
+		{
+			return false;
+		}
+
+		if (t[0].z > t[1].z)
+		{
+			std::swap(t[0].z, t[1].z);
+		}
+
+		// no overlap found => no intersection
+		if (t[1].x < t[0].z || t[0].x > t[1].z || t[1].y < t[0].z || t[0].y > t[1].z)
+		{
+			return false;
+		}
+
+		return true;
+	}
+
+	glm::vec3 get_normal(glm::vec3 p) const
+	{
+		return glm::vec3(0.f);
+	}
 };
 
 }

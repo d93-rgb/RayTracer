@@ -73,6 +73,10 @@
     <IncludePath>C:\ThirdParty\libraries\glm-0.9.9.3;C:\ThirdParty\libraries\assimp\include;C:\ThirdParty\libraries\AntTweakBar\include;$(IncludePath)</IncludePath>
     <LibraryPath>C:\ThirdParty\libraries\assimp\lib;C:\ThirdParty\libraries\AntTweakBar\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <LibraryPath>C:\ThirdParty\libraries\assimp\lib;C:\ThirdParty\libraries\AntTweakBar\lib;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib\um\x64</LibraryPath>
+    <IncludePath>C:\ThirdParty\libraries\glm-0.9.9.3;C:\ThirdParty\libraries\assimp\include;C:\ThirdParty\libraries\AntTweakBar\include;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
@@ -82,8 +86,9 @@
       <OpenMPSupport>true</OpenMPSupport>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>AntTweakBar64.lib;assimp-vc140-mt.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <ImportLibrary>AntTweakBar64.lib;assimp-vc140-mt.lib</ImportLibrary>
+      <AdditionalDependencies>AntTweakBar.lib;assimp-vc140-mt.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <ImportLibrary>AntTweakBar.lib;assimp-vc140-mt.lib</ImportLibrary>
+      <TargetMachine>MachineX86</TargetMachine>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -92,7 +97,12 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
+      <OpenMPSupport>true</OpenMPSupport>
     </ClCompile>
+    <Link>
+      <AdditionalDependencies>assimp-vc140-mt.lib;AntTweakBar64.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <ImportLibrary>assimp-vc140-mt.lib;AntTweakBar64.lib</ImportLibrary>
+    </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>

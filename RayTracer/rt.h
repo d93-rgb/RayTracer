@@ -56,6 +56,8 @@ struct Rectangle;
 class Triangle;
 class Cube;
 
+class Bounds3;
+
 class SingleCubeScene;
 class GatheringScene;
 
