@@ -9,7 +9,7 @@
 
 using namespace rt;
 
-constexpr auto SPP = 1;
+constexpr auto SPP = 32;
 constexpr auto GRID_DIM = 2;
 
 constexpr auto WIDTH = 533;

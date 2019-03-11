@@ -263,7 +263,7 @@ void SingleCubeScene::init()
 
 
 	// put triangle mesh into scene
-	sc.emplace_back(std::move(t_pot));
+//	sc.emplace_back(std::move(t_pot));
 	////////////////////////////////
 	// END
 	////////////////////////////////
@@ -317,23 +317,39 @@ void SingleCubeScene::init()
 		sc.emplace_back(std::move(p));
 	}
 
-	sc.emplace_back(std::unique_ptr<Object>(new Triangle(glm::vec3(0.f, 0.f, -4.f),
+	/*sc.emplace_back(std::unique_ptr<Object>(new Triangle(glm::vec3(0.f, 0.f, -4.f),
 		glm::vec3(4.f, 0.f, -4.f),
 		glm::vec3(4.f, 4.f, -4.f),
 		glm::vec3(0.f, 0.f, 1.f),
 		glm::mat4(1.f),
 		triangle_mat_1)));
+*/
+	/////////////////////////////////////
+	// Sphere
+	/////////////////////////////////////
+	std::shared_ptr<Material> sphere_mat =
+		std::shared_ptr<Material>(new Material(
+			glm::vec3(0.02, 0.02, 0.02),
+			glm::vec3(0.3, 0.3, 0.3f),
+			glm::vec3(0.f, 0.f, 0.f)));
 
+	sc.emplace_back(std::unique_ptr<Object>(new Sphere(
+		glm::vec3(4.f, 0.f, 1.f),
+		3.f,
+		glm::vec3(1.f),
+		sphere_mat,
+		std::shared_ptr<Texture>(new CheckerBoardTexture()))));
+	
 	/////////////////////////////////////
 	// Lights
 	/////////////////////////////////////
 	lights.emplace_back(std::unique_ptr<Light>(new PointLight(glm::vec3(-2.f, 2.f, -15.f),
 		glm::vec3(-2, -4, -2),
 		glm::vec3(40.f))));
-	/*lights.emplace_back(std::unique_ptr<Light>(new PointLight(glm::vec3(0.f, 0.f, 10.f),
+	lights.emplace_back(std::unique_ptr<Light>(new PointLight(glm::vec3(0.f, 0.f, 10.f),
 		glm::vec3(0.f, 0.f, -1.f),
 		glm::vec3(30.f))));
-*/
+
 	/////////////////////////////////////
 	// Lights END
 	/////////////////////////////////////

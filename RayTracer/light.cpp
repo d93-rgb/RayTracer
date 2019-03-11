@@ -14,10 +14,19 @@ Light::~Light() {}
 glm::vec3 PointLight::diff_shade(const SurfaceInteraction & isect, const glm::vec3 & ob_pos)
 {
 	glm::vec3 dir = ob_pos - this->p;
-
+	glm::vec3 diffuse;
 	//float sq_dist = glm::dot(dir, dir); // attenuation
+	
+	if (isect.texture != nullptr)
+	{
+		diffuse = isect.texture->getTexel(isect.uv, glm::vec3(1.f));
+	}
+	else
+	{
+		diffuse = isect.mat->diffuse;
+	}
 
-	glm::vec3 col = getEmission(dir) * isect.mat->diffuse *
+	glm::vec3 col = getEmission(dir) * diffuse *
 		glm::max(0.f,
 			glm::dot(isect.normal,
 				-glm::normalize(dir)));
@@ -87,7 +96,7 @@ bool PointLight::calc_shadow(glm::vec3 p, const Scene &sc)
 
 glm::vec3 PointLight::phong_shade(const Scene &sc,
 	const Ray &ray,
-	const glm::vec3 &ob_pos, 
+	const glm::vec3 &ob_pos,
 	const SurfaceInteraction & isect)
 {
 	bool visible = true;
@@ -176,7 +185,7 @@ bool DistantLight::calc_shadow(glm::vec3 p, const Scene &sc)
 
 glm::vec3 DistantLight::phong_shade(const Scene &sc,
 	const Ray &ray,
-	const glm::vec3 &ob_pos, 
+	const glm::vec3 &ob_pos,
 	const SurfaceInteraction &isect)
 {
 	bool visible = true;

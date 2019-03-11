@@ -16,6 +16,7 @@ public:
 	glm::vec3 normal;
 	glm::vec2 uv;
 	std::shared_ptr<Material> mat;
+	std::shared_ptr<Texture> texture;
 
 	SurfaceInteraction() = default;
 };

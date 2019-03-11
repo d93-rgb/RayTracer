@@ -131,7 +131,7 @@ void ProgressReporter::PrintBar()
 			sleepDuration *= 5;
 
 		float percentDone = float(workDone) / float(totalWork);
-		int plussesNeeded = std::round(totalPlusses * percentDone);
+		int plussesNeeded = (int)std::round(totalPlusses * percentDone);
 		while (plussesPrinted < plussesNeeded) {
 			*curSpace++ = '+';
 			++plussesPrinted;

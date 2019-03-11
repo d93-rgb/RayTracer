@@ -118,9 +118,11 @@ public:
 
 struct Sphere : public Object
 {
-	glm::vec3 origin;
 	float r;
+	glm::vec3 origin;
 	glm::vec3 color;
+	std::shared_ptr<Texture> tex;
+
 
 	Sphere(glm::vec3 origin, float radius, glm::vec3 color, std::shared_ptr<Material> m)
 	{
@@ -128,6 +130,20 @@ struct Sphere : public Object
 		this->r = radius;
 		this->color = color;
 		this->mat = m;
+		tex = nullptr;
+	}
+
+	Sphere(glm::vec3 origin, 
+		float radius, 
+		glm::vec3 color, 
+		std::shared_ptr<Material> m,
+		std::shared_ptr<Texture> texture)
+	{
+		this->origin = origin;
+		this->r = radius;
+		this->color = color;
+		this->mat = m;
+		tex = texture;
 	}
 
 	glm::vec3 get_normal(glm::vec3 p) const
@@ -167,6 +183,7 @@ struct Sphere : public Object
 				isect->normal = get_normal(isect->p);
 				isect->uv = getTextureCoordinates(isect->p);
 				isect->mat = mat;
+				isect->texture = tex;
 
 			}
 		}
@@ -177,8 +194,8 @@ struct Sphere : public Object
 	{
 		glm::vec3 pos_shift = glm::normalize(pos - origin);
 		//float radius = glm::length(pos_shift);
-		float u = (1 + atan2f(pos_shift.y, pos_shift.x) / M_PI) * 0.5f;
-		float v = acosf(pos_shift.z) / M_PI;
+		float u = (1 + atan2f(pos_shift.y, pos_shift.x) / (float)M_PI) * 0.5f;
+		float v = acosf(pos_shift.z) / (float)M_PI;
 		
 		return glm::vec2(u, v);
 	}
