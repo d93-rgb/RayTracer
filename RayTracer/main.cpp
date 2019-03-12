@@ -29,12 +29,13 @@ glm::vec3 clamp(glm::vec3 v)
 	return glm::min(glm::vec3(1.f), glm::max(glm::vec3(0.f), v));
 }
 
-void crop(float hor, float ver)
+void crop(float min, float max, int x, int cropped[])
 {
-
+	cropped[0] = (int)round(min * x);
+	cropped[1] = (int)round(max * x);
 }
 
-void write_file(const char *file, std::vector<glm::vec3> &col);
+void write_file(const char *file, std::vector<glm::vec3> &col, int width, int height);
 
 //float deg2rad(float deg) { return deg * (float)M_PI / 180; }
 //float rad2deg(float rad) { return rad * 180 / (float)M_PI; }
@@ -51,6 +52,7 @@ std::ostream &operator<<(std::ostream &os, glm::vec3 v)
 void render()
 {
 	int i = 0;
+	int new_width, new_height;
 	float fov = glm::radians(55.f);
 	float fov_tan = tan(fov / 2);
 	float u = 0.f, v = 0.f;
@@ -59,9 +61,22 @@ void render()
 	float inv_spp = 1.f / SPP;
 	float inv_grid_dim = 1.f / GRID_DIM;
 
+	float crop_min_x = 0.1f, crop_max_x = 0.8f;
+	float crop_min_y = 0.1f, crop_max_y = 0.8f;
+
+	assert(crop_min_x <= crop_max_x && crop_min_y <= crop_max_y);
+
+	int cropped_width[2];
+	int cropped_height[2];
 	glm::vec3 radiance = glm::vec3(0.f);
 
-	std::vector<glm::vec3> col(WIDTH * HEIGHT, glm::vec3(0.f));
+	crop(crop_min_x, crop_max_x, WIDTH, cropped_width);
+	crop(crop_min_y, crop_max_y, HEIGHT, cropped_height);
+
+	new_width = cropped_width[1] - cropped_width[0];
+	new_height = cropped_height[1] - cropped_height[0];
+
+	std::vector<glm::vec3> col(new_width * new_height, glm::vec3(0.f));
 
 	/***************************************/
 	// CREATING SCENE
@@ -81,13 +96,13 @@ void render()
 		std::default_random_engine eng(rd());
 		std::uniform_real_distribution<> dist(0, 1);
 		// dynamic schedule for proper I/O progress update
-	#pragma omp parallel for schedule(dynamic, 1)
-		for (int y = 0; y < HEIGHT; ++y)
+#pragma omp parallel for schedule(dynamic, 1)
+		for (int y = cropped_height[0]; y < cropped_height[1]; ++y)
 		{
 			//fprintf(stderr, "\rRendering %5.2f%%", 100.*y / (HEIGHT - 1));
 			reporter.Update();
 			SurfaceInteraction isect;
-			for (int x = 0; x < WIDTH; ++x)
+			for (int x = cropped_width[0]; x < cropped_width[1]; ++x)
 			{
 				for (int m = 0; m < GRID_DIM; ++m)
 				{
@@ -96,7 +111,9 @@ void render()
 						// hackery needed for omp pragma
 						// the index i will be distributed among all threads
 						// by omp automatically
-						for (int k = 0, i = y * WIDTH + x; k < SPP; ++k)
+						for (int k = 0,
+							i = (y - cropped_height[0]) * new_width + x - cropped_width[0]; 
+							k < SPP; ++k)
 						{
 							// TODO: Consider changing random values to the range [0,1)
 							float u_rnd = 2 * float(dist(eng)) - 1;
@@ -122,11 +139,11 @@ void render()
 	//		std::cout << " thread: " << omp_get_thread_num() << std::endl;
 	//	}
 
-	write_file("picture.ppm", col);
+	write_file("picture.ppm", col, new_width, new_height);
 
 }
 
-void write_file(const char *file, std::vector<glm::vec3> &col)
+void write_file(const char *file, std::vector<glm::vec3> &col, int width, int height)
 {
 	static int i_debug = 0;
 	std::ofstream ofs;
@@ -136,10 +153,10 @@ void write_file(const char *file, std::vector<glm::vec3> &col)
 	/***************************************/
 	ofs.open(file, _IOSbinary);
 	// don't use \n as ending white space, because of windows
-	ofs << "P6 " << WIDTH << " " << HEIGHT << " 255 ";
+	ofs << "P6 " << width << " " << height << " 255 ";
 
 	// write to image file
-	for (int i = 0; i < WIDTH * HEIGHT; ++i)
+	for (size_t i = 0; i < col.size(); ++i)
 	{
 		// gamma correction and mapping to [0;255]
 		col[i] = glm::pow(glm::min(glm::vec3(1), col[i]),
@@ -220,7 +237,7 @@ ofs.close();
 	{
 		printf("CreateProcess failed (%d).\n%s\n",
 			GetLastError(), szCmdline.c_str());
-}
+	}
 	// Close process and thread handles. 
 	CloseHandle(pi.hProcess);
 	CloseHandle(pi.hThread);
