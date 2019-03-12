@@ -59,7 +59,7 @@ void render()
 	// distance to view plane
 	float d = 1.f;
 	float inv_spp = 1.f / SPP;
-	float inv_grid_dim = 1.f / GRID_DIM;
+	float inv_grid_dim = 1.f / (GRID_DIM * GRID_DIM);
 
 	float crop_min_x = 0.f, crop_max_x = 1.f;
 	float crop_min_y = 0.f, crop_max_y = 1.f;

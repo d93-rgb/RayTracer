@@ -108,7 +108,15 @@ glm::vec3 PointLight::phong_shade(const Scene &sc,
 	//if (sqd_dist > 1.f) sqd_dist *= 0.1f;
 
 	visible = calc_shadow(ob_pos, sc);
-	color = 0.01f * isect.mat->ambient * getEmission(ray.rd);
+	if (isect.texture != nullptr)
+	{
+		color = 0.00001f * isect.texture->getTexel(isect.uv, glm::vec3(1.f))
+			* getEmission(ray.rd);
+	}
+	else
+	{
+		color = 0.01f * isect.mat->ambient * getEmission(ray.rd);
+	}
 
 	if (visible) {
 		color += (diff_shade(isect, ob_pos) +

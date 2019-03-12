@@ -15,7 +15,7 @@ template <typename T> inline int sgn(T val)
 	return (T(0) < val) - (val < T(0));
 }
 
-struct Object
+struct Shape
 {
 	glm::mat4 obj_to_world, world_to_obj;
 	std::shared_ptr<Material> mat;
@@ -43,7 +43,7 @@ public:
 
 		glm::vec3 t[2] = { glm::vec3(INFINITY), glm::vec3(INFINITY) };
 
-		// calculate the 6 ray-plane intersections
+		// calculate the 6 transformed_ray-plane intersections
 		t[0] = boundaries[0] - ray.ro;
 		t[1] = boundaries[1] - ray.ro;
 
@@ -116,7 +116,7 @@ public:
 	}
 };
 
-struct Sphere : public Object
+struct Sphere : public Shape
 {
 	float r;
 	glm::vec3 origin;
@@ -200,7 +200,7 @@ struct Sphere : public Object
 	}
 };
 
-struct Plane : public Object
+struct Plane : public Shape
 {
 	glm::vec3 pos;
 	glm::vec3 normal;
@@ -300,7 +300,7 @@ struct Plane : public Object
 	}
 };
 
-struct Rectangle : public Object
+struct Rectangle : public Shape
 {
 	glm::vec3 center;
 	glm::vec3 v1;
@@ -325,7 +325,7 @@ struct Rectangle : public Object
 	}
 
 	/*
-		Intersection routine for the ray-triangle intersection test.
+		Intersection routine for the transformed_ray-triangle intersection test.
 		The nearest intersection parameter of Ray will not be updated
 	*/
 	float intersect(const Ray &ray, SurfaceInteraction * isect)
@@ -402,7 +402,7 @@ struct Rectangle : public Object
 	}
 };
 
-class Cube : public Object
+class Cube : public Shape
 {
 	glm::vec3 normal;
 	glm::vec3 boundaries;
@@ -460,7 +460,7 @@ public:
 		glm::vec3 isec_p;
 
 
-		// calculate the 6 ray-plane intersections
+		// calculate the 6 transformed_ray-plane intersections
 		t[0] = (boundaries - transformed_ray.ro);
 		t[1] = -(boundaries + transformed_ray.ro);
 
@@ -547,7 +547,7 @@ public:
 
 	/*
 		Intersection test without updating the nearest intersection parameter for Ray.
-		This routine will be used for the ray-bounding box intersection test.
+		This routine will be used for the transformed_ray-bounding box intersection test.
 	*/
 	float intersect(const Ray &ray)
 	{
@@ -566,7 +566,7 @@ public:
 		glm::vec3 isec_p;
 
 
-		// calculate the 6 ray-plane intersections
+		// calculate the 6 transformed_ray-plane intersections
 		t[0] = (boundaries - transformed_ray.ro);
 		t[1] = -(boundaries + transformed_ray.ro);
 
@@ -660,7 +660,7 @@ inline void create_cube(glm::vec3 center,
 	glm::vec3 up,
 	glm::vec3 front,
 	float s_len,
-	std::unique_ptr<Object> sides[],
+	std::unique_ptr<Shape> sides[],
 	std::shared_ptr<Material> mat)
 {
 	float tmp = s_len / 2;
@@ -691,14 +691,18 @@ inline void create_cube(glm::vec3 center,
 	sides[5].reset(new Rectangle(center - t_uf, n_front, n_up, mat));
 }
 
-class Triangle : public Object
+class Triangle : public Shape
 {
+	bool interpolate = false;
+
 	// vertices
 	glm::vec3 p1, p2, p3;
 	// normal
 	glm::vec3 n;
 	glm::mat4 objToWorld;
+	glm::mat4 worldToObj;
 	glm::mat3 m_inv;
+
 
 public:
 	Triangle(glm::vec3 p1,
@@ -707,7 +711,8 @@ public:
 		glm::vec3 n,
 		glm::mat4 objToWorld,
 		std::shared_ptr<Material> mat) :
-		objToWorld(objToWorld)
+		objToWorld(objToWorld),
+		worldToObj(glm::inverse(objToWorld))
 	{
 		this->mat = mat;
 
@@ -741,6 +746,15 @@ public:
 				isect->p = ray.ro + ray.rd * t_plane;
 				isect->normal = get_normal(isect->p);
 				isect->mat = mat;
+
+				if (interpolate)
+				{
+					glm::vec3 c = glm::vec3((1 - (t_vec.y + t_vec.z)) * 1.f,
+						t_vec.y * 1.f, t_vec.z * 1.f);
+					isect->mat->ambient = c;
+					isect->mat->diffuse = c;
+					isect->mat->specular = glm::vec3(0.f);
+				}
 			}
 
 			return t_plane;
@@ -757,9 +771,14 @@ public:
 	{
 		return n;
 	}
+
+	void setInterpolate(bool interpolate)
+	{
+		this->interpolate = interpolate;
+	}
 };
 
-class TriangleMesh : public Object
+class TriangleMesh : public Shape
 {
 public:
 	std::unique_ptr<Bounds3> boundary;

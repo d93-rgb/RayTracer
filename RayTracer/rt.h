@@ -44,7 +44,7 @@ namespace rt
 
 struct Ray;
 class Scene;
-struct Object;
+struct Shape;
 struct Material;
 class Interaction;
 class SurfaceInteraction;

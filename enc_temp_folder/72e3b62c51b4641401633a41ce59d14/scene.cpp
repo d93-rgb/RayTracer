@@ -347,7 +347,7 @@ void SingleCubeScene::init()
 		sphere_mat,
 		std::shared_ptr<Texture>(new CheckerBoardTexture()))));
 
-	// red sphere at origin
+	// sphere at origin
 	sphere_mat =
 		std::shared_ptr<Material>(new Material(
 			glm::vec3(1.f, 0.f, 0.f),

@@ -25,6 +25,12 @@ public:
 	{
 		return ((fmodf(uv.x, NUM) < GAP) ^ (fmodf(uv.y, NUM) < GAP)) * color;
 	}
+
+	glm::vec3 getTexel(glm::vec2 uv, glm::vec3 color_1, glm::vec3 color_2)
+	{
+		return ((fmodf(uv.x, NUM) < GAP) ^ (fmodf(uv.y, NUM) < GAP)) ? color_1 : color_2;
+	}
+
 };
 
 } // namespace rt
