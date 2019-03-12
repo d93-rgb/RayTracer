@@ -31,8 +31,8 @@ glm::vec3 clamp(glm::vec3 v)
 
 void crop(float min, float max, int x, int cropped[])
 {
-	cropped[0] = (int)round(min * x);
-	cropped[1] = (int)round(max * x);
+	cropped[0] = (int)round(clamp(min) * x);
+	cropped[1] = (int)round(clamp(max) * x);
 }
 
 void write_file(const char *file, std::vector<glm::vec3> &col, int width, int height);
@@ -61,8 +61,8 @@ void render()
 	float inv_spp = 1.f / SPP;
 	float inv_grid_dim = 1.f / GRID_DIM;
 
-	float crop_min_x = 0.1f, crop_max_x = 0.8f;
-	float crop_min_y = 0.1f, crop_max_y = 0.8f;
+	float crop_min_x = 0.f, crop_max_x = 1.f;
+	float crop_min_y = 0.f, crop_max_y = 1.f;
 
 	assert(crop_min_x <= crop_max_x && crop_min_y <= crop_max_y);
 
@@ -101,9 +101,9 @@ void render()
 		{
 			//fprintf(stderr, "\rRendering %5.2f%%", 100.*y / (HEIGHT - 1));
 			reporter.Update();
-			SurfaceInteraction isect;
 			for (int x = cropped_width[0]; x < cropped_width[1]; ++x)
 			{
+				SurfaceInteraction isect;
 				for (int m = 0; m < GRID_DIM; ++m)
 				{
 					for (int n = 0; n < GRID_DIM; ++n)

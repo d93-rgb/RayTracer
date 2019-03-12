@@ -184,7 +184,6 @@ struct Sphere : public Object
 				isect->uv = getTextureCoordinates(isect->p);
 				isect->mat = mat;
 				isect->texture = tex;
-
 			}
 		}
 		return tmp;
