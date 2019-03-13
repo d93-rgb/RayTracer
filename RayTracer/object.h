@@ -1,4 +1,6 @@
 #pragma once
+#include <glm/gtc/matrix_transform.hpp>
+
 #include "rt.h"
 #include "material.h"
 #include "ray.h"
@@ -46,6 +48,7 @@ public:
 	{
 		assert(abs(length(ray.rd)) > 0);
 
+		// no need for checking division by zero, floating point arithmetic is helping here
 		glm::vec3 inv_rd = 1.f / ray.rd;
 		glm::vec3 t[2] = { glm::vec3(INFINITY), glm::vec3(INFINITY) };
 		// interval of intersection
@@ -64,13 +67,14 @@ public:
 				std::swap(t[0][i], t[1][i]);
 			}
 
-			// check if intersection possible and update interval
-			if (t[0][i] > t1 || t[1][i] < t0)
+			// update interval and check if intersection possible
+			t0 = t0 > t[0][i] ? t0 : t[0][i];
+			t1 = t1 < t[1][i] ? t1 : t[1][i];
+
+			if (t0 > t1)
 			{
 				return false;
 			}
-			t0 = t[0][i];
-			t1 = t[1][i];
 		}
 
 		return true;
@@ -126,15 +130,16 @@ struct Sphere : public Shape
 		float term_2 = 2 * glm::dot(ray.rd, ray.ro - origin);
 		float term_3 = glm::dot(ray.ro - origin, ray.ro - origin) - r * r;
 
-		float disc = term_2 * term_2 - 4 * term_1*term_3;
+		float disc = term_2 * term_2 - 4 * term_1 * term_3;
 
 		if (disc < 0)
 		{
 			return INFINITY;
 		}
 
-		t1 = (-term_2 + sqrt(disc)) / (2 * term_1);
-		t2 = (-term_2 - sqrt(disc)) / (2 * term_1);
+		tmp = sqrt(disc);
+		t1 = (-term_2 + tmp) / term_1 * 0.5f;
+		t2 = (-term_2 - tmp) / term_1 * 0.5f;
 
 		tmp = std::fmin(t1, t2);
 		tmp = tmp >= 0 ? tmp : fmax(t1, t2);
@@ -165,7 +170,6 @@ struct Sphere : public Shape
 		return glm::vec2(u, v);
 	}
 };
-
 struct Plane : public Shape
 {
 	glm::vec3 pos;
@@ -618,8 +622,8 @@ public:
 		return a_p.x > a_p.y ?
 			(a_p.x > a_p.z ? glm::vec3(sgn(p.x), 0.f, 0.f) : glm::vec3(0.f, 0.f, sgn(p.z))) :
 			(a_p.y > a_p.z ? glm::vec3(0.f, sgn(p.y), 0.f) : glm::vec3(0.f, 0.f, sgn(p.z)));
-		}
-	};
+	}
+};
 
 inline void create_cube(glm::vec3 center,
 	glm::vec3 up,
@@ -790,4 +794,95 @@ public:
 
 };
 
+struct Cylinder : public Shape
+{
+	float height, radius;
+	glm::vec3 pos, dir;
+	glm::mat4 objToWorld;
+	glm::mat4 worldToObj;
+
+	Cylinder(glm::vec3 pos,
+		glm::vec3 dir,
+		float radius,
+		float height,
+		std::shared_ptr<Material> mat) :
+		pos(pos), dir(dir), radius(radius), height(height)
+	{
+		this->mat = mat;
+
+		objToWorld = glm::lookAt(pos, pos + dir, glm::vec3(0.f, 1.f, 0.f));
+		worldToObj = glm::inverse(objToWorld);
+	}
+
+	float intersect(const Ray &ray, SurfaceInteraction *isect)
+	{
+		Ray transformed_ray{ worldToObj * glm::vec4(ray.ro, 1.f),
+			worldToObj * glm::vec4(ray.rd, 0.f) };
+		//Ray transformed_ray{ glm::vec4(ray.ro, 1.f), glm::vec4(ray.rd, 0.f) };
+		glm::vec2 t_ro = glm::vec2(transformed_ray.ro.x, transformed_ray.ro.z);
+		glm::vec2 t_rd = glm::vec2(transformed_ray.rd.x, transformed_ray.rd.z);
+
+		glm::vec3 isect_p1 = glm::vec3(INFINITY), isect_p2 = glm::vec3(INFINITY);
+		float x1, x2, tmp1 = INFINITY, tmp2 = INFINITY;
+		float a = glm::dot(t_rd, t_rd);
+		float b = 2 * glm::dot(t_ro, t_rd);
+		float c = glm::dot(t_ro, t_ro) - radius * radius;
+
+		float discr = b * b - 4 * a * c;
+
+		if (discr < 0)
+		{
+			return INFINITY;
+		}
+
+		discr = sqrt(discr);
+		x1 = (-b + discr) / a * 0.5f;
+		x2 = (-b - discr) / a * 0.5f;
+
+		// get intersection points
+		if (x1 > 0)
+		{
+			isect_p1 = transformed_ray.ro + x1 * transformed_ray.rd;
+		}
+
+		if (x2 > 0)
+		{
+			isect_p2 = transformed_ray.ro + x2 * transformed_ray.rd;
+		}
+
+		// no intersection found check
+		if ((isect_p1 == glm::vec3(INFINITY)) && (isect_p2 == glm::vec3(INFINITY)))
+		{
+			return INFINITY;
+		}
+
+		// check if inside the given height boundary
+		if (isect_p1.y >= 0 && isect_p1.y <= height)
+		{
+			tmp1 = x1;
+		}
+
+		if (isect_p2.y >= 0 && isect_p2.y <= height)
+		{
+			tmp2 = x2;
+		}
+
+		tmp2 = std::min(tmp1, tmp2);
+
+		if (tmp2 < ray.tNearest)
+		{
+			ray.tNearest = tmp2;
+			isect->p = ray.ro + ray.rd * tmp2;
+			isect->normal = get_normal(isect->p);
+			isect->mat = mat;
+		}
+
+		return tmp2;
+	}
+
+	glm::vec3 get_normal(glm::vec3 p) const
+	{
+		return glm::vec3(p.x, 0.f, p.z);
+	}
+};
 }
