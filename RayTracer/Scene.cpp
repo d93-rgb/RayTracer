@@ -10,7 +10,7 @@
 #include "object.h"
 #include "light.h"
 
-//#define LOAD_TEAPOT
+#define LOAD_TEAPOT
 // DEBUGGING
 // divide the triangle mesh of the teapot to reduce rendering time
 constexpr auto TEAPOTSIZE = 1;
@@ -293,7 +293,7 @@ void SingleCubeScene::init()
 	std::shared_ptr<Material> triangle_mat_1 =
 		std::shared_ptr<Material>(new Material(
 			glm::vec3(0.f, 0.f, 0.f),
-			glm::vec3(0.9, 0.9, 0.0f),
+			glm::vec3(0.f, 0.f, 0.f),
 			glm::vec3(0.f, 0.f, 0.f)));
 	std::shared_ptr<Material> cube_mat_2 =
 		std::shared_ptr<Material>(new Material(
@@ -356,7 +356,7 @@ void SingleCubeScene::init()
 
 	sc.emplace_back(std::unique_ptr<Shape>(new Sphere(
 		glm::vec3(0.f, 0.f, 0.f),
-		0.2f,
+		0.1f,
 		glm::vec3(1.f),
 		sphere_mat)));
 	/////////////////////////////////////

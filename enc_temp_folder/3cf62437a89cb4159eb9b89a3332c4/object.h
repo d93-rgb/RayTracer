@@ -49,7 +49,7 @@ public:
 		glm::vec3 inv_rd = 1.f / ray.rd;
 		glm::vec3 t[2] = { glm::vec3(INFINITY), glm::vec3(INFINITY) };
 		// interval of intersection
-		float t0 = 0.f, t1 = INFINITY;
+		float t0, t1;
 
 		t[0] = boundaries[0] - ray.ro;
 		t[1] = boundaries[1] - ray.ro;
@@ -64,13 +64,23 @@ public:
 				std::swap(t[0][i], t[1][i]);
 			}
 
-			// check if intersection possible and update interval
-			if (t[0][i] > t1 || t[1][i] < t0)
-			{
-				return false;
-			}
-			t0 = t[0][i];
-			t1 = t[1][i];
+		}
+
+		// no overlap found => no intersection
+		if (t[1].x < t[0].y || t[0].x > t[1].y)
+		{
+			return false;
+		}
+
+		if (t[0].z > t[1].z)
+		{
+			std::swap(t[0].z, t[1].z);
+		}
+
+		// no overlap found => no intersection
+		if (t[1].x < t[0].z || t[0].x > t[1].z || t[1].y < t[0].z || t[0].y > t[1].z)
+		{
+			return false;
 		}
 
 		return true;

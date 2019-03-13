@@ -10,14 +10,14 @@
 using namespace rt;
 
 constexpr auto SPP = 1;
-constexpr auto GRID_DIM = 2;
+constexpr auto GRID_DIM = 1;
 
 constexpr auto WIDTH = 533;
 constexpr auto HEIGHT = 400;
 
 int MAX_DEPTH = 4;
 
-std::vector<float> debug_vec;
+//std::vector<float> debug_vec;
 
 float clamp(float f)
 {
@@ -124,7 +124,8 @@ void render()
 
 							// this can not be split up and needs to be in one line, otherwise
 							// omp will not take the average
-							col[i] += clamp(shoot_recursively(sc, sc.cam->getPrimaryRay(u, v, d), &isect, 0)) * inv_spp * inv_grid_dim;
+							col[i] += clamp(shoot_recursively(sc, sc.cam->getPrimaryRay(u, v, d), &isect, 0))
+								* inv_spp * inv_grid_dim;
 						}
 					}
 				}
