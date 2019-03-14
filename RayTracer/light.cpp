@@ -1,7 +1,7 @@
 #pragma once
 #include "rt.h"
 #include "light.h"
-#include "object.h"
+#include "shape.h"
 #include "scene.h"
 #include "camera.h"
 

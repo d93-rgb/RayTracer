@@ -7,7 +7,8 @@
 #include "camera.h"
 #include "loader.h"
 #include "material.h"
-#include "object.h"
+#include "shape.h"
+#include "quadrics.h"
 #include "light.h"
 
 //#define LOAD_TEAPOT
@@ -192,9 +193,9 @@ void GatheringScene::init()
 
 void SingleCubeScene::init()
 {
-	float rot_x = glm::radians(-30.f);
+	float rot_x = glm::radians(0.f);
 	float deb;
-	glm::vec3 translation = glm::vec3(-8.f, -3.f, 20.f);
+	glm::vec3 translation = glm::vec3(-2.f, -2.f, 18.f);
 	glm::vec4 cube_position;
 	glm::vec3 cube_normal;
 	glm::vec3 p1, p2, p3, tr_normal;
@@ -359,20 +360,52 @@ void SingleCubeScene::init()
 		glm::vec3(1.f),
 		sphere_mat)));
 
+	sc.emplace_back(std::unique_ptr<Shape>(new Sphere(
+		glm::vec3(0.f, 0.f, 0.f),
+		1.f,
+		glm::vec3(1.f),
+		sphere_mat)));
+
+	sc.emplace_back(std::unique_ptr<Shape>(new Sphere(
+		glm::vec3(0.f, 0.f, 0.f),
+		1.5f,
+		glm::vec3(1.f),
+		sphere_mat)));
+
+	sc.emplace_back(std::unique_ptr<Shape>(new Sphere(
+		glm::vec3(0.f, 0.f, 0.f),
+		2.f,
+		glm::vec3(1.f),
+		sphere_mat)));
+
 	/////////////////////////////////////
 	// Cylinders
 	/////////////////////////////////////
+	float cyl_rad = 0.1f;
 	std::shared_ptr<Material> cylinder_mat_1 =
 		std::shared_ptr<Material>(new Material(
 			glm::vec3(0.009f, 0.002f, 0.f),
 			glm::vec3(0.9f, 0.2f, 0.0f),
-			glm::vec3(0.2f, 0.2f, 0.1f)));
+			glm::vec3(0.0f, 0.0f, 0.0f)));
+	cylinder_mat_1->setShininess(20.f);
 
 	sc.emplace_back(std::unique_ptr<Shape> (new Cylinder(
-		glm::vec3(-5.f, -4.f, 0.f),
-		glm::vec3(1.f, 0.f, 1.f),
-		2.f,
-		3.f,
+		glm::vec3(0.f, 0.f, 0.f),
+		glm::vec3(1.f, 0.f, 0.f),
+		cyl_rad,
+		8.f,
+		cylinder_mat_1)));
+	sc.emplace_back(std::unique_ptr<Shape>(new Cylinder(
+		glm::vec3(0.f, 0.f, 0.f),
+		glm::vec3(0.f, 1.f, 0.f),
+		cyl_rad,
+		8.f,
+		cylinder_mat_1)));
+	sc.emplace_back(std::unique_ptr<Shape>(new Cylinder(
+		glm::vec3(0.f, 0.f, 0.f),
+		glm::vec3(0.f, 0.f, 1.f),
+		cyl_rad,
+		8.f,
 		cylinder_mat_1)));
 	/*dynamic_cast<Cylinder*>(sc.back().get())->worldToObj =
 		glm::inverse(

@@ -2,7 +2,7 @@
 #include "renderer.h"
 #include "ray.h"
 #include "scene.h"
-#include "object.h"
+#include "shape.h"
 #include "light.h"
 
 //#define DEBUG_NORMALS
