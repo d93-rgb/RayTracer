@@ -91,12 +91,6 @@ struct Cylinder : public Quadric
 
 	float intersect(const Ray &ray, SurfaceInteraction *isect);
 
-	glm::vec3 get_normal(glm::vec3 p) const
-	{
-		// TODO: Inside or outside? How to figure out which side the ray hit?
-		return glm::vec3(p.x, 0.f, p.z);
-	}
-
 	glm::vec3 get_normal(glm::vec3 p, int hit_cnt) const
 	{
 		if (hit_cnt == 2)

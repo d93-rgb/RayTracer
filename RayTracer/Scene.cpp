@@ -186,8 +186,7 @@ void GatheringScene::init()
 		glm::vec3(100.f))));
 
 
-	cam->setCamToWorld(glm::rotate(glm::translate(glm::mat4(1.f), translation),
-		rot_y, glm::vec3(cam->getUpVec())));
+	cam->setCamToWorld(translation, glm::vec3(0.f), glm::vec3(0.f, 1.f, 0.f));
 	cam->update();
 }
 
@@ -195,9 +194,9 @@ void SingleCubeScene::init()
 {
 	float rot_x = glm::radians(0.f);
 	float deb;
-	glm::vec3 translation = glm::vec3(-2.f, -2.f, 15.f);
-	glm::vec3 look_pos = glm::vec3(0.f, 0.f, 0.f);
-	glm::vec3 cam_up = glm::vec3(0.f, 1.f, 0.f);
+	glm::vec3 translation	= glm::vec3(-5.f, -5.f, 15.f);
+	glm::vec3 look_pos		= glm::vec3(0.f, 0.f, 0.f);
+	glm::vec3 cam_up		= glm::vec3(0.f, 1.f, 0.f);
 	glm::vec4 cube_position;
 	glm::vec3 cube_normal;
 //	glm::vec3 p1, p2, p3, tr_normal;
@@ -212,7 +211,7 @@ void SingleCubeScene::init()
 		glm::scale(
 			//glm::mat4(1.f),
 			glm::translate(glm::mat4(1.f), glm::vec3(-6.f, 0.f, 2.f)),
-			glm::vec3(1.5f)),
+			glm::vec3(0.9f)),
 		glm::radians(30.f),
 		glm::vec3(0.f, 1.f, 0.f));
 	
@@ -393,7 +392,7 @@ void SingleCubeScene::init()
 	sphere_mat->transparent = glm::vec3(1.f);
 
 	sc.emplace_back(std::unique_ptr<Shape>(new Sphere(
-		glm::vec3(2.f, -5.f, 0.f),
+		glm::vec3(5.f, 2.f, 0.f),
 		3.f,
 		glm::vec3(1.f),
 		sphere_mat)));

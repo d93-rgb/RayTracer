@@ -74,8 +74,8 @@
     <LibraryPath>C:\ThirdParty\libraries\assimp\lib;C:\ThirdParty\libraries\AntTweakBar\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <LibraryPath>C:\ThirdParty\libraries\assimp\lib;C:\ThirdParty\libraries\AntTweakBar\lib;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib\um\x64</LibraryPath>
-    <IncludePath>C:\ThirdParty\libraries\glm-0.9.9.3;C:\ThirdParty\libraries\assimp\include;C:\ThirdParty\libraries\AntTweakBar\include;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
+    <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib\um\x64</LibraryPath>
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -98,11 +98,20 @@
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
       <OpenMPSupport>true</OpenMPSupport>
+      <AdditionalIncludeDirectories>C:\ThirdParty\libraries\glog\include;C:\ThirdParty\libraries\glm-0.9.9.3;C:\ThirdParty\libraries\assimp\include;C:\ThirdParty\libraries\AntTweakBar\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>assimp-vc140-mt.lib;AntTweakBar64.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <ImportLibrary>assimp-vc140-mt.lib;AntTweakBar64.lib</ImportLibrary>
+      <AdditionalDependencies>glog.lib;assimp-vc140-mt.lib;AntTweakBar64.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <ImportLibrary>
+      </ImportLibrary>
+      <AdditionalLibraryDirectories>C:\ThirdParty\libraries\glog\lib;C:\ThirdParty\libraries\assimp\lib;C:\ThirdParty\libraries\AntTweakBar\lib;</AdditionalLibraryDirectories>
     </Link>
+    <PostBuildEvent>
+      <Command>xcopy /y /d "C:\ThirdParty\libraries\glog\bin\glog.dll" "$(OutDir)"
+xcopy /y /d "C:\ThirdParty\libraries\AntTweakBar\lib\AntTweakBar64.dll" "$(OutDir)"
+xcopy /y /d "C:\ThirdParty\libraries\assimp\bin\assimp-vc140-mt.dll" "$(OutDir)"</Command>
+      <Message>Copy DLL files to output directory</Message>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -131,6 +140,12 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
+    <PostBuildEvent>
+      <Command>xcopy /y /d "C:\ThirdParty\libraries\glog\bin\glog.dll" "$(OutDir)"
+xcopy /y /d "C:\ThirdParty\libraries\AntTweakBar\lib\AntTweakBar64.dll" "$(OutDir)"
+xcopy /y /d "C:\ThirdParty\libraries\assimp\bin\assimp-vc140-mt.dll" "$(OutDir)"</Command>
+      <Message>Copy DLL files to output directory</Message>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="camera.cpp" />

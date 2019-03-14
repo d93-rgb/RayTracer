@@ -5,6 +5,7 @@
 
 #define WIN32_LEAN_AND_MEAN
 #define _USE_MATH_DEFINES
+#define GLOG_NO_ABBREVIATED_SEVERITIES
 
 #include <Windows.h>
 
@@ -22,6 +23,7 @@
 //#include <omp.h>
 
 #include <glm/glm.hpp>
+#include <glog/logging.h>
 
 //#include "ray.h"
 //#include "material.h"
@@ -55,6 +57,13 @@ struct Plane;
 struct Rectangle;
 class Triangle;
 class Cube;
+
+struct Sphere;
+struct Cylinder;
+struct Disk;
+struct Cone;
+struct Paraboloid;
+struct Hyperboloid;
 
 class Bounds3;
 

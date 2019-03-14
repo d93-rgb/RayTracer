@@ -166,8 +166,9 @@ void write_file(const char *file, std::vector<glm::vec3> &col, int width, int he
 	std::cout << "Writing to file finished." << std::endl;
 }
 
-int main(int argc, const char **agrv)
+int main(int argc, const char **argv)
 {
+	google::InitGoogleLogging(argv[0]);
 	//for (int i = 0; i < 3; ++i)
 //{
 //	for (int j = 0; j < 3; ++j)
@@ -200,6 +201,8 @@ ofs.close();
 	std::string gimp_path = "C:\\Program Files\\GIMP 2\\bin\\gimp-2.10.exe";
 	std::string image_path = "C:\\Users\\Dood\\source\\repos\\RayTracer\\RayTracer\\picture.ppm";
 	std::string szCmdline = gimp_path + " " + image_path;
+
+	LOG(INFO) << "Opening image with " << gimp_path;
 
 	// additional information
 	STARTUPINFO si;
