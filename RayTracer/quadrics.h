@@ -7,6 +7,7 @@ namespace rt
 {
 class Quadric : public Shape
 {
+
 	static bool solveQuadraticEq();
 };
 
@@ -104,5 +105,28 @@ struct Cylinder : public Quadric
 			return -(tr_worldToObj * glm::vec4(p.x, 0.f, p.z, 0.f));
 	}
 };
+
+// TODO: Implement the missing quadrics
+
+struct Disk : public Quadric
+{
+
+};
+
+struct Cone : public Quadric
+{
+
+};
+
+struct Paraboloid : public Quadric
+{
+
+};
+
+struct Hyperboloid : public Quadric
+{
+
+};
+
 
 } // namespace rt

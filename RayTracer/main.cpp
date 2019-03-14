@@ -2,6 +2,7 @@
 #include "renderer.h"
 #include "scene.h"
 #include "camera.h"
+#include "utility.h"
 
 // use for debugging
 #undef DEBUG
@@ -18,22 +19,6 @@ constexpr auto HEIGHT = 400;
 int MAX_DEPTH = 4;
 
 //std::vector<float> debug_vec;
-
-float clamp(float f)
-{
-	return f < 0.f ? 0.f : (f > 1.f ? 1.f : f);
-}
-
-glm::vec3 clamp(glm::vec3 v)
-{
-	return glm::min(glm::vec3(1.f), glm::max(glm::vec3(0.f), v));
-}
-
-void crop(float min, float max, int x, int cropped[])
-{
-	cropped[0] = (int)round(clamp(min) * x);
-	cropped[1] = (int)round(clamp(max) * x);
-}
 
 void write_file(const char *file, std::vector<glm::vec3> &col, int width, int height);
 
@@ -103,7 +88,6 @@ void render()
 			reporter.Update();
 			for (int x = cropped_width[0]; x < cropped_width[1]; ++x)
 			{
-				SurfaceInteraction isect;
 				for (int m = 0; m < GRID_DIM; ++m)
 				{
 					for (int n = 0; n < GRID_DIM; ++n)
@@ -115,6 +99,8 @@ void render()
 							i = (y - cropped_height[0]) * new_width + x - cropped_width[0]; 
 							k < SPP; ++k)
 						{
+							SurfaceInteraction isect;
+
 							// TODO: Consider changing random values to the range [0,1)
 							float u_rnd = 2 * float(dist(eng)) - 1;
 							float v_rnd = 2 * float(dist(eng)) - 1;

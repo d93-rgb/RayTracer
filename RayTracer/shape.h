@@ -23,8 +23,6 @@ struct Shape
 	std::shared_ptr<Material> mat;
 
 	virtual float intersect(const Ray &ray, SurfaceInteraction *isect) = 0;
-
-	virtual glm::vec3 get_normal(glm::vec3 p) const = 0;
 };
 
 class Bounds3

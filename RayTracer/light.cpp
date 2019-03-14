@@ -70,9 +70,7 @@ bool PointLight::calc_shadow(glm::vec3 p, const Scene &sc)
 	dist = glm::length(dist_v);
 	ray.ro += ray.rd * shadowEpsilon;
 
-	// HACKS!
 	SurfaceInteraction isect;
-	// TODO: REMOVE ABOVE!!!
 
 	// send shadow rays
 	for (auto &objs : sc.get_scene())
@@ -170,9 +168,7 @@ bool DistantLight::calc_shadow(glm::vec3 p, const Scene &sc)
 	Ray ray = Ray(p, -this->dir);
 	ray.ro += ray.rd * shadowEpsilon;
 
-	// HACKS!
 	SurfaceInteraction isect;
-	// TODO: REMOVE ABOVE!!!
 
 	// send shadow rays
 	for (auto &objs : sc.get_scene())

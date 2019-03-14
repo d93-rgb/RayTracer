@@ -24,7 +24,7 @@ public:
 
 	~Camera();
 	
-	void setCamToWorld(glm::mat4);
+	void setCamToWorld(glm::vec3 eyePosition, glm::vec3 gazePoint, glm::vec3 upVector);
 
 	Ray getPrimaryRay(float u, float v, float d)
 	{

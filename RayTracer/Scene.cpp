@@ -195,10 +195,12 @@ void SingleCubeScene::init()
 {
 	float rot_x = glm::radians(0.f);
 	float deb;
-	glm::vec3 translation = glm::vec3(-2.f, -2.f, 18.f);
+	glm::vec3 translation = glm::vec3(-2.f, -2.f, 15.f);
+	glm::vec3 look_pos = glm::vec3(0.f, 0.f, 0.f);
+	glm::vec3 cam_up = glm::vec3(0.f, 1.f, 0.f);
 	glm::vec4 cube_position;
 	glm::vec3 cube_normal;
-	glm::vec3 p1, p2, p3, tr_normal;
+//	glm::vec3 p1, p2, p3, tr_normal;
 
 	std::string teapot =
 		"C:\\Users\\Dood\\Documents\\ComputerGraphics\\models\\teapot.obj";
@@ -326,7 +328,8 @@ void SingleCubeScene::init()
 		glm::vec3(4.f, 0.f, -4.f),
 		glm::vec3(4.f, 4.f, -4.f),
 		glm::vec3(0.f, 0.f, 1.f),
-		glm::scale(glm::mat4(1.f), glm::vec3(2.f)),
+		glm::translate(glm::scale(glm::mat4(1.f), glm::vec3(2.f)), 
+			glm::vec3(0.f, 0.f, -3.f)),
 		triangle_mat_1)));
 	dynamic_cast<Triangle*>(sc.back().get())->setInterpolate(true);
 	
@@ -373,23 +376,25 @@ void SingleCubeScene::init()
 		glm::vec3(1.f),
 		sphere_mat)));
 
+	// mirror
 	sphere_mat =
 		std::shared_ptr<Material>(new Material());
 	sphere_mat->reflective = glm::vec3(1.f);
 
 	sc.emplace_back(std::unique_ptr<Shape>(new Sphere(
-		glm::vec3(-5.f, -4.f, 4.f),
-		1.5f,
+		glm::vec3(-9.f, 1.f, -10.f),
+		3.f,
 		glm::vec3(1.f),
 		sphere_mat)));
 
+	// glass
 	sphere_mat =
 		std::shared_ptr<Material>(new Material());
 	sphere_mat->transparent = glm::vec3(1.f);
 
 	sc.emplace_back(std::unique_ptr<Shape>(new Sphere(
-		glm::vec3(5.f, -3.f, 4.f),
-		2.f,
+		glm::vec3(2.f, -5.f, 0.f),
+		3.f,
 		glm::vec3(1.f),
 		sphere_mat)));
 
@@ -399,10 +404,9 @@ void SingleCubeScene::init()
 	float cyl_rad = 0.1f;
 	std::shared_ptr<Material> cylinder_mat_1 =
 		std::shared_ptr<Material>(new Material(
-			glm::vec3(0.009f, 0.002f, 0.f),
-			glm::vec3(0.9f, 0.2f, 0.0f),
+			glm::vec3(0.f, 0.02f, 0.f),
+			glm::vec3(0.f, 1.f, 0.0f),
 			glm::vec3(0.0f, 0.0f, 0.0f)));
-	cylinder_mat_1->setShininess(20.f);
 
 	sc.emplace_back(std::unique_ptr<Shape> (new Cylinder(
 		glm::vec3(0.f, 0.f, 0.f),
@@ -447,8 +451,9 @@ void SingleCubeScene::init()
 	// Camera
 	/////////////////////////////////////
 	cam.reset(new Camera());
-	cam->setCamToWorld(glm::rotate(glm::translate(glm::mat4(1.f), translation),
-		rot_x, glm::vec3(0.f, 1.f, 0.f)));
+	/*cam->setCamToWorld(glm::rotate(glm::translate(glm::mat4(1.f), translation),
+		rot_x, glm::vec3(0.f, 1.f, 0.f)));*/
+	cam->setCamToWorld(translation, look_pos, cam_up);
 	cam->update();
 	/////////////////////////////////////
 	// Camera END
