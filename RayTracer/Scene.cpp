@@ -360,20 +360,35 @@ void SingleCubeScene::init()
 		glm::vec3(1.f),
 		sphere_mat)));
 
+	sphere_mat =
+		std::shared_ptr<Material>(new Material(
+			glm::vec3(0.02, 0.0f, 0.02),
+			glm::vec3(0.3, 0.f, 0.4f),
+			glm::vec3(0.4f, 0.4f, 0.4f)));
+	sphere_mat->setShininess(20.f);
+
 	sc.emplace_back(std::unique_ptr<Shape>(new Sphere(
-		glm::vec3(0.f, 0.f, 0.f),
+		glm::vec3(-6.f, 6.f, -3.f),
 		1.f,
 		glm::vec3(1.f),
 		sphere_mat)));
 
+	sphere_mat =
+		std::shared_ptr<Material>(new Material());
+	sphere_mat->reflective = glm::vec3(1.f);
+
 	sc.emplace_back(std::unique_ptr<Shape>(new Sphere(
-		glm::vec3(0.f, 0.f, 0.f),
+		glm::vec3(-5.f, -4.f, 4.f),
 		1.5f,
 		glm::vec3(1.f),
 		sphere_mat)));
 
+	sphere_mat =
+		std::shared_ptr<Material>(new Material());
+	sphere_mat->transparent = glm::vec3(1.f);
+
 	sc.emplace_back(std::unique_ptr<Shape>(new Sphere(
-		glm::vec3(0.f, 0.f, 0.f),
+		glm::vec3(5.f, -3.f, 4.f),
 		2.f,
 		glm::vec3(1.f),
 		sphere_mat)));

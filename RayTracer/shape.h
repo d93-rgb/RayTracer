@@ -338,7 +338,7 @@ public:
 
 	}
 
-	float intersect(const Ray &ray, SurfaceInteraction * isect);
+	float intersect(const Ray &ray, SurfaceInteraction *isect);
 
 	glm::vec3 get_normal(glm::vec3 p) const
 	{

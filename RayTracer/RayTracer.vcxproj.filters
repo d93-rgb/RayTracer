@@ -39,6 +39,9 @@
     <ClCompile Include="quadrics.cpp">
       <Filter>Source Files\rt</Filter>
     </ClCompile>
+    <ClCompile Include="shape.cpp">
+      <Filter>Source Files\rt</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="picture.ppm">
