@@ -192,9 +192,9 @@ void GatheringScene::init()
 
 void SingleCubeScene::init()
 {
-	float rot_x = glm::radians(0.f);
+	float rot_x = glm::radians(-30.f);
 	float deb;
-	glm::vec3 translation = glm::vec3(2.f, -3.f, 20.f);
+	glm::vec3 translation = glm::vec3(-8.f, -3.f, 20.f);
 	glm::vec4 cube_position;
 	glm::vec3 cube_normal;
 	glm::vec3 p1, p2, p3, tr_normal;
@@ -362,24 +362,23 @@ void SingleCubeScene::init()
 	/////////////////////////////////////
 	// Cylinders
 	/////////////////////////////////////
-
 	std::shared_ptr<Material> cylinder_mat_1 =
 		std::shared_ptr<Material>(new Material(
 			glm::vec3(0.009f, 0.002f, 0.f),
 			glm::vec3(0.9f, 0.2f, 0.0f),
-			glm::vec3(0.3f, 0.3f, 0.3f)));
+			glm::vec3(0.2f, 0.2f, 0.1f)));
 
 	sc.emplace_back(std::unique_ptr<Shape> (new Cylinder(
-		glm::vec3(-5.f, 4.f, 4.f),
-		glm::vec3(1.f, 1.f, 1.f),
+		glm::vec3(-5.f, -4.f, 0.f),
+		glm::vec3(1.f, 0.f, 1.f),
 		2.f,
 		3.f,
 		cylinder_mat_1)));
-	dynamic_cast<Cylinder*>(sc.back().get())->worldToObj =
+	/*dynamic_cast<Cylinder*>(sc.back().get())->worldToObj =
 		glm::inverse(
 			glm::translate(
 			glm::rotate(glm::mat4(1.f), glm::radians(60.f), glm::vec3(1.f, 0.f, 0.f)),
-			glm::vec3(5.f, 1.f, 2.f)));
+			glm::vec3(5.f, 1.f, 2.f)));*/
 	//dynamic_cast<Cylinder*>(sc.back().get())->worldToObj = glm::mat4(1.f);
 	
 	/////////////////////////////////////

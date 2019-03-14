@@ -267,6 +267,24 @@ struct Plane : public Shape
 	{
 		return normal;
 	}
+
+	static glm::vec3 getTangentVector(glm::vec3 normal)
+	{
+		if (normal.x != 0.f)
+		{
+			return glm::vec3(-normal.y / normal.x, 1.f, 0.f);
+		}
+		else if (normal.y != 0.f)
+		{
+			return glm::vec3(1.f, -normal.x / normal.y, 0.f);
+		}
+		else if (normal.z != 0.f)
+		{
+			return glm::vec3(0.f, 1.f, -normal.y / normal.z);
+		}
+
+		return glm::vec3(0.f);
+	}
 };
 
 struct Rectangle : public Shape
@@ -806,11 +824,19 @@ struct Cylinder : public Shape
 		float radius,
 		float height,
 		std::shared_ptr<Material> mat) :
-		pos(pos), dir(dir), radius(radius), height(height)
+		pos(pos), dir(glm::normalize(dir)), radius(radius), height(height)
 	{
 		this->mat = mat;
 
-		objToWorld = glm::lookAt(pos, pos + dir, glm::vec3(0.f, 1.f, 0.f));
+		glm::vec3 tangent_v = glm::normalize(Plane::getTangentVector(dir));
+
+		//objToWorld = glm::lookAt(pos, pos + tangent_v, dir);
+		// transform axis of the cylinder to the axis given by dir
+		objToWorld[0] = glm::vec4(glm::cross(dir, tangent_v), 0.f);
+		objToWorld[1] = glm::vec4(dir, 0.f);
+		objToWorld[2] = glm::vec4(tangent_v, 0.f);
+		objToWorld[3] = glm::vec4(pos, 1.f);
+
 		worldToObj = glm::inverse(objToWorld);
 	}
 
@@ -818,7 +844,6 @@ struct Cylinder : public Shape
 	{
 		Ray transformed_ray{ worldToObj * glm::vec4(ray.ro, 1.f),
 			worldToObj * glm::vec4(ray.rd, 0.f) };
-		//Ray transformed_ray{ glm::vec4(ray.ro, 1.f), glm::vec4(ray.rd, 0.f) };
 		glm::vec2 t_ro = glm::vec2(transformed_ray.ro.x, transformed_ray.ro.z);
 		glm::vec2 t_rd = glm::vec2(transformed_ray.rd.x, transformed_ray.rd.z);
 
@@ -873,7 +898,7 @@ struct Cylinder : public Shape
 		{
 			ray.tNearest = tmp2;
 			isect->p = ray.ro + ray.rd * tmp2;
-			isect->normal = get_normal(isect->p);
+			isect->normal = get_normal(transformed_ray.ro + tmp2 * transformed_ray.rd);
 			isect->mat = mat;
 		}
 
@@ -882,6 +907,7 @@ struct Cylinder : public Shape
 
 	glm::vec3 get_normal(glm::vec3 p) const
 	{
+		// TODO: Inside or outside? How to figure out which side the ray hit?
 		return glm::vec3(p.x, 0.f, p.z);
 	}
 };
