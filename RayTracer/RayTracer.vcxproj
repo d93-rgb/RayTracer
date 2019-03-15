@@ -175,6 +175,7 @@ xcopy /y /d "C:\ThirdParty\libraries\assimp\bin\assimp-vc140-mt.dll" "$(OutDir)"
     <ClInclude Include="rt.h" />
     <ClInclude Include="scene.h" />
     <ClInclude Include="texture.h" />
+    <ClInclude Include="texturemapping.h" />
     <ClInclude Include="utility.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -19,7 +19,8 @@ glm::vec3 PointLight::diff_shade(const SurfaceInteraction & isect, const glm::ve
 	
 	if (isect.texture != nullptr)
 	{
-		diffuse = isect.texture->getTexel(isect.uv, glm::vec3(1.f));
+		diffuse = isect.texture->getTexel(
+			isect.texture->getTextureCoordinates(isect.p));
 	}
 	else
 	{
@@ -108,7 +109,8 @@ glm::vec3 PointLight::phong_shade(const Scene &sc,
 	visible = calc_shadow(ob_pos, sc);
 	if (isect.texture != nullptr)
 	{
-		color = 0.00001f * isect.texture->getTexel(isect.uv, glm::vec3(1.f))
+		color = 0.00001f * isect.texture->getTexel(
+		isect.texture->getTextureCoordinates(isect.p))
 			* getEmission(ray.rd);
 	}
 	else

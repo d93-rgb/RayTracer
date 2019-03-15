@@ -194,8 +194,8 @@ void SingleCubeScene::init()
 {
 	float rot_x = glm::radians(0.f);
 	float deb;
-	glm::vec3 translation	= glm::vec3(-5.f, -5.f, 15.f);
-	glm::vec3 look_pos		= glm::vec3(0.f, 0.f, 0.f);
+	glm::vec3 translation	= glm::vec3(5.f, 10.f, 15.f);
+	glm::vec3 look_pos		= glm::vec3(0.f, 9.f, -5.f);
 	glm::vec3 cam_up		= glm::vec3(0.f, 1.f, 0.f);
 	glm::vec4 cube_position;
 	glm::vec3 cube_normal;
@@ -347,7 +347,9 @@ void SingleCubeScene::init()
 		2.f,
 		glm::vec3(1.f),
 		sphere_mat,
-		std::shared_ptr<Texture>(new CheckerBoardTexture()))));
+		std::shared_ptr<Texture>(new CheckerBoardTexture(
+		std::shared_ptr<SphericalMapping>(new SphericalMapping(
+			glm::vec3(-3.f, 0.f, -7.f))))))));
 
 	// red sphere at origin
 	sphere_mat =
@@ -432,6 +434,30 @@ void SingleCubeScene::init()
 			glm::vec3(5.f, 1.f, 2.f)));*/
 	//dynamic_cast<Cylinder*>(sc.back().get())->worldToObj = glm::mat4(1.f);
 	
+	////////////////////////////////
+	// NEW CUBE
+	////////////////////////////////
+	// cube material for new cube class object
+	auto new_cube_mat = std::shared_ptr<Material>(new Material(glm::vec3(0.01f, 0.02f, 0.005f),
+		glm::vec3(0.2f, 0.6f, 0.1f),
+		glm::vec3(0.f, 0.f, 0.f)));
+
+	sc.emplace_back(std::unique_ptr<Shape>(new Cube(glm::vec3(3.f), new_cube_mat,
+		std::shared_ptr<CheckerBoardTexture>( new CheckerBoardTexture(
+			std::shared_ptr<SphericalMapping> (new SphericalMapping(
+			glm::vec3(0.f, 9.f, -5.f))))))));
+	sc.back()->obj_to_world = glm::rotate(glm::scale(glm::translate(
+		glm::mat4(1.f),
+		glm::vec3(0.f, 9.f, -5.f)),
+		glm::vec3(1.25f, 0.5f, 1.f)),
+		glm::radians(110.f),
+		glm::vec3(1.f, 0.f, 0.f));
+
+	sc.back()->world_to_obj = glm::inverse(sc.back()->obj_to_world);
+	////////////////////////////////
+	// END
+	////////////////////////////////
+
 	/////////////////////////////////////
 	// Lights
 	/////////////////////////////////////

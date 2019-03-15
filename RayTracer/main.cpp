@@ -61,6 +61,9 @@ void render()
 	new_width = cropped_width[1] - cropped_width[0];
 	new_height = cropped_height[1] - cropped_height[0];
 
+	LOG(INFO) << "Image width = " << WIDTH << "; Image height = " << HEIGHT;
+	LOG(INFO) << "Cropped width = " << new_width << "; Cropped height =" << new_height;
+
 	std::vector<glm::vec3> col(new_width * new_height, glm::vec3(0.f));
 
 	/***************************************/
@@ -163,7 +166,7 @@ void write_file(const char *file, std::vector<glm::vec3> &col, int width, int he
 
 	ofs.close();
 
-	std::cout << "Writing to file finished." << std::endl;
+	LOG(INFO) << "Writing to " << file << " finished.";
 }
 
 int main(int argc, const char **argv)
