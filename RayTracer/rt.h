@@ -41,6 +41,9 @@
 
 #define PBRT_IS_WINDOWS
 
+// uncomment if you want to shade the color according to the direction of surface normals
+//#define DEBUG_NORMALS
+
 namespace rt
 {
 

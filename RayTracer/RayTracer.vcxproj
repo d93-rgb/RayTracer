@@ -99,6 +99,7 @@
       <ConformanceMode>true</ConformanceMode>
       <OpenMPSupport>true</OpenMPSupport>
       <AdditionalIncludeDirectories>C:\ThirdParty\libraries\glog\include;C:\ThirdParty\libraries\glm-0.9.9.3;C:\ThirdParty\libraries\assimp\include;C:\ThirdParty\libraries\AntTweakBar\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions>/Zc:twoPhase- %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <AdditionalDependencies>glog.lib;assimp-vc140-mt.lib;AntTweakBar64.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -135,6 +136,7 @@ xcopy /y /d "C:\ThirdParty\libraries\assimp\bin\assimp-vc140-mt.dll" "$(OutDir)"
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
+      <AdditionalOptions>/Zc:twoPhase- %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>

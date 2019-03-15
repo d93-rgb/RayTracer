@@ -16,6 +16,9 @@
     <Filter Include="Source Files\rt">
       <UniqueIdentifier>{252c5284-f680-44bf-bad1-b6e1c18d2c16}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\shapes">
+      <UniqueIdentifier>{bf31184d-06b2-4ae8-8d23-0e1c7c8f064e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -85,17 +88,17 @@
     <ClInclude Include="texture.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="quadrics.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="shape.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="utility.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="texturemapping.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="shape.h">
+      <Filter>Header Files\shapes</Filter>
+    </ClInclude>
+    <ClInclude Include="quadrics.h">
+      <Filter>Header Files\shapes</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

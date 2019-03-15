@@ -5,8 +5,6 @@
 #include "shape.h"
 #include "light.h"
 
-//#define DEBUG_NORMALS
-
 namespace rt
 {
 /*

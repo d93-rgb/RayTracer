@@ -48,15 +48,6 @@ struct Sphere : public Quadric
 
 	float intersect(const Ray &ray, SurfaceInteraction *isect);
 
-	glm::vec2 getTextureCoordinates(glm::vec3 pos)
-	{
-		glm::vec3 pos_shift = glm::normalize(pos - origin);
-		//float radius = glm::length(pos_shift);
-		float u = (1 + atan2f(pos_shift.z, pos_shift.x) / (float)M_PI) * 0.5f;
-		float v = acosf(pos_shift.y) / (float)M_PI;
-
-		return glm::vec2(u, v);
-	}
 };
 
 struct Cylinder : public Quadric

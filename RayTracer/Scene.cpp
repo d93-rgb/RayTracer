@@ -194,8 +194,8 @@ void SingleCubeScene::init()
 {
 	float rot_x = glm::radians(0.f);
 	float deb;
-	glm::vec3 translation	= glm::vec3(5.f, 10.f, 15.f);
-	glm::vec3 look_pos		= glm::vec3(0.f, 9.f, -5.f);
+	glm::vec3 translation	= glm::vec3(0.f, -20.f, 15.f);
+	glm::vec3 look_pos		= glm::vec3(0.f, -6.f, 0.f);
 	glm::vec3 cam_up		= glm::vec3(0.f, 1.f, 0.f);
 	glm::vec4 cube_position;
 	glm::vec3 cube_normal;
@@ -394,7 +394,7 @@ void SingleCubeScene::init()
 	sphere_mat->transparent = glm::vec3(1.f);
 
 	sc.emplace_back(std::unique_ptr<Shape>(new Sphere(
-		glm::vec3(5.f, 2.f, 0.f),
+		glm::vec3(7.f, -10.f, 0.f),
 		3.f,
 		glm::vec3(1.f),
 		sphere_mat)));
@@ -437,21 +437,38 @@ void SingleCubeScene::init()
 	////////////////////////////////
 	// NEW CUBE
 	////////////////////////////////
+	cube_position = floor->getRectPos(-3.f, -4.f, 'y') + 
+		1.5f * glm::vec4(cube_normal, 0.f);
 	// cube material for new cube class object
 	auto new_cube_mat = std::shared_ptr<Material>(new Material(glm::vec3(0.01f, 0.02f, 0.005f),
 		glm::vec3(0.2f, 0.6f, 0.1f),
-		glm::vec3(0.f, 0.f, 0.f)));
+		glm::vec3(0.2f, 0.2f, 0.2f)));
+	new_cube_mat->setShininess(20.f);
+	auto cube_tex_mapping = std::shared_ptr<SphericalMapping>(new SphericalMapping(
+		cube_position));
+	auto cube_texture = std::shared_ptr<CheckerBoardTexture>(new CheckerBoardTexture(
+		cube_tex_mapping));
 
-	sc.emplace_back(std::unique_ptr<Shape>(new Cube(glm::vec3(3.f), new_cube_mat,
-		std::shared_ptr<CheckerBoardTexture>( new CheckerBoardTexture(
-			std::shared_ptr<SphericalMapping> (new SphericalMapping(
-			glm::vec3(0.f, 9.f, -5.f))))))));
-	sc.back()->obj_to_world = glm::rotate(glm::scale(glm::translate(
+	sc.emplace_back(std::unique_ptr<Shape>(new Cube(
+		glm::vec3(3.f), 
+		new_cube_mat,
+		cube_texture)));
+
+	/*sc.back()->obj_to_world = glm::rotate(glm::scale(glm::translate(
 		glm::mat4(1.f),
-		glm::vec3(0.f, 9.f, -5.f)),
+		glm::vec3(cube_position) + glm::vec3(3.f * cube_normal)),
 		glm::vec3(1.25f, 0.5f, 1.f)),
-		glm::radians(110.f),
-		glm::vec3(1.f, 0.f, 0.f));
+		glm::radians(0.f),
+		glm::vec3(1.f, 0.f, 0.f));*/
+
+	glm::vec3 tangent_v = glm::normalize(Plane::getTangentVector(cube_normal));
+
+	//objToWorld = glm::lookAt(pos, pos + tangent_v, dir);
+	// transform axis of the cylinder to the axis given by dir
+	sc.back()->obj_to_world[0] = glm::vec4(glm::cross(cube_normal, tangent_v), 0.f);
+	sc.back()->obj_to_world[1] = glm::vec4(cube_normal, 0.f);
+	sc.back()->obj_to_world[2] = glm::vec4(tangent_v, 0.f);
+	sc.back()->obj_to_world[3] = cube_position;
 
 	sc.back()->world_to_obj = glm::inverse(sc.back()->obj_to_world);
 	////////////////////////////////

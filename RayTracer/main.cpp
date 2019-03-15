@@ -11,7 +11,7 @@
 using namespace rt;
 
 constexpr auto SPP = 1;
-constexpr auto GRID_DIM = 1;
+constexpr auto GRID_DIM = 4;
 
 constexpr auto WIDTH = 533;
 constexpr auto HEIGHT = 400;
@@ -104,12 +104,12 @@ void render()
 						{
 							SurfaceInteraction isect;
 
-							// TODO: Consider changing random values to the range [0,1)
-							float u_rnd = 2 * float(dist(eng)) - 1;
-							float v_rnd = 2 * float(dist(eng)) - 1;
+							// stratified sampling
+							float u_rnd = float(dist(eng));
+							float v_rnd = float(dist(eng));
 							// map pixel coordinates to[-1, 1]x[-1, 1]
-							float u = (2.f * (x + (m + 0.5f + u_rnd) / 2.f) - WIDTH) / HEIGHT * fov_tan;
-							float v = (-2.f * (y + (n + 0.5f + v_rnd) / 2.f) + HEIGHT) / HEIGHT * fov_tan;
+							float u = (2.f * (x + (m + u_rnd) / GRID_DIM) - WIDTH) / HEIGHT * fov_tan;
+							float v = (-2.f * (y + (n + v_rnd) / GRID_DIM) + HEIGHT) / HEIGHT * fov_tan;
 
 							// this can not be split up and needs to be in one line, otherwise
 							// omp will not take the average
