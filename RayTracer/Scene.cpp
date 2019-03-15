@@ -47,15 +47,15 @@ void GatheringScene::init()
 
 
 	std::vector<std::shared_ptr<Material>> mats = {
-		std::shared_ptr<Material>(new Material(glm::vec3(0.02, 0, 0), glm::vec3(0.7, 0, 0), glm::vec3(1.0, 0, 0))),
-		std::shared_ptr<Material>(new Material(glm::vec3(0, 0.02, 0), glm::vec3(0, 0.7, 0), glm::vec3(0, 1.0, 0))),
-		std::shared_ptr<Material>(new Material(glm::vec3(0.02, 0, 0.02), glm::vec3(0.7, 0, 0.7), glm::vec3(0.7, 0, 0.7))),
-		std::shared_ptr<Material>(new Material(glm::vec3(0.013, 0.013, 0.035), glm::vec3(0.3, 0.3, 0.8), glm::vec3(0.7, 0.7, 0.7))),
-		std::shared_ptr<Material>(new Material(glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.0, 0.0, 0.0), glm::vec3(0, 0, 0))),
-		std::shared_ptr<Material>(new Material(glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.0, 0.0, 0.0), glm::vec3(0, 0, 0))),
-		std::shared_ptr<Material>(new Material(glm::vec3(0.02, 0.02, 0.f), glm::vec3(0.8, 0.8, 0.0), glm::vec3(0.5, 0.5, 0))),
-		std::shared_ptr<Material>(new Material(glm::vec3(0.0, 0.0f, 0.0f), glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0f, 0.0f, 0.0f))),
-		std::shared_ptr<Material>(new Material(glm::vec3(0, 0.f, 0.f), glm::vec3(1.0, 1.0, 1.0), glm::vec3(0.f, 0.f, 0.f)))
+		std::make_shared<Material>(glm::vec3(0.02, 0, 0), glm::vec3(0.7, 0, 0), glm::vec3(1.0, 0, 0)),
+		std::make_shared<Material>(glm::vec3(0, 0.02, 0), glm::vec3(0, 0.7, 0), glm::vec3(0, 1.0, 0)),
+		std::make_shared<Material>(glm::vec3(0.02, 0, 0.02), glm::vec3(0.7, 0, 0.7), glm::vec3(0.7, 0, 0.7)),
+		std::make_shared<Material>(glm::vec3(0.013, 0.013, 0.035), glm::vec3(0.3, 0.3, 0.8), glm::vec3(0.7, 0.7, 0.7)),
+		std::make_shared<Material>(glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.0, 0.0, 0.0), glm::vec3(0, 0, 0)),
+		std::make_shared<Material>(glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.0, 0.0, 0.0), glm::vec3(0, 0, 0)),
+		std::make_shared<Material>(glm::vec3(0.02, 0.02, 0.f), glm::vec3(0.8, 0.8, 0.0), glm::vec3(0.5, 0.5, 0)),
+		std::make_shared<Material>(glm::vec3(0.0, 0.0f, 0.0f), glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0f, 0.0f, 0.0f)),
+		std::make_shared<Material>(glm::vec3(0, 0.f, 0.f), glm::vec3(1.0, 1.0, 1.0), glm::vec3(0.f, 0.f, 0.f))
 	};
 
 	mats[2]->setShininess(10.f);
@@ -69,25 +69,25 @@ void GatheringScene::init()
 	mats[7]->setRefractiveIdx(1.5f);
 
 	// material for walls
-	std::shared_ptr<Material> wall_bot =
-		std::shared_ptr<Material>(new Material(glm::vec3(0.02, 0.02, 0.02), glm::vec3(0.4, 0.4, 0.4), glm::vec3(0.0, 0.0, 0.0)));
-	std::shared_ptr<Material> wall_front =
-		std::shared_ptr<Material>(new Material(glm::vec3(0.02, 0.02, 0.02), glm::vec3(0.2, 0.2, 0.2), glm::vec3(0.1, 0.1, 0.1)));
-	std::shared_ptr<Material> wall_right =
-		std::shared_ptr<Material>(new Material(glm::vec3(0.02, 0.024, 0.016), glm::vec3(0.5, 0.6, 0.4), glm::vec3(0.1, 0.1, 0.1)));
-	std::shared_ptr<Material> wall_left =
-		std::shared_ptr<Material>(new Material(glm::vec3(0.02, 0.02, 0.02), glm::vec3(0.2, 0.4, 0.6), glm::vec3(0.1, 0.1, 0.1)));
+	auto wall_bot =
+		std::make_shared<Material>(glm::vec3(0.02, 0.02, 0.02), glm::vec3(0.4, 0.4, 0.4), glm::vec3(0.0, 0.0, 0.0));
+	auto wall_front =
+		std::make_shared<Material>(glm::vec3(0.02, 0.02, 0.02), glm::vec3(0.2, 0.2, 0.2), glm::vec3(0.1, 0.1, 0.1));
+	auto wall_right =
+		std::make_shared<Material>(glm::vec3(0.02, 0.024, 0.016), glm::vec3(0.5, 0.6, 0.4), glm::vec3(0.1, 0.1, 0.1));
+	auto wall_left =
+		std::make_shared<Material>(glm::vec3(0.02, 0.02, 0.02), glm::vec3(0.2, 0.4, 0.6), glm::vec3(0.1, 0.1, 0.1));
 
 	wall_bot->reflective = glm::vec3(0.2f);
 
 	for (size_t i = 0; i < sph_origins.size(); ++i)
 	{
-		sc.emplace_back(std::unique_ptr<Shape>(new Sphere(sph_origins[i], radius[i], glm::vec3(0.f), mats[i])));
+		sc.emplace_back(std::make_unique<Sphere>(sph_origins[i], radius[i], glm::vec3(0.f), mats[i]));
 	}
 
 	//bottom
-	sc.emplace_back(std::unique_ptr<Shape>(new Rectangle(glm::vec3(-4, 2, -18),
-		glm::vec3(150, 0, 0), glm::vec3(0, 150, -150), wall_bot)));
+	sc.emplace_back(std::make_unique<Rectangle>(glm::vec3(-4, 2, -18),
+		glm::vec3(150, 0, 0), glm::vec3(0, 150, -150), wall_bot));
 
 	// get pointer to the floor
 	Rectangle *floor = dynamic_cast<Rectangle*>(sc.back().get());
@@ -103,12 +103,12 @@ void GatheringScene::init()
 	//	glm::vec3(0, 50, 0), glm::vec3(0, 0, 60), wall_left)));
 
 	// cube material
-	std::shared_ptr<Material> cube_mat_1 =
+	auto cube_mat_1 =
 		std::shared_ptr<Material>(new Material(
 			glm::vec3(0.02, 0.0, 0.02),
 			glm::vec3(0.1, 0.0, 0.7f),
 			glm::vec3(0.6, 0.0, 0.6)));
-	std::shared_ptr<Material> cube_mat_2 =
+	auto cube_mat_2 =
 		std::shared_ptr<Material>(new Material(
 			glm::vec3(0.02, 0.02, 0.0),
 			glm::vec3(0.9, 0.2, 0.0f),
@@ -194,16 +194,16 @@ void SingleCubeScene::init()
 {
 	float rot_x = glm::radians(0.f);
 	float deb;
-	glm::vec3 translation	= glm::vec3(0.f, -20.f, 15.f);
-	glm::vec3 look_pos		= glm::vec3(0.f, -6.f, 0.f);
-	glm::vec3 cam_up		= glm::vec3(0.f, 1.f, 0.f);
+	glm::vec3 translation = glm::vec3(-3.f, 10.f, 15.f);
+	glm::vec3 look_pos = glm::vec3(0.f, 0.f, 0.f);
+	glm::vec3 cam_up = glm::vec3(0.f, 1.f, 0.f);
 	glm::vec4 cube_position;
 	glm::vec3 cube_normal;
-//	glm::vec3 p1, p2, p3, tr_normal;
+	//	glm::vec3 p1, p2, p3, tr_normal;
 
 	std::string teapot =
 		"C:\\Users\\Dood\\Documents\\ComputerGraphics\\models\\teapot.obj";
-	
+
 	std::vector<glm::vec3> vertices;
 	std::vector<unsigned int> indices;
 
@@ -214,7 +214,7 @@ void SingleCubeScene::init()
 			glm::vec3(0.9f)),
 		glm::radians(30.f),
 		glm::vec3(0.f, 1.f, 0.f));
-	
+
 	Rectangle *floor;
 	std::unique_ptr<Shape> cube_2[6];
 
@@ -224,7 +224,7 @@ void SingleCubeScene::init()
 #ifdef LOAD_TEAPOT
 	std::unique_ptr<TriangleMesh> t_pot{ new TriangleMesh() };
 	glm::vec3 b_min = glm::vec3(INFINITY), b_max = glm::vec3(-INFINITY);
-	
+
 	extractMesh(teapot, vertices, indices);
 
 	std::shared_ptr<Material> teapot_mat =
@@ -261,7 +261,7 @@ void SingleCubeScene::init()
 	// BOUNDARY FOR THE TEAPOT
 	////////////////////////////////
 	t_pot->boundary.reset(new Bounds3(
-		teapot_to_world * glm::vec4(b_min, 1.f), 
+		teapot_to_world * glm::vec4(b_min, 1.f),
 		teapot_to_world * glm::vec4(b_max, 1.f)));
 
 	// put triangle mesh into scene
@@ -272,16 +272,16 @@ void SingleCubeScene::init()
 #endif
 
 	// material for walls
-	std::shared_ptr<Material> wall_bot =
-		std::shared_ptr<Material>(
-			new Material(glm::vec3(0.02, 0.02, 0.02),
-				glm::vec3(0.4, 0.4, 0.4),
-				glm::vec3(0.0, 0.0, 0.0)));
+	auto wall_bot =
+		std::make_shared<Material>(
+			glm::vec3(0.02, 0.02, 0.02),
+			glm::vec3(0.4, 0.4, 0.4),
+			glm::vec3(0.0, 0.0, 0.0));
 	wall_bot->reflective = glm::vec3(0.2f);
 
 	//bottom
-	sc.emplace_back(std::unique_ptr<Shape>(new Rectangle(glm::vec3(-4, 2, -18),
-		glm::vec3(150, 0, 0), glm::vec3(0, 150, -150), wall_bot)));
+	sc.emplace_back(std::make_unique<Rectangle>(glm::vec3(-4, 2, -18),
+		glm::vec3(150, 0, 0), glm::vec3(0, 150, -150), wall_bot));
 
 	// get pointer to the floor
 	floor = dynamic_cast<Rectangle*>(sc.back().get());
@@ -291,16 +291,16 @@ void SingleCubeScene::init()
 
 	deb = glm::dot(cube_normal, glm::vec3(-2.f, 4.f, -17.f) - floor->center);
 
-	std::shared_ptr<Material> triangle_mat_1 =
-		std::shared_ptr<Material>(new Material(
+	auto triangle_mat_1 =
+		std::make_shared<Material>(
 			glm::vec3(0.f, 0.f, 0.f),
 			glm::vec3(0.f, 0.f, 0.f),
-			glm::vec3(0.f, 0.f, 0.f)));
-	std::shared_ptr<Material> cube_mat_2 =
-		std::shared_ptr<Material>(new Material(
+			glm::vec3(0.f, 0.f, 0.f));
+	auto cube_mat_2 =
+		std::make_shared<Material>(
 			glm::vec3(0.02, 0.02, 0.0),
 			glm::vec3(0.9, 0.2, 0.0f),
-			glm::vec3(0.6, 0.0, 0.6)));
+			glm::vec3(0.6, 0.0, 0.6));
 	cube_mat_2->setShininess(10.f);
 
 	create_cube(cube_position + glm::vec4((3.f * cube_normal), 1.f),
@@ -327,132 +327,143 @@ void SingleCubeScene::init()
 		glm::vec3(4.f, 0.f, -4.f),
 		glm::vec3(4.f, 4.f, -4.f),
 		glm::vec3(0.f, 0.f, 1.f),
-		glm::translate(glm::scale(glm::mat4(1.f), glm::vec3(2.f)), 
+		glm::translate(glm::scale(glm::mat4(1.f), glm::vec3(2.f)),
 			glm::vec3(0.f, 0.f, -3.f)),
 		triangle_mat_1)));
 	dynamic_cast<Triangle*>(sc.back().get())->setInterpolate(true);
-	
+
 	/////////////////////////////////////
 	// Sphere
 	/////////////////////////////////////
-	std::shared_ptr<Material> sphere_mat =
-		std::shared_ptr<Material>(new Material(
+	auto sphere_mat =
+		std::make_shared<Material>(
 			glm::vec3(0.02, 0.02, 0.02),
 			glm::vec3(0.3, 0.3, 0.3f),
-			glm::vec3(0.4f, 0.4f, 0.4f)));
+			glm::vec3(0.4f, 0.4f, 0.4f));
 	sphere_mat->setShininess(10.f);
 
-	sc.emplace_back(std::unique_ptr<Shape>(new Sphere(
+	auto sphere_texture = std::make_shared<CheckerBoardTexture>(
+		std::make_shared<SphericalMapping>(glm::vec3(-3.f, 0.f, -7.f)));
+	sphere_mat->setTexture(sphere_texture);
+
+	sc.emplace_back(std::make_unique<Sphere>(
 		glm::vec3(-3.f, 0.f, -7.f),
 		2.f,
 		glm::vec3(1.f),
-		sphere_mat,
-		std::shared_ptr<Texture>(new CheckerBoardTexture(
-		std::shared_ptr<SphericalMapping>(new SphericalMapping(
-			glm::vec3(-3.f, 0.f, -7.f))))))));
-
+		sphere_mat));
 	// red sphere at origin
 	sphere_mat =
-		std::shared_ptr<Material>(new Material(
+		std::make_shared<Material>(
 			glm::vec3(1.f, 0.f, 0.f),
 			glm::vec3(0.f, 0.f, 0.f),
-			glm::vec3(0.f, 0.f, 0.f)));
+			glm::vec3(0.f, 0.f, 0.f));
 
-	sc.emplace_back(std::unique_ptr<Shape>(new Sphere(
+	sc.emplace_back(std::make_unique<Sphere>(
 		glm::vec3(0.f, 0.f, 0.f),
 		0.1f,
 		glm::vec3(1.f),
-		sphere_mat)));
+		sphere_mat));
 
 	sphere_mat =
-		std::shared_ptr<Material>(new Material(
+		std::make_shared<Material>(
 			glm::vec3(0.02, 0.0f, 0.02),
 			glm::vec3(0.3, 0.f, 0.4f),
-			glm::vec3(0.4f, 0.4f, 0.4f)));
+			glm::vec3(0.4f, 0.4f, 0.4f));
 	sphere_mat->setShininess(20.f);
 
-	sc.emplace_back(std::unique_ptr<Shape>(new Sphere(
+	sc.emplace_back(std::make_unique<Sphere>(
 		glm::vec3(-6.f, 6.f, -3.f),
 		1.f,
 		glm::vec3(1.f),
-		sphere_mat)));
+		sphere_mat));
 
 	// mirror
 	sphere_mat =
-		std::shared_ptr<Material>(new Material());
+		std::make_shared<Material>();
 	sphere_mat->reflective = glm::vec3(1.f);
 
-	sc.emplace_back(std::unique_ptr<Shape>(new Sphere(
+	sc.emplace_back(std::make_unique<Sphere>(
 		glm::vec3(-9.f, 1.f, -10.f),
 		3.f,
 		glm::vec3(1.f),
-		sphere_mat)));
+		sphere_mat));
 
 	// glass
 	sphere_mat =
-		std::shared_ptr<Material>(new Material());
+		std::make_shared<Material>();
 	sphere_mat->transparent = glm::vec3(1.f);
 
-	sc.emplace_back(std::unique_ptr<Shape>(new Sphere(
-		glm::vec3(7.f, -10.f, 0.f),
+	sc.emplace_back(std::make_unique<Sphere>(
+		glm::vec3(10.f, -10.f, 0.f),
 		3.f,
 		glm::vec3(1.f),
-		sphere_mat)));
+		sphere_mat));
 
 	/////////////////////////////////////
 	// Cylinders
 	/////////////////////////////////////
 	float cyl_rad = 0.1f;
-	std::shared_ptr<Material> cylinder_mat_1 =
-		std::shared_ptr<Material>(new Material(
-			glm::vec3(0.f, 0.02f, 0.f),
-			glm::vec3(0.f, 1.f, 0.0f),
-			glm::vec3(0.0f, 0.0f, 0.0f)));
+	auto cylinder_mat_1 =
+		std::make_shared<Material>(
+			glm::vec3(1.f, 0.f, 0.f),
+			glm::vec3(1.f, 0.f, 0.0f),
+			glm::vec3(0.0f, 0.0f, 0.0f));
 
-	sc.emplace_back(std::unique_ptr<Shape> (new Cylinder(
+	sc.emplace_back(std::make_unique<Cylinder>(
 		glm::vec3(0.f, 0.f, 0.f),
 		glm::vec3(1.f, 0.f, 0.f),
 		cyl_rad,
 		8.f,
-		cylinder_mat_1)));
-	sc.emplace_back(std::unique_ptr<Shape>(new Cylinder(
+		cylinder_mat_1));
+
+	cylinder_mat_1 =
+		std::make_shared<Material>(
+			glm::vec3(0.f, 1.0f, 0.f),
+			glm::vec3(0.f, 1.f, 0.0f),
+			glm::vec3(0.0f, 0.0f, 0.0f));
+	sc.emplace_back(std::make_unique<Cylinder>(
 		glm::vec3(0.f, 0.f, 0.f),
 		glm::vec3(0.f, 1.f, 0.f),
 		cyl_rad,
 		8.f,
-		cylinder_mat_1)));
-	sc.emplace_back(std::unique_ptr<Shape>(new Cylinder(
+		cylinder_mat_1));
+
+	cylinder_mat_1 =
+		std::make_shared<Material>(
+			glm::vec3(0.f, 0.0f, 1.f),
+			glm::vec3(0.f, 0.f, 1.f),
+			glm::vec3(0.0f, 0.0f, 0.0f));
+	sc.emplace_back(std::make_unique<Cylinder>(
 		glm::vec3(0.f, 0.f, 0.f),
 		glm::vec3(0.f, 0.f, 1.f),
 		cyl_rad,
 		8.f,
-		cylinder_mat_1)));
+		cylinder_mat_1));
 	/*dynamic_cast<Cylinder*>(sc.back().get())->worldToObj =
 		glm::inverse(
 			glm::translate(
 			glm::rotate(glm::mat4(1.f), glm::radians(60.f), glm::vec3(1.f, 0.f, 0.f)),
 			glm::vec3(5.f, 1.f, 2.f)));*/
-	//dynamic_cast<Cylinder*>(sc.back().get())->worldToObj = glm::mat4(1.f);
-	
-	////////////////////////////////
-	// NEW CUBE
-	////////////////////////////////
-	cube_position = floor->getRectPos(-3.f, -4.f, 'y') + 
+			//dynamic_cast<Cylinder*>(sc.back().get())->worldToObj = glm::mat4(1.f);
+
+			////////////////////////////////
+			// NEW CUBE
+			////////////////////////////////
+	cube_position = floor->getRectPos(1.f, -4.f, 'y') +
 		1.5f * glm::vec4(cube_normal, 0.f);
 	// cube material for new cube class object
-	auto new_cube_mat = std::shared_ptr<Material>(new Material(glm::vec3(0.01f, 0.02f, 0.005f),
+	auto new_cube_mat = std::shared_ptr<Material>(new Material(
+		glm::vec3(0.0f, 0.0f, 0.0f),
 		glm::vec3(0.2f, 0.6f, 0.1f),
-		glm::vec3(0.2f, 0.2f, 0.2f)));
-	new_cube_mat->setShininess(20.f);
-	auto cube_tex_mapping = std::shared_ptr<SphericalMapping>(new SphericalMapping(
-		cube_position));
-	auto cube_texture = std::shared_ptr<CheckerBoardTexture>(new CheckerBoardTexture(
-		cube_tex_mapping));
+		glm::vec3(0.4f, 0.4f, 0.4f)));
+	new_cube_mat->setShininess(40.f);
+	auto cube_tex_mapping = std::make_shared<SphericalMapping>(cube_position);
+	auto cube_texture = std::make_shared<CheckerBoardTexture>(cube_tex_mapping);
+	new_cube_mat->setTexture(cube_texture);
 
-	sc.emplace_back(std::unique_ptr<Shape>(new Cube(
-		glm::vec3(3.f), 
-		new_cube_mat,
-		cube_texture)));
+	sc.emplace_back(std::make_unique<Cube>(
+		glm::vec3(3.f),
+		new_cube_mat));
 
 	/*sc.back()->obj_to_world = glm::rotate(glm::scale(glm::translate(
 		glm::mat4(1.f),
@@ -470,7 +481,12 @@ void SingleCubeScene::init()
 	sc.back()->obj_to_world[2] = glm::vec4(tangent_v, 0.f);
 	sc.back()->obj_to_world[3] = cube_position;
 
-	sc.back()->world_to_obj = glm::inverse(sc.back()->obj_to_world);
+	sc.back()->world_to_obj = glm::inverse(
+		glm::scale(glm::mat4(1.f), glm::vec3(2.f, 1.1f, 2.f)) *
+		glm::scale(
+			sc.back()->obj_to_world,
+			glm::vec3(1.f, 1.f, 1.f)));
+	//sc.back()->world_to_obj = glm::inverse(sc.back()->obj_to_world);
 	////////////////////////////////
 	// END
 	////////////////////////////////
@@ -478,13 +494,14 @@ void SingleCubeScene::init()
 	/////////////////////////////////////
 	// Lights
 	/////////////////////////////////////
-	lights.emplace_back(std::unique_ptr<Light>(new PointLight(glm::vec3(-2.f, 20.f, -5.f),
+	lights.emplace_back(std::make_unique<PointLight>(glm::vec3(-2.f, 20.f, -5.f),
 		glm::vec3(-2, -4, -2),
-		glm::vec3(80.f))));
-	/*lights.emplace_back(std::unique_ptr<Light>(new PointLight(glm::vec3(0.f, 0.f, 10.f),
+		glm::vec3(110.f)));
+	lights.emplace_back(std::make_unique<PointLight>(
+		cube_position + glm::vec4(0.f, 3.f, -4.f, 0.f),
 		glm::vec3(0.f, 0.f, -1.f),
-		glm::vec3(30.f))));
-*/
+		glm::vec3(30.f)));
+
 	/////////////////////////////////////
 	// Lights END
 	/////////////////////////////////////

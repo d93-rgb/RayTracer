@@ -243,16 +243,12 @@ class Cube : public Shape
 	glm::vec3 v1[3], v2[3];
 	float v1_dots[3], v2_dots[3];
 
-	std::shared_ptr<Texture> tex;
-
 public:
-	Cube(glm::vec3 side_length, std::shared_ptr<Material> mat, 
-		std::shared_ptr<Texture> tex = nullptr) :
+	Cube(glm::vec3 side_length, std::shared_ptr<Material> mat) :
 		boundaries(side_length / 2.f)
 	{
 		assert(fmin(fmin(side_length.x, side_length.y), side_length.z) > 0);
 		this->mat = mat;
-		this->tex = tex;
 
 		// sides
 		v1[0] = glm::vec3(0.f, 0.f, side_length[2]);
@@ -303,7 +299,7 @@ public:
 		glm::vec3 n = a_p.x > a_p.y ?
 			(a_p.x > a_p.z ? glm::vec3(sgn(p.x), 0.f, 0.f) : glm::vec3(0.f, 0.f, sgn(p.z))) :
 			(a_p.y > a_p.z ? glm::vec3(0.f, sgn(p.y), 0.f) : glm::vec3(0.f, 0.f, sgn(p.z)));
-		return glm::transpose(world_to_obj) * glm::vec4(n, 0.f);
+		return glm::normalize(glm::transpose(world_to_obj) * glm::vec4(n, 0.f));
 	}
 };
 

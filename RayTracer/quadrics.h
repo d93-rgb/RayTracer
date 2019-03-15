@@ -16,8 +16,6 @@ struct Sphere : public Quadric
 	float r;
 	glm::vec3 origin;
 	glm::vec3 color;
-	std::shared_ptr<Texture> tex;
-
 
 	Sphere(glm::vec3 origin, float radius, glm::vec3 color, std::shared_ptr<Material> m)
 	{
@@ -25,20 +23,6 @@ struct Sphere : public Quadric
 		this->r = radius;
 		this->color = color;
 		this->mat = m;
-		tex = nullptr;
-	}
-
-	Sphere(glm::vec3 origin,
-		float radius,
-		glm::vec3 color,
-		std::shared_ptr<Material> m,
-		std::shared_ptr<Texture> texture)
-	{
-		this->origin = origin;
-		this->r = radius;
-		this->color = color;
-		this->mat = m;
-		this->tex = texture;
 	}
 
 	glm::vec3 get_normal(glm::vec3 p) const
@@ -85,9 +69,9 @@ struct Cylinder : public Quadric
 	glm::vec3 get_normal(glm::vec3 p, int hit_cnt) const
 	{
 		if (hit_cnt == 2)
-			return tr_worldToObj * glm::vec4(p.x, 0.f, p.z, 0.f);
+			return glm::normalize(tr_worldToObj * glm::vec4(p.x, 0.f, p.z, 0.f));
 		else
-			return -(tr_worldToObj * glm::vec4(p.x, 0.f, p.z, 0.f));
+			return -glm::normalize((tr_worldToObj * glm::vec4(p.x, 0.f, p.z, 0.f)));
 	}
 };
 

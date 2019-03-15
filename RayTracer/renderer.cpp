@@ -42,7 +42,7 @@ bool refract(glm::vec3 V, glm::vec3 N, float refr_idx, glm::vec3 *refracted)
 	// check for total internal reflection
 	if (radicand < 0.f)
 	{
-		//*refracted = glm::vec3(0.f);
+		*refracted = glm::vec3(0.f);
 		return false;
 	}
 

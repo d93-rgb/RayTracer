@@ -39,7 +39,6 @@ float Sphere::intersect(const Ray &ray, SurfaceInteraction *isect)
 			isect->p = ray.ro + ray.rd * tmp;
 			isect->normal = get_normal(isect->p);
 			isect->mat = mat;
-			isect->texture = tex;
 		}
 	}
 	return tmp;

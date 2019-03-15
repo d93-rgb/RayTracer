@@ -11,7 +11,7 @@
 using namespace rt;
 
 constexpr auto SPP = 1;
-constexpr auto GRID_DIM = 4;
+constexpr auto GRID_DIM = 1;
 
 constexpr auto WIDTH = 533;
 constexpr auto HEIGHT = 400;

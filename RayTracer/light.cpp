@@ -16,16 +16,8 @@ glm::vec3 PointLight::diff_shade(const SurfaceInteraction & isect, const glm::ve
 	glm::vec3 dir = ob_pos - this->p;
 	glm::vec3 diffuse;
 	//float sq_dist = glm::dot(dir, dir); // attenuation
-	
-	if (isect.texture != nullptr)
-	{
-		diffuse = isect.texture->getTexel(
-			isect.texture->getTextureCoordinates(isect.p));
-	}
-	else
-	{
-		diffuse = isect.mat->diffuse;
-	}
+
+	diffuse = isect.mat->getDiffuse(isect.p);
 
 	glm::vec3 col = getEmission(dir) * diffuse *
 		glm::max(0.f,
@@ -107,16 +99,8 @@ glm::vec3 PointLight::phong_shade(const Scene &sc,
 	//if (sqd_dist > 1.f) sqd_dist *= 0.1f;
 
 	visible = calc_shadow(ob_pos, sc);
-	if (isect.texture != nullptr)
-	{
-		color = 0.00001f * isect.texture->getTexel(
-		isect.texture->getTextureCoordinates(isect.p))
-			* getEmission(ray.rd);
-	}
-	else
-	{
-		color = 0.01f * isect.mat->ambient * getEmission(ray.rd);
-	}
+
+	color = 0.01f * isect.mat->getAmbient(isect.p) * getEmission(ray.rd);
 
 	if (visible) {
 		color += (diff_shade(isect, ob_pos) +

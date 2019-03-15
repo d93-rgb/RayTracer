@@ -171,7 +171,6 @@ float Cube::intersect(const Ray &ray, SurfaceInteraction *isect)
 			isect->p = ray.ro + ray.rd * isec_t;
 			isect->normal = get_normal(isect->p);
 			isect->mat = mat;
-			isect->texture = tex;
 		}
 	}
 
@@ -229,7 +228,7 @@ float Cube::intersect(const Ray &ray)
 	}
 	else
 	{
-		t[0].z = (t[0].z == 0 ? 0.f : INFINITY);
+		t[0].z = (t[0].z == 0 ? 0.f : INFINITY);	
 		t[1].z = (t[1].z == 0 ? 0.f : INFINITY);
 	}
 
