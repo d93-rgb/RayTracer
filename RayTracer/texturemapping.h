@@ -1,6 +1,5 @@
 #pragma once
 #include "rt.h"
-#include "texture.h"
 
 namespace rt
 {
@@ -26,6 +25,17 @@ public:
 		float v = acosf(pos_shift.y) / (float)M_PI;
 
 		return glm::vec2(u, v);
+	}
+};
+
+class PlanarMapping : public TextureMapping
+{
+public:
+	PlanarMapping() = default;
+
+	glm::vec2 getTextureCoordinates(glm::vec3 pos)
+	{
+
 	}
 };
 

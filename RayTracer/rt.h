@@ -73,6 +73,7 @@ class Bounds3;
 
 class Texture;
 class CheckerBoardTexture;
+class RGB_TriangleTexture;
 
 class SingleCubeScene;
 class GatheringScene;

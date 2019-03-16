@@ -45,6 +45,12 @@
     <ClCompile Include="shape.cpp">
       <Filter>Source Files\rt</Filter>
     </ClCompile>
+    <ClCompile Include="texture.cpp">
+      <Filter>Source Files\rt</Filter>
+    </ClCompile>
+    <ClCompile Include="material.cpp">
+      <Filter>Source Files\rt</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="picture.ppm">

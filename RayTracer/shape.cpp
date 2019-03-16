@@ -97,6 +97,112 @@ float Cube::intersect(const Ray &ray, SurfaceInteraction *isect)
 	t[0] = (boundaries - transformed_ray.ro);
 	t[1] = -(boundaries + transformed_ray.ro);
 
+	// not regarding IEEE floating point arithmetics here, see Bounds3 for a better variant
+	if (transformed_ray.rd.x != 0)
+	{
+		t[0].x /= transformed_ray.rd.x;
+		t[1].x /= transformed_ray.rd.x;
+	}
+	else
+	{
+		t[0].x = (t[0].x == 0 ? 0.f : INFINITY);
+		t[1].x = (t[1].x == 0 ? 0.f : INFINITY);
+	}
+
+	if (transformed_ray.rd.y != 0)
+	{
+		t[0].y /= transformed_ray.rd.y;
+		t[1].y /= transformed_ray.rd.y;
+	}
+	else
+	{
+		t[0].y = (t[0].y == 0 ? 0.f : INFINITY);
+		t[1].y = (t[1].y == 0 ? 0.f : INFINITY);
+	}
+
+	if (transformed_ray.rd.z != 0)
+	{
+		t[0].z /= transformed_ray.rd.z;
+		t[1].z /= transformed_ray.rd.z;
+	}
+	else
+	{
+		t[0].z = (t[0].z == 0 ? 0.f : INFINITY);
+		t[1].z = (t[1].z == 0 ? 0.f : INFINITY);
+	}
+
+	// check if inside boundaries
+	for (int i = 0; i < 6; ++i)
+	{
+		tmp = i % 3;
+		// filter out negative parameters
+		if (t[i >= 3][tmp] >= 0.f)
+		{
+			isec_t = t[i >= 3][tmp];
+			isec_p = transformed_ray.ro + isec_t * transformed_ray.rd;
+
+			// project onto spanning vectors of the plane
+			inside_1 = glm::dot(isec_p - moved_centers[i], v1[tmp]) /
+				v1_dots[tmp];
+			inside_2 = glm::dot(isec_p - moved_centers[i], v2[tmp]) /
+				v2_dots[tmp];
+
+			tests[i] = (0 <= inside_1) && (inside_1 <= 1)
+				&& (0 <= inside_2) && (inside_2 <= 1);
+		}
+	}
+
+	// get smallest positive parameter
+	isec_t = INFINITY;
+	for (int i = 0; i < 6; ++i)
+	{
+		tmp = i % 3;
+		if (tests[i])
+		{
+			if (isec_t > t[i >= 3][tmp])
+			{
+				isec_t = t[i >= 3][tmp];
+			}
+		}
+	}
+
+	if (isec_t >= 0 && isec_t < INFINITY)
+	{
+		if (isec_t < ray.tNearest)
+		{
+			// update maximum intersection parameter
+			ray.tNearest = isec_t;
+			// update intersection properties
+			isect->p = ray.ro + ray.rd * isec_t;
+			isect->normal = get_normal(isect->p);
+			isect->mat = mat;
+		}
+	}
+
+	return isec_t;
+}
+
+float Cube::intersect(const Ray &ray)
+{
+	assert(abs(length(ray.rd)) > 0);
+
+	Ray transformed_ray{ world_to_obj * glm::vec4(ray.ro, 1.f),
+		world_to_obj * glm::vec4(ray.rd, 0.f) };
+
+	int nearest = 0;
+	int tmp = 0;
+	float isec_t = INFINITY;
+	float inside_1;
+	float inside_2;
+	bool tests[6] = { false };
+	glm::vec3 t[2] = { glm::vec3(INFINITY), glm::vec3(INFINITY) };
+	glm::vec3 isec_p;
+
+
+	// calculate the 6 transformed_ray-plane intersections
+	t[0] = (boundaries - transformed_ray.ro);
+	t[1] = -(boundaries + transformed_ray.ro);
+
 
 	if (transformed_ray.rd.x != 0)
 	{
@@ -162,107 +268,6 @@ float Cube::intersect(const Ray &ray, SurfaceInteraction *isect)
 			}
 		}
 	}
-
-	if (isec_t >= 0 && isec_t < INFINITY)
-	{
-		if (isec_t < ray.tNearest)
-		{
-			ray.tNearest = isec_t;
-			isect->p = ray.ro + ray.rd * isec_t;
-			isect->normal = get_normal(isect->p);
-			isect->mat = mat;
-		}
-	}
-
-	return isec_t;
-}
-
-float Cube::intersect(const Ray &ray)
-{
-	assert(abs(length(ray.rd)) > 0);
-
-	Ray transformed_ray{ world_to_obj * glm::vec4(ray.ro, 1.f),
-		world_to_obj * glm::vec4(ray.rd, 0.f) };
-
-	int nearest = 0;
-	int tmp = 0;
-	float isec_t = INFINITY;
-	float inside_1;
-	float inside_2;
-	bool tests[6] = { false };
-	glm::vec3 t[2] = { glm::vec3(INFINITY), glm::vec3(INFINITY) };
-	glm::vec3 isec_p;
-
-
-	// calculate the 6 transformed_ray-plane intersections
-	t[0] = (boundaries - transformed_ray.ro);
-	t[1] = -(boundaries + transformed_ray.ro);
-
-
-	if (transformed_ray.rd.x != 0)
-	{
-		t[0].x /= transformed_ray.rd.x;
-		t[1].x /= transformed_ray.rd.x;
-	}
-	else
-	{
-		t[0].x = (t[0].x == 0 ? 0.f : INFINITY);
-		t[1].x = (t[1].x == 0 ? 0.f : INFINITY);
-	}
-
-	if (transformed_ray.rd.y != 0)
-	{
-		t[0].y /= transformed_ray.rd.y;
-		t[1].y /= transformed_ray.rd.y;
-	}
-	else
-	{
-		t[0].y = (t[0].y == 0 ? 0.f : INFINITY);
-		t[1].y = (t[1].y == 0 ? 0.f : INFINITY);
-	}
-
-	if (transformed_ray.rd.z != 0)
-	{
-		t[0].z /= transformed_ray.rd.z;
-		t[1].z /= transformed_ray.rd.z;
-	}
-	else
-	{
-		t[0].z = (t[0].z == 0 ? 0.f : INFINITY);	
-		t[1].z = (t[1].z == 0 ? 0.f : INFINITY);
-	}
-
-	// check if inside boundaries
-	for (int i = 0; i < 6; ++i)
-	{
-		tmp = i % 3;
-		if (t[i >= 3][tmp] >= 0.f)
-		{
-			isec_t = t[i >= 3][tmp];
-			isec_p = transformed_ray.ro + isec_t * transformed_ray.rd;
-
-			inside_1 = glm::dot(isec_p - moved_centers[i], v1[tmp]) /
-				v1_dots[tmp];
-			inside_2 = glm::dot(isec_p - moved_centers[i], v2[tmp]) /
-				v2_dots[tmp];
-
-			tests[i] = (0 <= inside_1) && (inside_1 <= 1)
-				&& (0 <= inside_2) && (inside_2 <= 1);
-		}
-	}
-
-	isec_t = INFINITY;
-	for (int i = 0; i < 6; ++i)
-	{
-		tmp = i % 3;
-		if (tests[i])
-		{
-			if (isec_t > t[i >= 3][tmp])
-			{
-				isec_t = t[i >= 3][tmp];
-			}
-		}
-	}
 	return isec_t;
 }
 
@@ -285,21 +290,7 @@ float Triangle::intersect(const Ray &ray, SurfaceInteraction * isect)
 			ray.tNearest = t_plane;
 			isect->p = ray.ro + ray.rd * t_plane;
 			isect->normal = get_normal(isect->p);
-
-			if (interpolate)
-			{
-				isect->mat.reset(new Material());
-				//TODO: NOT THREADSAFE => CHANGE
-				// interpolate with barycentric coordinates
-				glm::vec3 c = glm::vec3((1 - (t_vec.y + t_vec.z)), t_vec.y, t_vec.z);
-				isect->mat->ambient = c;
-				isect->mat->diffuse = glm::vec3(0.f);
-				isect->mat->specular = glm::vec3(0.f);
-			}
-			else
-			{
-				isect->mat = mat;
-			}
+			isect->mat = mat;
 		}
 
 		return t_plane;

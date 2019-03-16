@@ -323,14 +323,17 @@ void SingleCubeScene::init()
 	/////////////////////////////////////
 	// Single Triangle
 	/////////////////////////////////////
-	sc.emplace_back(std::unique_ptr<Shape>(new Triangle(glm::vec3(0.f, 0.f, -4.f),
+	triangle_mat_1 = std::make_shared<Material>();
+	sc.emplace_back(std::make_unique<Triangle>(glm::vec3(0.f, 0.f, -4.f),
 		glm::vec3(4.f, 0.f, -4.f),
 		glm::vec3(4.f, 4.f, -4.f),
 		glm::vec3(0.f, 0.f, 1.f),
 		glm::translate(glm::scale(glm::mat4(1.f), glm::vec3(2.f)),
 			glm::vec3(0.f, 0.f, -3.f)),
-		triangle_mat_1)));
-	dynamic_cast<Triangle*>(sc.back().get())->setInterpolate(true);
+		triangle_mat_1));
+	auto tr_tex = std::make_shared<RGB_TextureTriangle>(
+		dynamic_cast<Triangle*>(sc.back().get()));
+	triangle_mat_1->setTexture(tr_tex);
 
 	/////////////////////////////////////
 	// Sphere
@@ -479,21 +482,39 @@ void SingleCubeScene::init()
 	sc.back()->obj_to_world[0] = glm::vec4(glm::cross(cube_normal, tangent_v), 0.f);
 	sc.back()->obj_to_world[1] = glm::vec4(cube_normal, 0.f);
 	sc.back()->obj_to_world[2] = glm::vec4(tangent_v, 0.f);
-	sc.back()->obj_to_world[3] = cube_position;
+	sc.back()->obj_to_world[3] = glm::vec4(0.f, 0.f, 0.f, 1.f);
 
 	sc.back()->world_to_obj = glm::inverse(
-		glm::scale(glm::mat4(1.f), glm::vec3(2.f, 1.1f, 2.f)) *
-		glm::scale(
-			sc.back()->obj_to_world,
-			glm::vec3(1.f, 1.f, 1.f)));
-	//sc.back()->world_to_obj = glm::inverse(sc.back()->obj_to_world);
-	////////////////////////////////
-	// END
-	////////////////////////////////
+		glm::translate(glm::mat4(1.f), glm::vec3(cube_position)) *
+		glm::scale(glm::mat4(1.f), glm::vec3(1.f, 1.f, 1.f)) *
+		sc.back()->obj_to_world);
 
-	/////////////////////////////////////
-	// Lights
-	/////////////////////////////////////
+	/*
+	Scaling along arbitrary axis:
+	1. Choose rotation axis
+	3. Translate the shape to the origin of your coordinate system
+	2. Rotate chosen axis onto x-, y- or z-axis of your coordinate system
+	 a) Do this by computing the normal of the spanned plane of your chosen axis
+		and coordinate system axis
+	 b) Rotate around this normal onto your coordinate system axis
+	3. Scale along chosen coordinate axis
+	4. Rotate back 
+	5. Translate back to originial position
+
+	*/
+	/*sc.back()->world_to_obj = glm::inverse(
+		glm::rotate(
+			glm::scale(
+				glm::mat4(1.f), glm::vec3(4.f, 1.f, 1.f)),
+			glm::radians(30.f),
+			glm::vec3(1.f, 0.f, 1.f)));*/
+			////////////////////////////////
+			// END
+			////////////////////////////////
+
+			/////////////////////////////////////
+			// Lights
+			/////////////////////////////////////
 	lights.emplace_back(std::make_unique<PointLight>(glm::vec3(-2.f, 20.f, -5.f),
 		glm::vec3(-2, -4, -2),
 		glm::vec3(110.f)));

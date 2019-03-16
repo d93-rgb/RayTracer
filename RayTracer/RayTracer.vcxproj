@@ -153,11 +153,13 @@ xcopy /y /d "C:\ThirdParty\libraries\assimp\bin\assimp-vc140-mt.dll" "$(OutDir)"
     <ClCompile Include="camera.cpp" />
     <ClCompile Include="light.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="material.cpp" />
     <ClCompile Include="progressreporter.cpp" />
     <ClCompile Include="quadrics.cpp" />
     <ClCompile Include="renderer.cpp" />
     <ClCompile Include="scene.cpp" />
     <ClCompile Include="shape.cpp" />
+    <ClCompile Include="texture.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="picture.ppm" />

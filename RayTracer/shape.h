@@ -65,7 +65,9 @@ public:
 				std::swap(t[0][i], t[1][i]);
 			}
 
-			// update interval and check if intersection possible
+			// narrow interval and check if intersection possible
+			// smaller interval bound may only get larger, the bigger interval bound may only 
+			// become smaller
 			t0 = t0 > t[0][i] ? t0 : t[0][i];
 			t1 = t1 < t[1][i] ? t1 : t[1][i];
 
@@ -235,6 +237,7 @@ struct Rectangle : public Shape
 	}
 };
 
+// Only defined as a unit cube for now
 class Cube : public Shape
 {
 	glm::vec3 normal;
@@ -305,16 +308,6 @@ public:
 
 class Triangle : public Shape
 {
-	bool interpolate = false;
-
-	// vertices
-	glm::vec3 p1, p2, p3;
-	// normal
-	glm::vec3 n;
-	glm::mat4 objToWorld;
-	glm::mat4 worldToObj;
-	glm::mat3 m_inv;
-
 public:
 	Triangle(glm::vec3 p1,
 		glm::vec3 p2,
@@ -349,10 +342,16 @@ public:
 		return n;
 	}
 
-	void setInterpolate(bool interpolate)
-	{
-		this->interpolate = interpolate;
-	}
+private:
+	// vertices
+	glm::vec3 p1, p2, p3;
+	// normal
+	glm::vec3 n;
+	glm::mat4 objToWorld;
+	glm::mat4 worldToObj;
+	glm::mat3 m_inv;
+
+	friend class RGB_TextureTriangle;
 };
 
 class TriangleMesh : public Shape

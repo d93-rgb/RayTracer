@@ -1,6 +1,7 @@
 #pragma once
 #include "rt.h"
 #include "texturemapping.h"
+#include "shape.h"
 
 constexpr auto NUM = 0.2f;
 constexpr auto GAP = NUM / 2.f;
@@ -18,9 +19,7 @@ protected:
 	std::shared_ptr<TextureMapping> tm;
 public:
 	Texture() = default;
-	virtual glm::vec3 getTexel(glm::vec2 uv) = 0;
-	virtual glm::vec2 getTextureCoordinates(glm::vec3 pos) = 0;
-
+	virtual glm::vec3 getTexel(glm::vec3 pos) = 0;
 };
 
 class CheckerBoardTexture : public Texture
@@ -35,21 +34,32 @@ public:
 		this->tm = texMap;
 	}
 
-	glm::vec2 getTextureCoordinates(glm::vec3 pos)
+	glm::vec3 getTexel(glm::vec3 pos)
 	{
-		return tm->getTextureCoordinates(pos);
-	}
-
-	glm::vec3 getTexel(glm::vec2 uv)
-	{
+		glm::vec2 uv = tm->getTextureCoordinates(pos);
 		return ((fmodf(uv.x, NUM) < GAP) ^ (fmodf(uv.y, NUM) < GAP)) * color;
 	}
 
-	glm::vec3 getTexel(glm::vec2 uv, glm::vec3 color_1, glm::vec3 color_2)
+	glm::vec3 getTexel(glm::vec3 pos, glm::vec3 color_1, glm::vec3 color_2)
 	{
+		glm::vec2 uv = tm->getTextureCoordinates(pos);
 		return ((fmodf(uv.x, NUM) < GAP) ^ (fmodf(uv.y, NUM) < GAP)) ? color_1 : color_2;
 	}
 
+};
+
+// friend class texture of triangle
+class RGB_TextureTriangle : public Texture
+{
+public:
+	RGB_TextureTriangle(Triangle *tr) : tr(tr)
+	{
+	}
+	
+	glm::vec3 getTexel(glm::vec3 pos);
+
+private:
+	Triangle *tr;
 };
 
 } // namespace rt

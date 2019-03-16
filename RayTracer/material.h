@@ -6,11 +6,6 @@ namespace rt
 {
 struct Material
 {
-	glm::vec3 ambient, diffuse, specular, reflective, transparent;
-	float refr_indx;
-
-	std::shared_ptr<Texture> tex;
-
 	Material() :
 		ambient(0),
 		diffuse(0),
@@ -36,23 +31,9 @@ struct Material
 		this->tex = tex;
 	}
 
-	glm::vec3 getAmbient(glm::vec3 pos)
-	{
-		if (tex)
-		{
-			return 0.001f * tex->getTexel(tex->getTextureCoordinates(pos));
-		}
-		return ambient;
-	}
+	glm::vec3 getAmbient(glm::vec3 pos);
 
-	glm::vec3 getDiffuse(glm::vec3 pos)
-	{
-		if (tex)
-		{
-			return tex->getTexel(tex->getTextureCoordinates(pos));
-		}
-		return diffuse;
-	}
+	glm::vec3 getDiffuse(glm::vec3 pos);
 
 	void setShininess(float exp)
 	{
@@ -77,5 +58,9 @@ struct Material
 protected:
 	// specular exponent
 	float n;
+	glm::vec3 ambient, diffuse, specular, reflective, transparent;
+	float refr_indx;
+
+	std::shared_ptr<Texture> tex;
 };
 }
