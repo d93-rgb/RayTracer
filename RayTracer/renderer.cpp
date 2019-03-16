@@ -98,7 +98,7 @@ glm::vec3 handle_transmission(const Scene &s,
 	reflected = reflect(ray.rd, isect->normal);
 
 	// check for total internal reflection
-	if (!refract(ray.rd, isect->normal, isect->mat->refr_indx, &refracted))
+	if (!refract(ray.rd, isect->normal, isect->mat->getRefractiveIdx(), &refracted))
 	{
 		//reflected = glm::normalize(reflect(ray.rd, (*o)->get_normal(isect_p)));
 		return shoot_recursively(s, 
@@ -107,7 +107,7 @@ glm::vec3 handle_transmission(const Scene &s,
 			++depth);
 	}
 
-	f = fresnel(1.f / isect->mat->refr_indx,
+	f = fresnel(1.f / isect->mat->getRefractiveIdx(),
 		glm::dot(-ray.rd, isect->normal));
 	++depth;
 
@@ -190,15 +190,15 @@ glm::vec3 shoot_recursively(const Scene &s,
 			*isect);
 	}
 
-	if (glm::length(isect->mat->reflective) > 0)
+	if (glm::length(isect->mat->getReflective()) > 0)
 	{
-		glm::vec3 reflective = isect->mat->reflective;
+		glm::vec3 reflective = isect->mat->getReflective();
 		contribution += reflective * handle_reflection(s, ray, isect_p, isect, depth);
 	}
 
-	if (glm::length(isect->mat->transparent) > 0)
+	if (glm::length(isect->mat->getTransparent()) > 0)
 	{
-		glm::vec3 transparent = isect->mat->transparent;
+		glm::vec3 transparent = isect->mat->getTransparent();
 		contribution += transparent * handle_transmission(s, ray, isect_p, isect, depth);
 	}
 

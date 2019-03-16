@@ -61,11 +61,11 @@ void GatheringScene::init()
 	mats[2]->setShininess(10.f);
 	mats[3]->setShininess(5.f);
 
-	mats[4]->reflective = glm::vec3(0.8f);
-	mats[5]->reflective = glm::vec3(1.0f); // ideal mirror
+	mats[4]->setReflective(glm::vec3(0.8f));
+	mats[5]->setReflective(glm::vec3(1.0f)); // ideal mirror
 
 	// glass sphere
-	mats[7]->transparent = glm::vec3(1.f);
+	mats[7]->setTransparent(glm::vec3(1.f));
 	mats[7]->setRefractiveIdx(1.5f);
 
 	// material for walls
@@ -78,7 +78,7 @@ void GatheringScene::init()
 	auto wall_left =
 		std::make_shared<Material>(glm::vec3(0.02, 0.02, 0.02), glm::vec3(0.2, 0.4, 0.6), glm::vec3(0.1, 0.1, 0.1));
 
-	wall_bot->reflective = glm::vec3(0.2f);
+	wall_bot->setReflective(glm::vec3(0.2f));
 
 	for (size_t i = 0; i < sph_origins.size(); ++i)
 	{
@@ -277,7 +277,7 @@ void SingleCubeScene::init()
 			glm::vec3(0.02, 0.02, 0.02),
 			glm::vec3(0.4, 0.4, 0.4),
 			glm::vec3(0.0, 0.0, 0.0));
-	wall_bot->reflective = glm::vec3(0.2f);
+	wall_bot->setReflective(glm::vec3(0.2f));
 
 	//bottom
 	sc.emplace_back(std::make_unique<Rectangle>(glm::vec3(-4, 2, -18),
@@ -383,7 +383,7 @@ void SingleCubeScene::init()
 	// mirror
 	sphere_mat =
 		std::make_shared<Material>();
-	sphere_mat->reflective = glm::vec3(1.f);
+	sphere_mat->setReflective(glm::vec3(1.f));
 
 	sc.emplace_back(std::make_unique<Sphere>(
 		glm::vec3(-9.f, 1.f, -10.f),
@@ -394,7 +394,7 @@ void SingleCubeScene::init()
 	// glass
 	sphere_mat =
 		std::make_shared<Material>();
-	sphere_mat->transparent = glm::vec3(1.f);
+	sphere_mat->setTransparent(glm::vec3(1.f));
 
 	sc.emplace_back(std::make_unique<Sphere>(
 		glm::vec3(10.f, -10.f, 0.f),

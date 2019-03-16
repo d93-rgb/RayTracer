@@ -35,6 +35,11 @@ struct Material
 
 	glm::vec3 getDiffuse(glm::vec3 pos);
 
+	glm::vec3 getSpecular()
+	{
+		return specular;
+	}
+
 	void setShininess(float exp)
 	{
 		n = exp;
@@ -45,9 +50,34 @@ struct Material
 		return n;
 	}
 
+	void setReflective(glm::vec3 r)
+	{
+		reflective = r;
+	}
+
+	glm::vec3 getReflective()
+	{
+		return reflective ;
+	}
+
+	void setTransparent(glm::vec3 t)
+	{
+		transparent = t;
+	}
+
+	glm::vec3 getTransparent()
+	{
+		return transparent;
+	}
+
 	void setRefractiveIdx(float f)
 	{
 		this->refr_indx = f;
+	}
+
+	float getRefractiveIdx()
+	{
+		return refr_indx;
 	}
 
 	void setTexture(std::shared_ptr<Texture> tex)
