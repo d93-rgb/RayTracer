@@ -15,7 +15,8 @@ class SphericalMapping : public TextureMapping
 	glm::vec3 center;
 public:
 	SphericalMapping(glm::vec3 center) : center(center)
-	{ }
+	{
+	}
 
 	glm::vec2 getTextureCoordinates(glm::vec3 pos)
 	{
@@ -31,12 +32,26 @@ public:
 class PlanarMapping : public TextureMapping
 {
 public:
-	PlanarMapping() = default;
-
-	glm::vec2 getTextureCoordinates(glm::vec3 pos)
+	/*
+		pos: plane position
+		vs: spanning vector
+		vt: (non parallel to vs) spanning vector
+	*/
+	PlanarMapping(glm::vec3 pos, glm::vec3 vs, glm::vec3 vt) : pos(pos), vs(s), vt(vt)
 	{
 
 	}
+
+	glm::vec2 getTextureCoordinates(glm::vec3 pos)
+	{
+		float s = glm::dot(pos - this->pos, vs);
+		float t = glm::dot(pos - this->pos, vt);
+
+		return glm::vec2(s, t);
+	}
+
+private:
+	glm::vec3 pos, vs, vt;
 };
 
 } // namespace rt
