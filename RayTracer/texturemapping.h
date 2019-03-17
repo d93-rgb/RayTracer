@@ -37,21 +37,25 @@ public:
 		vs: spanning vector
 		vt: (non parallel to vs) spanning vector
 	*/
-	PlanarMapping(glm::vec3 pos, glm::vec3 vs, glm::vec3 vt) : pos(pos), vs(s), vt(vt)
-	{
-
-	}
+	PlanarMapping(glm::vec3 pos, glm::vec3 vs, glm::vec3 vt) : 
+		pos(pos), 
+		vs(glm::normalize(vs)), 
+		vt(glm::normalize(vt)),
+		vsl(glm::length(vs)), 
+		vtl(glm::length(vt))
+	{}
 
 	glm::vec2 getTextureCoordinates(glm::vec3 pos)
 	{
-		float s = glm::dot(pos - this->pos, vs);
-		float t = glm::dot(pos - this->pos, vt);
+		float u = glm::dot(pos - this->pos, vs) / vsl;
+		float v = glm::dot(pos - this->pos, vt) / vtl;
 
-		return glm::vec2(s, t);
+		return glm::vec2(u, v);
 	}
 
 private:
 	glm::vec3 pos, vs, vt;
+	float vsl, vtl;
 };
 
 } // namespace rt

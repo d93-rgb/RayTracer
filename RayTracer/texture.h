@@ -2,6 +2,7 @@
 #include "rt.h"
 #include "texturemapping.h"
 #include "shape.h"
+#include "utility.h"
 
 constexpr auto NUM = 0.2f;
 constexpr auto GAP = NUM / 2.f;
@@ -13,10 +14,13 @@ inline glm::vec3 operator*(int n, const glm::vec3 &v)
 	return glm::vec3(n * v.x, n * v.y, n * v.z);
 }
 
+enum class ImageWrap
+{
+	REPEAT, CLAMP, BLACK
+};
+
 class Texture
 {
-protected:
-	std::shared_ptr<TextureMapping> tm;
 public:
 	Texture() = default;
 	virtual glm::vec3 getTexel(glm::vec3 pos) = 0;
@@ -24,19 +28,46 @@ public:
 
 class CheckerBoardTexture : public Texture
 {
+	std::shared_ptr<TextureMapping> tm;
 	glm::vec3 color;
+	ImageWrap mode;
+
 public:
 
 	CheckerBoardTexture() = default;
-	CheckerBoardTexture(std::shared_ptr<TextureMapping> texMap, glm::vec3 color = glm::vec3(1.f))
+	CheckerBoardTexture(std::shared_ptr<TextureMapping> texMap,
+		glm::vec3 color = glm::vec3(1.f),
+		ImageWrap mode = ImageWrap::BLACK) : tm(texMap), color(color), mode(mode)
 	{
-		this->color = color;
-		this->tm = texMap;
 	}
 
 	glm::vec3 getTexel(glm::vec3 pos)
 	{
 		glm::vec2 uv = tm->getTextureCoordinates(pos);
+		
+		switch (mode)
+		{
+		case ImageWrap::REPEAT:
+			uv.x = std::abs(uv.x) - (int)std::abs(uv.x);
+			uv.y = std::abs(uv.y) - (int)std::abs(uv.y);
+			break;
+		case ImageWrap::CLAMP:
+			uv.x = clamp(uv.x);
+			uv.x = clamp(uv.y);
+			break;
+		case ImageWrap::BLACK:
+			if (uv.x < 0.f || 
+				uv.y < 0.f || 
+				uv.x > 1.f ||
+				uv.y > 1.f)
+			{
+				uv.x = uv.y = 0.f;
+			}
+			break;
+		default:
+			break;
+		}
+
 		return ((fmodf(uv.x, NUM) < GAP) ^ (fmodf(uv.y, NUM) < GAP)) * color;
 	}
 
@@ -55,11 +86,29 @@ public:
 	RGB_TextureTriangle(Triangle *tr) : tr(tr)
 	{
 	}
-	
+
 	glm::vec3 getTexel(glm::vec3 pos);
 
 private:
 	Triangle *tr;
+};
+
+// friend class texture of cube
+class RGBCubeTexture : public Texture
+{
+public:
+	RGBCubeTexture(Cube *cube) : 
+		cube(cube)
+	{
+
+	}
+
+	glm::vec3 getTexel(glm::vec3 pos);
+
+private:
+	glm::vec3 p1, p2, p3, p4;
+
+	Cube *cube;
 };
 
 } // namespace rt

@@ -78,6 +78,7 @@ class RGB_TriangleTexture;
 class SingleCubeScene;
 class GatheringScene;
 
+enum class ImageWrap;
 
 static constexpr bool QUIET = false;
 

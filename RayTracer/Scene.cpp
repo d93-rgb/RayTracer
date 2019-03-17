@@ -345,15 +345,23 @@ void SingleCubeScene::init()
 			glm::vec3(0.4f, 0.4f, 0.4f));
 	sphere_mat->setShininess(10.f);
 
+	/*auto sphere_texture = std::make_shared<CheckerBoardTexture>(
+		std::make_shared<SphericalMapping>(glm::vec3(-3.f, 0.f, -7.f)));*/
 	auto sphere_texture = std::make_shared<CheckerBoardTexture>(
-		std::make_shared<SphericalMapping>(glm::vec3(-3.f, 0.f, -7.f)));
+		std::make_shared<PlanarMapping>(
+			glm::vec3(-7.f, -4.f, -7.f),
+			glm::vec3(4.f, 0.f, 0.f),
+			glm::vec3(0.f, 4.f, 0.f)),
+		glm::vec3(1.f),
+		ImageWrap::REPEAT);
 	sphere_mat->setTexture(sphere_texture);
 
 	sc.emplace_back(std::make_unique<Sphere>(
 		glm::vec3(-3.f, 0.f, -7.f),
-		2.f,
+		3.f,
 		glm::vec3(1.f),
 		sphere_mat));
+
 	// red sphere at origin
 	sphere_mat =
 		std::make_shared<Material>(
@@ -458,15 +466,16 @@ void SingleCubeScene::init()
 	auto new_cube_mat = std::shared_ptr<Material>(new Material(
 		glm::vec3(0.0f, 0.0f, 0.0f),
 		glm::vec3(0.2f, 0.6f, 0.1f),
-		glm::vec3(0.4f, 0.4f, 0.4f)));
+		glm::vec3(0.f, 0.f, 0.f)));
 	new_cube_mat->setShininess(40.f);
 	auto cube_tex_mapping = std::make_shared<SphericalMapping>(cube_position);
-	auto cube_texture = std::make_shared<CheckerBoardTexture>(cube_tex_mapping);
-	new_cube_mat->setTexture(cube_texture);
-
+	
 	sc.emplace_back(std::make_unique<Cube>(
 		glm::vec3(3.f),
 		new_cube_mat));
+	auto cube_texture = std::make_shared<RGBCubeTexture>(
+		dynamic_cast<Cube*>(sc.back().get()));
+	new_cube_mat->setTexture(cube_texture);
 
 	/*sc.back()->obj_to_world = glm::rotate(glm::scale(glm::translate(
 		glm::mat4(1.f),
@@ -485,7 +494,8 @@ void SingleCubeScene::init()
 	sc.back()->obj_to_world[3] = glm::vec4(0.f, 0.f, 0.f, 1.f);
 
 	sc.back()->world_to_obj = glm::inverse(
-		glm::translate(glm::mat4(1.f), glm::vec3(cube_position)) *
+		glm::translate(glm::mat4(1.f), glm::vec3(cube_position + 
+			glm::vec4(0.f, 13.f, -3.f, 0.f))) *
 		glm::scale(glm::mat4(1.f), glm::vec3(1.f, 1.f, 1.f)) *
 		sc.back()->obj_to_world);
 
@@ -498,7 +508,7 @@ void SingleCubeScene::init()
 		and coordinate system axis
 	 b) Rotate around this normal onto your coordinate system axis
 	3. Scale along chosen coordinate axis
-	4. Rotate back 
+	4. Rotate back
 	5. Translate back to originial position
 
 	*/
@@ -518,18 +528,18 @@ void SingleCubeScene::init()
 	lights.emplace_back(std::make_unique<PointLight>(glm::vec3(-2.f, 20.f, -5.f),
 		glm::vec3(-2, -4, -2),
 		glm::vec3(110.f)));
-	lights.emplace_back(std::make_unique<PointLight>(
+	/*lights.emplace_back(std::make_unique<PointLight>(
 		cube_position + glm::vec4(0.f, 3.f, -4.f, 0.f),
 		glm::vec3(0.f, 0.f, -1.f),
 		glm::vec3(30.f)));
+*/
+/////////////////////////////////////
+// Lights END
+/////////////////////////////////////
 
-	/////////////////////////////////////
-	// Lights END
-	/////////////////////////////////////
-
-	/////////////////////////////////////
-	// Camera
-	/////////////////////////////////////
+/////////////////////////////////////
+// Camera
+/////////////////////////////////////
 	cam.reset(new Camera());
 	/*cam->setCamToWorld(glm::rotate(glm::translate(glm::mat4(1.f), translation),
 		rot_x, glm::vec3(0.f, 1.f, 0.f)));*/
