@@ -19,7 +19,10 @@ template <typename T> inline int sgn(T val)
 
 struct Shape
 {
-	glm::mat4 obj_to_world, world_to_obj;
+	glm::mat4 obj_to_world = glm::mat4(1.f);
+	glm::mat4 world_to_obj = glm::mat4(1.f);
+	//TODO: Decouple material interface from shape class for flexibility
+	// => Take it over to the SurfaceInteraction class
 	std::shared_ptr<Material> mat;
 
 	virtual float intersect(const Ray &ray, SurfaceInteraction *isect) = 0;
@@ -211,35 +214,61 @@ struct Rectangle : public Shape
 		float a;
 		float tmp = glm::dot(normal, center);
 
-		//TODO: Catch degenerate cases with some normal component being zero
 		switch (coordinate)
 		{
 		case 'x':
 			//
-			if (normal.x == 0.f &&
-				((normal.y == 0.f || v == 0.f) && (normal.z == 0.f || w == 0.f)))
+			if (normal.x == 0.f)
 			{
-				return glm::vec4(INFINITY);
+				if ((normal.y == 0.f || v == 0.f) && (normal.z == 0.f || w == 0.f))
+				{
+					return glm::vec4(INFINITY);
+				}
+				else
+				{
+					a = 0.f;
+				}
 			}
-			a = (tmp - (normal.y * v + normal.z * w)) / normal.x;
+			else
+			{
+				a = (tmp - (normal.y * v + normal.z * w)) / normal.x;
+			}
 			c = glm::vec4(a, v, w, 1.f);
 			break;
 		case 'y':
-			if (normal.y == 0.f &&
-				((normal.x == 0.f || v == 0.f) && (normal.z == 0.f || w == 0.f)))
+			if (normal.y == 0.f)
 			{
-				return glm::vec4(INFINITY);
+				if ((normal.x == 0.f || v == 0.f) && (normal.z == 0.f || w == 0.f))
+				{
+					return glm::vec4(INFINITY);
+				}
+				else
+				{
+					a = 0.f;
+				}
 			}
-			a = (tmp - (normal.x * v + normal.z * w)) / normal.y;
+			else
+			{
+				a = (tmp - (normal.x * v + normal.z * w)) / normal.y;
+			}
 			c = glm::vec4(v, a, w, 1.f);
 			break;
 		case 'z':
-			if (normal.z == 0.f &&
-				((normal.x == 0.f || v == 0.f) && (normal.y == 0.f || w == 0.f)))
+			if (normal.z == 0.f)
 			{
-				return glm::vec4(INFINITY);
+				if ((normal.x == 0.f || v == 0.f) && (normal.y == 0.f || w == 0.f))
+				{
+					return glm::vec4(INFINITY);
+				}
+				else
+				{
+					a = 0.f;
+				}
 			}
-			a = (tmp - (normal.x * v + normal.y * w)) / normal.z;
+			else
+			{
+				a = (tmp - (normal.x * v + normal.y * w)) / normal.z;
+			}
 			c = glm::vec4(v, w, a, 1.f);
 			break;
 		default:
@@ -259,7 +288,68 @@ struct Rectangle : public Shape
 	}
 };
 
-// Only defined as a unit cube for now
+class UnitCube : public Shape
+{
+public:
+	UnitCube(std::shared_ptr<Material> mat)
+	{
+		// cube must have thickness in all dimensios for now
+		this->mat = mat;
+
+		// sides
+		v1[0] = glm::vec3(0.f, 0.f, 1.f);
+		v2[0] = glm::vec3(0.f, 1.f, 0.f);
+
+		v1[1] = glm::vec3(1.f, 0.f, 0.f);
+		v2[1] = glm::vec3(0.f, 0.f, 1.f);
+
+		v1[2] = glm::vec3(1.f, 0.f, 0.f);
+		v2[2] = glm::vec3(0.f, 1.f, 0.f);
+
+		for (int i = 0; i < 6; ++i)
+		{
+			// moved centers
+			int i_m = i % 3;
+			moved_centers[i] = glm::vec3(1.f) *
+				glm::vec3(i_m == 0, i_m == 1, i_m == 2) *
+				(-1.f * (i >= 3 ? 1.f : -1.f)) - 0.5f * (v1[i_m] + v2[i_m]);
+		}
+	}
+
+	float intersect(const Ray &ray, SurfaceInteraction *isect);
+
+	/*
+		Intersection test without updating the nearest intersection parameter for Ray.
+		This routine will be used for the transformed_ray-bounding box intersection test.
+	*/
+	//float intersect(const Ray &ray);
+
+	glm::vec3 get_normal(glm::vec3 p) const
+	{
+#ifdef DEBUG
+		static int iter = 0;
+#endif
+#ifdef DEBUG
+		if ((iter++) % 150 == 0) {
+			bool stop = true;
+		}
+#endif
+		p = world_to_obj * glm::vec4(p, 1.f);
+		glm::vec3 a_p = glm::abs(p);
+		glm::vec3 n = a_p.x > a_p.y ?
+			(a_p.x > a_p.z ? glm::vec3(sgn(p.x), 0.f, 0.f) : glm::vec3(0.f, 0.f, sgn(p.z))) :
+			(a_p.y > a_p.z ? glm::vec3(0.f, sgn(p.y), 0.f) : glm::vec3(0.f, 0.f, sgn(p.z)));
+		return glm::normalize(glm::transpose(world_to_obj) * glm::vec4(n, 0.f));
+	}
+
+private:
+	glm::vec3 boundaries{ 0.5f, 0.5f, 0.5f };
+	glm::vec3 moved_centers[6];
+	glm::vec3 v1[3], v2[3];
+
+	friend class RGBCubeTexture;
+};
+
 class Cube : public Shape
 {
 public:
@@ -282,7 +372,7 @@ public:
 
 		for (int i = 0; i < 6; ++i)
 		{
-			// too lazy to write out the six moved_centers
+			// moved centers
 			int i_m = i % 3;
 			moved_centers[i] = side_length[i_m] * glm::vec3(1.f) *
 				glm::vec3(i_m == 0, i_m == 1, i_m == 2) *
@@ -312,7 +402,7 @@ public:
 #ifdef DEBUG
 		if ((iter++) % 150 == 0) {
 			bool stop = true;
-}
+		}
 #endif
 		p = world_to_obj * glm::vec4(p, 1.f);
 		glm::vec3 a_p = glm::abs(p);
@@ -320,7 +410,7 @@ public:
 			(a_p.x > a_p.z ? glm::vec3(sgn(p.x), 0.f, 0.f) : glm::vec3(0.f, 0.f, sgn(p.z))) :
 			(a_p.y > a_p.z ? glm::vec3(0.f, sgn(p.y), 0.f) : glm::vec3(0.f, 0.f, sgn(p.z)));
 		return glm::normalize(glm::transpose(world_to_obj) * glm::vec4(n, 0.f));
-}
+	}
 
 private:
 	glm::vec3 normal;

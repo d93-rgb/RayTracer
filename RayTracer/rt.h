@@ -60,6 +60,7 @@ struct Plane;
 struct Rectangle;
 class Triangle;
 class Cube;
+class UnitCube;
 
 struct Sphere;
 struct Cylinder;

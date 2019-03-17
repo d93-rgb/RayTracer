@@ -23,7 +23,7 @@ class Texture
 {
 public:
 	Texture() = default;
-	virtual glm::vec3 getTexel(glm::vec3 pos) = 0;
+	virtual glm::vec3 getTexel(const glm::vec3 &pos) const = 0;
 };
 
 class CheckerBoardTexture : public Texture
@@ -41,7 +41,7 @@ public:
 	{
 	}
 
-	glm::vec3 getTexel(glm::vec3 pos)
+	glm::vec3 getTexel(const glm::vec3 &pos) const
 	{
 		glm::vec2 uv = tm->getTextureCoordinates(pos);
 		
@@ -71,7 +71,7 @@ public:
 		return ((fmodf(uv.x, NUM) < GAP) ^ (fmodf(uv.y, NUM) < GAP)) * color;
 	}
 
-	glm::vec3 getTexel(glm::vec3 pos, glm::vec3 color_1, glm::vec3 color_2)
+	glm::vec3 getTexel(glm::vec3 pos, glm::vec3 color_1, glm::vec3 color_2) const
 	{
 		glm::vec2 uv = tm->getTextureCoordinates(pos);
 		return ((fmodf(uv.x, NUM) < GAP) ^ (fmodf(uv.y, NUM) < GAP)) ? color_1 : color_2;
@@ -87,9 +87,11 @@ public:
 	{
 	}
 
-	glm::vec3 getTexel(glm::vec3 pos);
+	glm::vec3 getTexel(const glm::vec3 &pos) const;
 
 private:
+	// this class is non owning of the following classes, so normal pointers are used instead
+	// of smart pointers
 	Triangle *tr;
 };
 
@@ -97,18 +99,23 @@ private:
 class RGBCubeTexture : public Texture
 {
 public:
-	RGBCubeTexture(Cube *cube) : 
-		cube(cube)
+	RGBCubeTexture(Cube *cube) :
+		cube(cube), unitcube(nullptr)
 	{
-
 	}
 
-	glm::vec3 getTexel(glm::vec3 pos);
+	RGBCubeTexture(UnitCube *ucube) :
+		cube(nullptr), unitcube(ucube)
+	{
+	}
+
+	glm::vec3 getTexel(const glm::vec3 &pos) const;
 
 private:
-	glm::vec3 p1, p2, p3, p4;
-
+	// this class is non owning of the following classes, so normal pointers are used instead
+	// of smart pointers
 	Cube *cube;
+	UnitCube *unitcube;
 };
 
 } // namespace rt

@@ -457,10 +457,10 @@ void SingleCubeScene::init()
 			glm::vec3(5.f, 1.f, 2.f)));*/
 			//dynamic_cast<Cylinder*>(sc.back().get())->worldToObj = glm::mat4(1.f);
 
-			////////////////////////////////
-			// NEW CUBE
-			////////////////////////////////
-	cube_position = floor->getRectPos(0.f, 0.f, 'y') +
+	////////////////////////////////
+	// NEW CUBE
+	////////////////////////////////
+	cube_position = floor->getRectPos(8.f, 3.f, 'z') +
 		1.5f * glm::vec4(cube_normal, 0.f);
 	// cube material for new cube class object
 	auto new_cube_mat = std::shared_ptr<Material>(new Material(
@@ -469,9 +469,9 @@ void SingleCubeScene::init()
 		glm::vec3(0.f, 0.f, 0.f)));
 	new_cube_mat->setShininess(40.f);
 	auto cube_tex_mapping = std::make_shared<SphericalMapping>(cube_position);
-	
+
 	sc.emplace_back(std::make_unique<Cube>(
-		glm::vec3(3.f, 1.f, 2.f),
+		glm::vec3(3.f),
 		new_cube_mat));
 	auto cube_texture = std::make_shared<RGBCubeTexture>(
 		dynamic_cast<Cube*>(sc.back().get()));
@@ -494,9 +494,27 @@ void SingleCubeScene::init()
 	sc.back()->obj_to_world[3] = glm::vec4(0.f, 0.f, 0.f, 1.f);
 
 	sc.back()->world_to_obj = glm::inverse(
-		glm::translate(glm::mat4(1.f), glm::vec3(0.f)) *
+		glm::translate(glm::mat4(1.f), (glm::vec3(cube_position) +
+			glm::vec3(0.f, 3.f, 0.f))) *
 		glm::scale(glm::mat4(1.f), glm::vec3(1.f, 1.f, 1.f)) *
 		sc.back()->obj_to_world);
+
+	////////////////////////////////
+	// UNIT CUBE
+	////////////////////////////////
+	new_cube_mat = std::make_shared<Material>();
+
+	sc.emplace_back(std::make_unique<UnitCube>(
+		new_cube_mat));
+	cube_texture = std::make_shared<RGBCubeTexture>(
+		dynamic_cast<UnitCube*>(sc.back().get()));
+	new_cube_mat->setTexture(cube_texture);
+
+	sc.back()->world_to_obj = glm::inverse(glm::scale(glm::translate(glm::mat4(1.f),
+		glm::vec3(3.f, -3.f, 3.f)), glm::vec3(2.f, 1.5, 3.f)));
+	////////////////////////////////
+	// END UNIT CUBE
+	////////////////////////////////
 
 	/*
 	Scaling along arbitrary axis:

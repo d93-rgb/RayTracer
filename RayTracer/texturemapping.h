@@ -6,7 +6,7 @@ namespace rt
 class TextureMapping
 {
 public:
-	virtual glm::vec2 getTextureCoordinates(glm::vec3 pos) = 0;
+	virtual glm::vec2 getTextureCoordinates(const glm::vec3 &pos) const = 0;
 
 };
 
@@ -18,7 +18,7 @@ public:
 	{
 	}
 
-	glm::vec2 getTextureCoordinates(glm::vec3 pos)
+	glm::vec2 getTextureCoordinates(const glm::vec3 &pos) const
 	{
 		glm::vec3 pos_shift = glm::normalize(pos - center);
 		//float radius = glm::length(pos_shift);
@@ -45,7 +45,7 @@ public:
 		vtl(glm::length(vt))
 	{}
 
-	glm::vec2 getTextureCoordinates(glm::vec3 pos)
+	glm::vec2 getTextureCoordinates(const glm::vec3 &pos) const
 	{
 		float u = glm::dot(pos - this->pos, vs) / vsl;
 		float v = glm::dot(pos - this->pos, vt) / vtl;
