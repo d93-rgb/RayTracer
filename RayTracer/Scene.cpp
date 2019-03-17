@@ -194,7 +194,7 @@ void SingleCubeScene::init()
 {
 	float rot_x = glm::radians(0.f);
 	float deb;
-	glm::vec3 translation = glm::vec3(-3.f, 10.f, 15.f);
+	glm::vec3 translation = glm::vec3(-7.f, 5.f, 15.f);
 	glm::vec3 look_pos = glm::vec3(0.f, 0.f, 0.f);
 	glm::vec3 cam_up = glm::vec3(0.f, 1.f, 0.f);
 	glm::vec4 cube_position;
@@ -460,7 +460,7 @@ void SingleCubeScene::init()
 			////////////////////////////////
 			// NEW CUBE
 			////////////////////////////////
-	cube_position = floor->getRectPos(1.f, -4.f, 'y') +
+	cube_position = floor->getRectPos(0.f, 0.f, 'y') +
 		1.5f * glm::vec4(cube_normal, 0.f);
 	// cube material for new cube class object
 	auto new_cube_mat = std::shared_ptr<Material>(new Material(
@@ -471,7 +471,7 @@ void SingleCubeScene::init()
 	auto cube_tex_mapping = std::make_shared<SphericalMapping>(cube_position);
 	
 	sc.emplace_back(std::make_unique<Cube>(
-		glm::vec3(3.f),
+		glm::vec3(3.f, 1.f, 2.f),
 		new_cube_mat));
 	auto cube_texture = std::make_shared<RGBCubeTexture>(
 		dynamic_cast<Cube*>(sc.back().get()));
@@ -494,8 +494,7 @@ void SingleCubeScene::init()
 	sc.back()->obj_to_world[3] = glm::vec4(0.f, 0.f, 0.f, 1.f);
 
 	sc.back()->world_to_obj = glm::inverse(
-		glm::translate(glm::mat4(1.f), glm::vec3(cube_position + 
-			glm::vec4(0.f, 13.f, -3.f, 0.f))) *
+		glm::translate(glm::mat4(1.f), glm::vec3(0.f)) *
 		glm::scale(glm::mat4(1.f), glm::vec3(1.f, 1.f, 1.f)) *
 		sc.back()->obj_to_world);
 

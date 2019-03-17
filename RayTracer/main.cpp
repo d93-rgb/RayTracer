@@ -236,5 +236,6 @@ ofs.close();
 	CloseHandle(pi.hThread);
 #endif
 
+	//MessageBox(nullptr, TEXT("Done."), TEXT("Notification"), MB_OK);
 	return 0;
 }

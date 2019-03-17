@@ -52,6 +52,9 @@ public:
 		// interval of intersection
 		float t0 = 0.f, t1 = INFINITY;
 
+		// the case where the ray is parallel to the plane is handled correctly by these two
+		// calculations => if the ray is outside the slabs, the values will both be -/+ inf,
+		// if it is inside, the values will be inf with different signs
 		t[0] = boundaries[0] - ray.ro;
 		t[1] = boundaries[1] - ray.ro;
 
@@ -198,7 +201,9 @@ struct Rectangle : public Shape
 	float intersect(const Ray &ray, SurfaceInteraction * isect);
 
 	/*
-	TODO: Check boundaries
+	Given two coordinates, this function calculates the missing third coordinate,
+	so that the resulting point lies on the rectangle, if possible.
+	Returns glm::vec3(INFINITY), if the point can not lie on the plane.
 	*/
 	glm::vec4 getRectPos(float v, float w, char coordinate)
 	{
@@ -206,17 +211,34 @@ struct Rectangle : public Shape
 		float a;
 		float tmp = glm::dot(normal, center);
 
+		//TODO: Catch degenerate cases with some normal component being zero
 		switch (coordinate)
 		{
 		case 'x':
+			//
+			if (normal.x == 0.f &&
+				((normal.y == 0.f || v == 0.f) && (normal.z == 0.f || w == 0.f)))
+			{
+				return glm::vec4(INFINITY);
+			}
 			a = (tmp - (normal.y * v + normal.z * w)) / normal.x;
 			c = glm::vec4(a, v, w, 1.f);
 			break;
 		case 'y':
+			if (normal.y == 0.f &&
+				((normal.x == 0.f || v == 0.f) && (normal.z == 0.f || w == 0.f)))
+			{
+				return glm::vec4(INFINITY);
+			}
 			a = (tmp - (normal.x * v + normal.z * w)) / normal.y;
 			c = glm::vec4(v, a, w, 1.f);
 			break;
 		case 'z':
+			if (normal.z == 0.f &&
+				((normal.x == 0.f || v == 0.f) && (normal.y == 0.f || w == 0.f)))
+			{
+				return glm::vec4(INFINITY);
+			}
 			a = (tmp - (normal.x * v + normal.y * w)) / normal.z;
 			c = glm::vec4(v, w, a, 1.f);
 			break;
@@ -244,6 +266,7 @@ public:
 	Cube(glm::vec3 side_length, std::shared_ptr<Material> mat) :
 		boundaries(side_length / 2.f)
 	{
+		// cube must have thickness in all dimensios for now
 		assert(fmin(fmin(side_length.x, side_length.y), side_length.z) > 0);
 		this->mat = mat;
 
@@ -289,7 +312,7 @@ public:
 #ifdef DEBUG
 		if ((iter++) % 150 == 0) {
 			bool stop = true;
-		}
+}
 #endif
 		p = world_to_obj * glm::vec4(p, 1.f);
 		glm::vec3 a_p = glm::abs(p);
@@ -297,7 +320,7 @@ public:
 			(a_p.x > a_p.z ? glm::vec3(sgn(p.x), 0.f, 0.f) : glm::vec3(0.f, 0.f, sgn(p.z))) :
 			(a_p.y > a_p.z ? glm::vec3(0.f, sgn(p.y), 0.f) : glm::vec3(0.f, 0.f, sgn(p.z)));
 		return glm::normalize(glm::transpose(world_to_obj) * glm::vec4(n, 0.f));
-	}
+}
 
 private:
 	glm::vec3 normal;
