@@ -17,6 +17,7 @@ void Camera::setCamToWorld(glm::vec3 eyePosition, glm::vec3 gazePoint, glm::vec3
 {
 	// z-axis points in the opposite direction of the view vector, by convention
 	// the viewDir therefore must point in the opposite direction
+	assert(eyePosition != gazePoint);
 	glm::vec3 viewDir = glm::normalize(eyePosition - gazePoint);
 	glm::vec3 crossVec = glm::cross(glm::normalize(upVector), viewDir);
 	glm::vec3 newUpVec = glm::cross(viewDir, crossVec);

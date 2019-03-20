@@ -11,6 +11,7 @@
 #include "quadrics.h"
 #include "light.h"
 
+//#define SHOW_AXIS
 //#define LOAD_TEAPOT
 // DEBUGGING
 // divide the triangle mesh of the teapot to reduce rendering time
@@ -192,10 +193,8 @@ void GatheringScene::init()
 
 void SingleCubeScene::init()
 {
-	float rot_x = glm::radians(0.f);
-	float deb;
-	glm::vec3 translation = glm::vec3(-7.f, 5.f, 15.f);
-	glm::vec3 look_pos = glm::vec3(0.f, 0.f, 0.f);
+	glm::vec3 translation = glm::vec3(0.f, sqrtf(2.f), sqrtf(2.f));
+	glm::vec3 look_pos = glm::vec3(0.f, -sqrtf(2.f), -sqrt(2.f));
 	glm::vec3 cam_up = glm::vec3(0.f, 1.f, 0.f);
 	glm::vec4 cube_position;
 	glm::vec3 cube_normal;
@@ -285,11 +284,8 @@ void SingleCubeScene::init()
 
 	// get pointer to the floor
 	floor = dynamic_cast<Rectangle*>(sc.back().get());
-
 	cube_position = floor->getRectPos(1.5f, -27.f, 'y');
 	cube_normal = floor->get_normal();
-
-	deb = glm::dot(cube_normal, glm::vec3(-2.f, 4.f, -17.f) - floor->center);
 
 	auto triangle_mat_1 =
 		std::make_shared<Material>(
@@ -357,23 +353,23 @@ void SingleCubeScene::init()
 	sphere_mat->setTexture(sphere_texture);
 
 	sc.emplace_back(std::make_unique<Sphere>(
-		glm::vec3(-3.f, 0.f, -7.f),
-		3.f,
+		glm::vec3(-7.f, 0.f, -7.f),
+		2.f,
 		glm::vec3(1.f),
 		sphere_mat));
 
 	// red sphere at origin
-	sphere_mat =
-		std::make_shared<Material>(
-			glm::vec3(1.f, 0.f, 0.f),
-			glm::vec3(0.f, 0.f, 0.f),
-			glm::vec3(0.f, 0.f, 0.f));
+	//sphere_mat =
+	//	std::make_shared<Material>(
+	//		glm::vec3(1.f, 0.f, 0.f),
+	//		glm::vec3(0.f, 0.f, 0.f),
+	//		glm::vec3(0.f, 0.f, 0.f));
 
-	sc.emplace_back(std::make_unique<Sphere>(
-		glm::vec3(0.f, 0.f, 0.f),
-		0.1f,
-		glm::vec3(1.f),
-		sphere_mat));
+	//sc.emplace_back(std::make_unique<Sphere>(
+	//	glm::vec3(0.f, 0.f, 0.f),
+	//	0.1f,
+	//	glm::vec3(1.f),
+	//	sphere_mat));
 
 	sphere_mat =
 		std::make_shared<Material>(
@@ -413,6 +409,7 @@ void SingleCubeScene::init()
 	/////////////////////////////////////
 	// Cylinders
 	/////////////////////////////////////
+#ifdef SHOW_AXIS
 	float cyl_rad = 0.1f;
 	auto cylinder_mat_1 =
 		std::make_shared<Material>(
@@ -450,6 +447,7 @@ void SingleCubeScene::init()
 		cyl_rad,
 		8.f,
 		cylinder_mat_1));
+#endif
 	/*dynamic_cast<Cylinder*>(sc.back().get())->worldToObj =
 		glm::inverse(
 			glm::translate(
@@ -499,23 +497,45 @@ void SingleCubeScene::init()
 		glm::scale(glm::mat4(1.f), glm::vec3(1.f, 1.f, 1.f)) *
 		sc.back()->obj_to_world);
 
+	// TODO: REMOVE AFTER TESTING
+	glm::mat4 temp_matrix = sc.back()->obj_to_world;
+	cube_position = floor->getRectPos(-3.f, -10.f, 'y') + glm::vec4(cube_normal, 0.f);
+
 	////////////////////////////////
 	// UNIT CUBE
 	////////////////////////////////
 	new_cube_mat = std::make_shared<Material>();
 
-	sc.emplace_back(std::make_unique<UnitCube>(
+	/*sc.emplace_back(std::make_unique<UnitCube>(
 		new_cube_mat));
 	cube_texture = std::make_shared<RGBCubeTexture>(
 		dynamic_cast<UnitCube*>(sc.back().get()));
 	new_cube_mat->setTexture(cube_texture);
+*/
+/*sc.back()->world_to_obj = glm::inverse(glm::scale(glm::translate(glm::mat4(1.f),
+	glm::vec3(3.f, -3.f, 3.f)), glm::vec3(2.f, 1.5, 3.f)));
+*/////////////////////////////////
+// END UNIT CUBE
+////////////////////////////////
 
-	sc.back()->world_to_obj = glm::inverse(glm::scale(glm::translate(glm::mat4(1.f),
-		glm::vec3(3.f, -3.f, 3.f)), glm::vec3(2.f, 1.5, 3.f)));
-	////////////////////////////////
-	// END UNIT CUBE
-	////////////////////////////////
+	for (int i = 0; i < 10; ++i)
+	{
+		new_cube_mat = std::make_shared<Material>();
 
+		sc.emplace_back(std::make_unique<UnitCube>(
+			new_cube_mat));
+		cube_texture = std::make_shared<RGBCubeTexture>(
+			dynamic_cast<UnitCube*>(sc.back().get()));
+		new_cube_mat->setTexture(cube_texture);
+
+		sc.back()->world_to_obj = glm::inverse(
+			glm::translate(
+				glm::rotate(glm::mat4(1.f),
+					float(i * M_PI * 0.2f), cube_normal),
+				glm::vec3(cube_position))
+			* temp_matrix
+			* glm::rotate(glm::mat4(1.f), float(i * M_PI * 0.5f), glm::vec3(0.f, 1.f, 0.f)));
+	}
 	/*
 	Scaling along arbitrary axis:
 	1. Choose rotation axis

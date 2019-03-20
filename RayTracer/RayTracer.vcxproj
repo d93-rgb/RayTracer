@@ -162,7 +162,7 @@ xcopy /y /d "C:\ThirdParty\libraries\assimp\bin\assimp-vc140-mt.dll" "$(OutDir)"
     <ClCompile Include="texture.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="picture.ppm" />
+    <None Include="results\picture.ppm" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="camera.h" />

@@ -1,3 +1,5 @@
+#include <chrono>
+
 #include "rt.h"
 #include "renderer.h"
 #include "scene.h"
@@ -20,7 +22,7 @@ int MAX_DEPTH = 4;
 
 //std::vector<float> debug_vec;
 
-void write_file(const char *file, std::vector<glm::vec3> &col, int width, int height);
+void write_file(std::string file, std::vector<glm::vec3> &col, int width, int height);
 
 //float deg2rad(float deg) { return deg * (float)M_PI / 180; }
 //float rad2deg(float rad) { return rad * 180 / (float)M_PI; }
@@ -62,7 +64,7 @@ void render()
 	new_height = cropped_height[1] - cropped_height[0];
 
 	LOG(INFO) << "Image width = " << WIDTH << "; Image height = " << HEIGHT;
-	LOG(INFO) << "Cropped width = " << new_width << "; Cropped height =" << new_height;
+	LOG(INFO) << "Cropped width = " << new_width << "; Cropped height = " << new_height;
 
 	std::vector<glm::vec3> col(new_width * new_height, glm::vec3(0.f));
 
@@ -129,11 +131,13 @@ void render()
 	//		std::cout << " thread: " << omp_get_thread_num() << std::endl;
 	//	}
 
-	write_file("picture.ppm", col, new_width, new_height);
+
+	write_file("results\\picture.ppm", col, new_width, new_height);
 
 }
 
-void write_file(const char *file, std::vector<glm::vec3> &col, int width, int height)
+void write_file(const std::string file, 
+	std::vector<glm::vec3> &col, int width, int height)
 {
 	static int i_debug = 0;
 	std::ofstream ofs;
@@ -142,6 +146,7 @@ void write_file(const char *file, std::vector<glm::vec3> &col, int width, int he
 	// WRITING TO IMAGE FILE
 	/***************************************/
 	ofs.open(file, _IOSbinary);
+
 	// don't use \n as ending white space, because of windows
 	ofs << "P6 " << width << " " << height << " 255 ";
 
@@ -171,7 +176,7 @@ void write_file(const char *file, std::vector<glm::vec3> &col, int width, int he
 
 int main(int argc, const char **argv)
 {
-	google::InitGoogleLogging(argv[0]);
+	//google::InitGoogleLogging(argv[0]);
 	//for (int i = 0; i < 3; ++i)
 //{
 //	for (int j = 0; j < 3; ++j)
@@ -202,7 +207,7 @@ ofs.close();
 #ifdef OPEN_WITH_GIMP
 	// OPEN FILE IN GIMP
 	std::string gimp_path = "C:\\Program Files\\GIMP 2\\bin\\gimp-2.10.exe";
-	std::string image_path = "C:\\Users\\Dood\\source\\repos\\RayTracer\\RayTracer\\picture.ppm";
+	std::string image_path = "C:\\Users\\Dood\\source\\repos\\RayTracer\\RayTracer\\results\\picture.ppm";
 	std::string szCmdline = gimp_path + " " + image_path;
 
 	LOG(INFO) << "Opening image with " << gimp_path;

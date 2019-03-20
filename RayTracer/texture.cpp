@@ -23,7 +23,7 @@ glm::vec3 RGBCubeTexture::getTexel(const glm::vec3 &pos) const
 			+ glm::vec4(cube->boundaries, 0.f)) / glm::vec4(cube->boundaries, 1.f) * 0.5f);
 	else if (unitcube)
 	{
-		return 10.f * ((unitcube->world_to_obj * glm::vec4(pos, 1.f)
+		return 100.f * ((unitcube->world_to_obj * glm::vec4(pos, 1.f)
 			+ glm::vec4(0.5f, 0.5f, 0.5f, 0.f)));
 	}
 	else

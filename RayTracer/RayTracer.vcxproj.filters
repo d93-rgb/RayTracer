@@ -53,7 +53,7 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="picture.ppm">
+    <None Include="results\picture.ppm">
       <Filter>Resource Files</Filter>
     </None>
   </ItemGroup>

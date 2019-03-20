@@ -56,7 +56,7 @@ public:
 			uv.x = clamp(uv.y);
 			break;
 		case ImageWrap::BLACK:
-			if (uv.x < 0.f || 
+			if (uv.x < 0.f ||
 				uv.y < 0.f || 
 				uv.x > 1.f ||
 				uv.y > 1.f)
