@@ -295,25 +295,6 @@ public:
 	{
 		// cube must have thickness in all dimensios for now
 		this->mat = mat;
-
-		// sides
-		v1[0] = glm::vec3(0.f, 0.f, 1.f);
-		v2[0] = glm::vec3(0.f, 1.f, 0.f);
-
-		v1[1] = glm::vec3(1.f, 0.f, 0.f);
-		v2[1] = glm::vec3(0.f, 0.f, 1.f);
-
-		v1[2] = glm::vec3(1.f, 0.f, 0.f);
-		v2[2] = glm::vec3(0.f, 1.f, 0.f);
-
-		for (int i = 0; i < 6; ++i)
-		{
-			// moved centers
-			int i_m = i % 3;
-			moved_centers[i] = glm::vec3(1.f) *
-				glm::vec3(i_m == 0, i_m == 1, i_m == 2) *
-				(-1.f * (i >= 3 ? 1.f : -1.f)) - 0.5f * (v1[i_m] + v2[i_m]);
-		}
 	}
 
 	float intersect(const Ray &ray, SurfaceInteraction *isect);
@@ -344,8 +325,6 @@ public:
 
 private:
 	glm::vec3 boundaries{ 0.5f, 0.5f, 0.5f };
-	glm::vec3 moved_centers[6];
-	glm::vec3 v1[3], v2[3];
 
 	friend class RGBCubeTexture;
 };

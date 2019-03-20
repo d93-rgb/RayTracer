@@ -305,100 +305,54 @@ float UnitCube::intersect(const Ray & ray, SurfaceInteraction * isect)
 	Ray transformed_ray{ world_to_obj * glm::vec4(ray.ro, 1.f),
 		world_to_obj * glm::vec4(ray.rd, 0.f) };
 
-	int nearest = 0;
-	int tmp = 0;
-	float isec_t = INFINITY;
-	float inside_1;
-	float inside_2;
-	bool tests[6] = { false };
+
+	// no need for checking division by zero, floating point arithmetic is helping here
+	glm::vec3 inv_rd = 1.f / ray.rd;
 	glm::vec3 t[2] = { glm::vec3(INFINITY), glm::vec3(INFINITY) };
-	glm::vec3 isec_p;
+	// interval of intersection
+	float t0 = 0.f, t1 = INFINITY;
 
+	// the case where the ray is parallel to the plane is handled correctly by these two
+	// calculations => if the ray is outside the slabs, the values will both be -/+ inf,
+	// if it is inside, the values will be inf with different signs
+	t[0] = -boundaries - ray.ro;
+	t[1] = boundaries - ray.ro;
 
-	// calculate the 6 transformed_ray-plane intersections
-	t[0] = (boundaries - transformed_ray.ro);
-	t[1] = -(boundaries + transformed_ray.ro);
+	for (int i = 0; i < 3; ++i)
+	{
+		t[0][i] *= inv_rd[i];
+		t[1][i] *= inv_rd[i];
 
-	// not regarding IEEE floating point arithmetics here, see Bounds3 for a better variant
-	if (transformed_ray.rd.x != 0)
-	{
-		t[0].x /= transformed_ray.rd.x;
-		t[1].x /= transformed_ray.rd.x;
-	}
-	else
-	{
-		t[0].x = (t[0].x == 0 ? 0.f : INFINITY);
-		t[1].x = (t[1].x == 0 ? 0.f : INFINITY);
-	}
-
-	if (transformed_ray.rd.y != 0)
-	{
-		t[0].y /= transformed_ray.rd.y;
-		t[1].y /= transformed_ray.rd.y;
-	}
-	else
-	{
-		t[0].y = (t[0].y == 0 ? 0.f : INFINITY);
-		t[1].y = (t[1].y == 0 ? 0.f : INFINITY);
-	}
-
-	if (transformed_ray.rd.z != 0)
-	{
-		t[0].z /= transformed_ray.rd.z;
-		t[1].z /= transformed_ray.rd.z;
-	}
-	else
-	{
-		t[0].z = (t[0].z == 0 ? 0.f : INFINITY);
-		t[1].z = (t[1].z == 0 ? 0.f : INFINITY);
-	}
-
-	// check if inside boundaries
-	for (int i = 0; i < 6; ++i)
-	{
-		tmp = i % 3;
-		// filter out negative parameters
-		if (t[i >= 3][tmp] >= 0.f)
+		if (t[0][i] > t[1][i])
 		{
-			isec_t = t[i >= 3][tmp];
-			isec_p = transformed_ray.ro + isec_t * transformed_ray.rd;
+			std::swap(t[0][i], t[1][i]);
+		}
 
-			// project onto spanning vectors of the plane
-			inside_1 = glm::dot(isec_p - moved_centers[i], v1[tmp]);
-			inside_2 = glm::dot(isec_p - moved_centers[i], v2[tmp]);
+		// narrow interval and check if intersection possible
+		// smaller interval bound may only get larger, the bigger interval bound may only 
+		// become smaller
+		t0 = t0 > t[0][i] ? t0 : t[0][i];
+		t1 = t1 < t[1][i] ? t1 : t[1][i];
 
-			tests[i] = (0 <= inside_1) && (inside_1 <= 1)
-				&& (0 <= inside_2) && (inside_2 <= 1);
+		if (t0 > t1)
+		{
+			return INFINITY;
 		}
 	}
 
-	// get smallest positive parameter
-	isec_t = INFINITY;
-	for (int i = 0; i < 6; ++i)
+	if (t0 >= 0 && t0 < INFINITY)
 	{
-		tmp = i % 3;
-		if (tests[i])
-		{
-			if (isec_t > t[i >= 3][tmp])
-			{
-				isec_t = t[i >= 3][tmp];
-			}
-		}
-	}
-
-	if (isec_t >= 0 && isec_t < INFINITY)
-	{
-		if (isec_t < ray.tNearest)
+		if (t0 < ray.tNearest)
 		{
 			// update maximum intersection parameter
-			ray.tNearest = isec_t;
+			ray.tNearest = t0;
 			// update intersection properties
-			isect->p = ray.ro + ray.rd * isec_t;
+			isect->p = ray.ro + ray.rd * t0;
 			isect->normal = get_normal(isect->p);
 			isect->mat = mat;
 		}
 	}
 
-	return isec_t;
+	return t0;
 }
 } //namespace rt
