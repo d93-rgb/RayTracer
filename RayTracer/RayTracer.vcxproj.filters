@@ -13,44 +13,72 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="Source Files\rt">
-      <UniqueIdentifier>{252c5284-f680-44bf-bad1-b6e1c18d2c16}</UniqueIdentifier>
+    <Filter Include="Header Files\core">
+      <UniqueIdentifier>{131008bb-671d-4238-9616-8f0895c62eef}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\shapes">
+    <Filter Include="Header Files\camera">
+      <UniqueIdentifier>{e8164d2f-3181-48e8-b5f4-0872326c028a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\texture">
+      <UniqueIdentifier>{40185133-65f9-4ced-92b7-a7de40327d42}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\material">
+      <UniqueIdentifier>{820967d4-e812-4bdb-a65e-80be62492f58}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\light">
+      <UniqueIdentifier>{6319024a-b77f-4ff6-a030-b6ead9521a31}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\misc">
+      <UniqueIdentifier>{a9c1ccb6-9664-49dd-8ea1-c44b522e350a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\scene">
+      <UniqueIdentifier>{909bf358-24a2-415a-8df8-f37d971291df}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\gui">
+      <UniqueIdentifier>{eff460ba-765b-4c29-8204-48d374e18617}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\interaction">
+      <UniqueIdentifier>{dfe8ed90-10bf-4946-b95a-a0aba58cdee0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\core">
+      <UniqueIdentifier>{abaec7c7-b4cf-4c00-9676-148c4e8975a9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\camera">
+      <UniqueIdentifier>{76cef566-1e6f-4293-a479-d92006b6b1e8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\material">
+      <UniqueIdentifier>{d66b35e7-1d1d-419a-937b-4933787edcf1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\light">
+      <UniqueIdentifier>{11ab1898-0de4-46ec-9e59-2fa63fa763fb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\misc">
+      <UniqueIdentifier>{0f414073-5f80-4406-9c9d-590a2acc08b5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\gui">
+      <UniqueIdentifier>{57ff6b67-9983-4b2f-9107-e70fdd29d0a0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\interaction">
+      <UniqueIdentifier>{adf2c178-c8e3-4c54-b08d-0f7e9c728317}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\scene">
+      <UniqueIdentifier>{a2fb865e-9ea7-4923-8c8d-1f8ba9b115d0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\texture">
+      <UniqueIdentifier>{0d496fde-5479-4921-93d0-3184ab05f4d5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\shape">
+      <UniqueIdentifier>{d886e226-0e80-470e-bce2-0ae504e1a778}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\shape">
       <UniqueIdentifier>{bf31184d-06b2-4ae8-8d23-0e1c7c8f064e}</UniqueIdentifier>
     </Filter>
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="main.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="scene.cpp">
-      <Filter>Source Files\rt</Filter>
-    </ClCompile>
-    <ClCompile Include="renderer.cpp">
-      <Filter>Source Files\rt</Filter>
-    </ClCompile>
-    <ClCompile Include="light.cpp">
-      <Filter>Source Files\rt</Filter>
-    </ClCompile>
-    <ClCompile Include="camera.cpp">
-      <Filter>Source Files\rt</Filter>
-    </ClCompile>
-    <ClCompile Include="progressreporter.cpp">
-      <Filter>Source Files\rt</Filter>
-    </ClCompile>
-    <ClCompile Include="quadrics.cpp">
-      <Filter>Source Files\rt</Filter>
-    </ClCompile>
-    <ClCompile Include="shape.cpp">
-      <Filter>Source Files\rt</Filter>
-    </ClCompile>
-    <ClCompile Include="texture.cpp">
-      <Filter>Source Files\rt</Filter>
-    </ClCompile>
-    <ClCompile Include="material.cpp">
-      <Filter>Source Files\rt</Filter>
-    </ClCompile>
+    <Filter Include="Source Files\shape\quadric">
+      <UniqueIdentifier>{fcac40e0-3ee7-4aee-a64a-3d9f29aff5bb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\shape\quadric">
+      <UniqueIdentifier>{7676e2af-b467-452c-b3f3-09dac191be49}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="results\picture.ppm">
@@ -58,53 +86,85 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="material.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="include\shape\ray.h">
+      <Filter>Header Files\shape</Filter>
     </ClInclude>
-    <ClInclude Include="light.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="include\shape\shape.h">
+      <Filter>Header Files\shape</Filter>
     </ClInclude>
-    <ClInclude Include="scene.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="include\core\renderer.h">
+      <Filter>Header Files\core</Filter>
     </ClInclude>
-    <ClInclude Include="gui.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="include\core\rt.h">
+      <Filter>Header Files\core</Filter>
     </ClInclude>
-    <ClInclude Include="ray.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="include\core\utility.h">
+      <Filter>Header Files\core</Filter>
     </ClInclude>
-    <ClInclude Include="renderer.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="include\camera\camera.h">
+      <Filter>Header Files\camera</Filter>
     </ClInclude>
-    <ClInclude Include="camera.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="include\texture\texture.h">
+      <Filter>Header Files\texture</Filter>
     </ClInclude>
-    <ClInclude Include="rt.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="include\texture\texturemapping.h">
+      <Filter>Header Files\texture</Filter>
     </ClInclude>
-    <ClInclude Include="loader.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="include\material\material.h">
+      <Filter>Header Files\material</Filter>
     </ClInclude>
-    <ClInclude Include="progressreporter.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="include\light\light.h">
+      <Filter>Header Files\light</Filter>
     </ClInclude>
-    <ClInclude Include="interaction.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="include\misc\loader.h">
+      <Filter>Header Files\misc</Filter>
     </ClInclude>
-    <ClInclude Include="texture.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="include\misc\progressreporter.h">
+      <Filter>Header Files\misc</Filter>
     </ClInclude>
-    <ClInclude Include="utility.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="include\scene\scene.h">
+      <Filter>Header Files\scene</Filter>
     </ClInclude>
-    <ClInclude Include="texturemapping.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="include\interaction\interaction.h">
+      <Filter>Header Files\interaction</Filter>
     </ClInclude>
-    <ClInclude Include="shape.h">
-      <Filter>Header Files\shapes</Filter>
+    <ClInclude Include="include\gui\gui.h">
+      <Filter>Header Files\gui</Filter>
     </ClInclude>
-    <ClInclude Include="quadrics.h">
-      <Filter>Header Files\shapes</Filter>
+    <ClInclude Include="include\shape\quadric\quadrics.h">
+      <Filter>Header Files\shape\quadric</Filter>
     </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\core\renderer.cpp">
+      <Filter>Source Files\core</Filter>
+    </ClCompile>
+    <ClCompile Include="src\camera\camera.cpp">
+      <Filter>Source Files\camera</Filter>
+    </ClCompile>
+    <ClCompile Include="src\material\material.cpp">
+      <Filter>Source Files\material</Filter>
+    </ClCompile>
+    <ClCompile Include="src\light\light.cpp">
+      <Filter>Source Files\light</Filter>
+    </ClCompile>
+    <ClCompile Include="src\misc\progressreporter.cpp">
+      <Filter>Source Files\misc</Filter>
+    </ClCompile>
+    <ClCompile Include="src\shape\shape.cpp">
+      <Filter>Source Files\shape</Filter>
+    </ClCompile>
+    <ClCompile Include="src\shape\quadric\quadrics.cpp">
+      <Filter>Source Files\shape\quadric</Filter>
+    </ClCompile>
+    <ClCompile Include="src\texture\texture.cpp">
+      <Filter>Source Files\texture</Filter>
+    </ClCompile>
+    <ClCompile Include="src\scene\Scene.cpp">
+      <Filter>Source Files\scene</Filter>
+    </ClCompile>
+    <ClCompile Include="src\main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

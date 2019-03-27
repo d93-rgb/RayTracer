@@ -98,14 +98,13 @@
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
       <OpenMPSupport>true</OpenMPSupport>
-      <AdditionalIncludeDirectories>C:\ThirdParty\libraries\glog\include;C:\ThirdParty\libraries\glm-0.9.9.3;C:\ThirdParty\libraries\assimp\include;C:\ThirdParty\libraries\AntTweakBar\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\ThirdParty\libraries\AntTweakBar\include;C:\Users\Dood\source\repos\RayTracer\RayTracer\include;C:\ThirdParty\libraries\glm-0.9.9.3;C:\ThirdParty\libraries\assimp\include;C:\ThirdParty\libraries\glog\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>/Zc:twoPhase- %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <AdditionalDependencies>glog.lib;assimp-vc140-mt.lib;AntTweakBar64.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <ImportLibrary>
-      </ImportLibrary>
-      <AdditionalLibraryDirectories>C:\ThirdParty\libraries\glog\lib;C:\ThirdParty\libraries\assimp\lib;C:\ThirdParty\libraries\AntTweakBar\lib;</AdditionalLibraryDirectories>
+      <ImportLibrary>glog.lib;assimp-vc140-mt.lib;AntTweakBar64.lib;</ImportLibrary>
+      <AdditionalLibraryDirectories>C:\ThirdParty\libraries\AntTweakBar\lib;C:\ThirdParty\libraries\glog\lib;C:\ThirdParty\libraries\assimp\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
       <Command>xcopy /y /d "C:\ThirdParty\libraries\glog\bin\glog.dll" "$(OutDir)"
@@ -137,10 +136,13 @@ xcopy /y /d "C:\ThirdParty\libraries\assimp\bin\assimp-vc140-mt.dll" "$(OutDir)"
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalOptions>/Zc:twoPhase- %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalIncludeDirectories>C:\ThirdParty\libraries\AntTweakBar\include;C:\Users\Dood\source\repos\RayTracer\RayTracer\include;C:\ThirdParty\libraries\glm-0.9.9.3;C:\ThirdParty\libraries\assimp\include;C:\ThirdParty\libraries\glog\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalLibraryDirectories>C:\ThirdParty\libraries\AntTweakBar\lib;C:\ThirdParty\libraries\glog\lib;C:\ThirdParty\libraries\assimp\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <ImportLibrary>glog.lib;assimp-vc140-mt.lib;AntTweakBar64.lib;</ImportLibrary>
     </Link>
     <PostBuildEvent>
       <Command>xcopy /y /d "C:\ThirdParty\libraries\glog\bin\glog.dll" "$(OutDir)"
@@ -150,37 +152,37 @@ xcopy /y /d "C:\ThirdParty\libraries\assimp\bin\assimp-vc140-mt.dll" "$(OutDir)"
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="camera.cpp" />
-    <ClCompile Include="light.cpp" />
-    <ClCompile Include="main.cpp" />
-    <ClCompile Include="material.cpp" />
-    <ClCompile Include="progressreporter.cpp" />
-    <ClCompile Include="quadrics.cpp" />
-    <ClCompile Include="renderer.cpp" />
-    <ClCompile Include="scene.cpp" />
-    <ClCompile Include="shape.cpp" />
-    <ClCompile Include="texture.cpp" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="results\picture.ppm" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="camera.h" />
-    <ClInclude Include="gui.h" />
-    <ClInclude Include="interaction.h" />
-    <ClInclude Include="light.h" />
-    <ClInclude Include="loader.h" />
-    <ClInclude Include="material.h" />
-    <ClInclude Include="shape.h" />
-    <ClInclude Include="progressreporter.h" />
-    <ClInclude Include="quadrics.h" />
-    <ClInclude Include="ray.h" />
-    <ClInclude Include="renderer.h" />
-    <ClInclude Include="rt.h" />
-    <ClInclude Include="scene.h" />
-    <ClInclude Include="texture.h" />
-    <ClInclude Include="texturemapping.h" />
-    <ClInclude Include="utility.h" />
+    <ClInclude Include="include\camera\camera.h" />
+    <ClInclude Include="include\core\renderer.h" />
+    <ClInclude Include="include\core\rt.h" />
+    <ClInclude Include="include\core\utility.h" />
+    <ClInclude Include="include\gui\gui.h" />
+    <ClInclude Include="include\interaction\interaction.h" />
+    <ClInclude Include="include\light\light.h" />
+    <ClInclude Include="include\material\material.h" />
+    <ClInclude Include="include\misc\loader.h" />
+    <ClInclude Include="include\misc\progressreporter.h" />
+    <ClInclude Include="include\scene\scene.h" />
+    <ClInclude Include="include\shape\quadric\quadrics.h" />
+    <ClInclude Include="include\shape\ray.h" />
+    <ClInclude Include="include\shape\shape.h" />
+    <ClInclude Include="include\texture\texture.h" />
+    <ClInclude Include="include\texture\texturemapping.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\camera\camera.cpp" />
+    <ClCompile Include="src\core\renderer.cpp" />
+    <ClCompile Include="src\light\light.cpp" />
+    <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\material\material.cpp" />
+    <ClCompile Include="src\misc\progressreporter.cpp" />
+    <ClCompile Include="src\scene\Scene.cpp" />
+    <ClCompile Include="src\shape\quadric\quadrics.cpp" />
+    <ClCompile Include="src\shape\shape.cpp" />
+    <ClCompile Include="src\texture\texture.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
