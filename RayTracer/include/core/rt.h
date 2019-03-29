@@ -1,13 +1,16 @@
+#pragma once
+
 #if defined(_MSC_VER)
 #define NOMINMAX
-#pragma once
 #endif
 
-#define WIN32_LEAN_AND_MEAN
 #define _USE_MATH_DEFINES
-#define GLOG_NO_ABBREVIATED_SEVERITIES
+//#define GLOG_NO_ABBREVIATED_SEVERITIES
 
+#if defined(WIN32) || defined(_WIN32) || defined(__WIN32) && !defined(__CYGWIN__)
+#define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
+#endif
 
 #include <iostream>
 #include <fstream>

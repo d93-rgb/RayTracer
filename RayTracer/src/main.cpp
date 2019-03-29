@@ -8,7 +8,7 @@
 
 // use for debugging
 #undef DEBUG
-#define OPEN_WITH_GIMP
+//#define OPEN_WITH_GIMP
 
 using namespace rt;
 
@@ -21,8 +21,9 @@ constexpr auto HEIGHT = 400;
 int MAX_DEPTH = 4;
 
 //std::vector<float> debug_vec;
-
-void write_file(std::string file, std::vector<glm::vec3> &col, int width, int height);
+void helper_fun(const std::string &file);
+std::vector<glm::vec3> render(unsigned int &width, unsigned int &height);
+void write_file(const std::string &file, std::vector<glm::vec3> &col, int width, int height);
 
 std::ostream &operator<<(std::ostream &os, glm::vec3 v)
 {
@@ -31,12 +32,31 @@ std::ostream &operator<<(std::ostream &os, glm::vec3 v)
 }
 
 /*
-	Starts rendering a scene and writes the pixels to a .ppm file
+	Short helper function
 */
-void render()
+void helper_fun(std::string &file)
+{
+	unsigned int width, height;
+	std::vector<glm::vec3> &colors = render(width, height);
+
+	if (file.empty())
+	{
+		LOG(INFO) << "Image is written to the directory of the executable.";
+		write_file("picture.ppm", colors, width, height);
+	}
+	else
+	{
+		file.append(".ppm");
+		write_file(file, colors, width, height);
+	}
+}
+
+/*
+	Starts rendering a scene and returns the color vector.
+*/
+std::vector<glm::vec3> render(unsigned int &width, unsigned int &height)
 {
 	int i = 0;
-	int new_width, new_height;
 	float fov = glm::radians(55.f);
 	float fov_tan = tan(fov / 2);
 	float u = 0.f, v = 0.f;
@@ -52,18 +72,17 @@ void render()
 
 	int cropped_width[2];
 	int cropped_height[2];
-	glm::vec3 radiance = glm::vec3(0.f);
 
 	crop(crop_min_x, crop_max_x, WIDTH, cropped_width);
 	crop(crop_min_y, crop_max_y, HEIGHT, cropped_height);
 
-	new_width = cropped_width[1] - cropped_width[0];
-	new_height = cropped_height[1] - cropped_height[0];
+	width = cropped_width[1] - cropped_width[0];
+	height = cropped_height[1] - cropped_height[0];
 
 	LOG(INFO) << "Image width = " << WIDTH << "; Image height = " << HEIGHT;
-	LOG(INFO) << "Cropped width = " << new_width << "; Cropped height = " << new_height;
+	LOG(INFO) << "Cropped width = " << width << "; Cropped height = " << height;
 
-	std::vector<glm::vec3> col(new_width * new_height, glm::vec3(0.f));
+	std::vector<glm::vec3> col{ width * height, glm::vec3(0.f) };
 
 	/***************************************/
 	// CREATING SCENE
@@ -98,7 +117,7 @@ void render()
 						// the index i will be distributed among all threads
 						// by omp automatically
 						for (int k = 0,
-							i = (y - cropped_height[0]) * new_width + x - cropped_width[0]; 
+							i = (y - cropped_height[0]) * width + x - cropped_width[0];
 							k < SPP; ++k)
 						{
 							SurfaceInteraction isect;
@@ -127,13 +146,10 @@ void render()
 	//		std::this_thread::sleep_for(std::chrono::seconds(1));
 	//		std::cout << " thread: " << omp_get_thread_num() << std::endl;
 	//	}
-
-
-	write_file("results\\picture.ppm", col, new_width, new_height);
-
+	return col;
 }
 
-void write_file(const std::string file, 
+void write_file(const std::string &file,
 	std::vector<glm::vec3> &col, int width, int height)
 {
 	static int i_debug = 0;
@@ -144,7 +160,20 @@ void write_file(const std::string file,
 	/***************************************/
 	ofs.open(file, _IOSbinary);
 
-	// don't use \n as ending white space, because of windows
+	if (ofs.fail())
+	{
+		char err_str[75] = { '\0' };
+		std::cout << "Error: Image could not be saved to \"" << file << "\"."
+			<< std::endl;
+		// print related error message
+		strerror_s(err_str, errno);
+		std::cout << err_str;
+		exit(1);
+	}
+
+	LOG(INFO) << "Writing image to \"" << file << "\"";
+
+	// don't use \n as ending white space, because of Windows
 	ofs << "P6 " << width << " " << height << " 255 ";
 
 	// write to image file
@@ -168,21 +197,48 @@ void write_file(const std::string file,
 
 	ofs.close();
 
-	LOG(INFO) << "Writing to " << file << " finished.";
+	LOG(INFO) << "Writing image to \"" << file << "\" finished.";
 }
 
 int main(int argc, const char **argv)
 {
+	// open image with gimp
+	auto owg = false;
+	std::string dest = "";
+
+	if (argc > 1)
+	{
+		for (int i = 0; i < argc; ++i)
+		{
+			printf("argv[%i] = %s\n", i, argv[i]);
+		}
+		int pos = 1;
+		while (pos < argc)
+		{
+			if (!strcmp(argv[pos], "--destination") || !strcmp(argv[pos], "-d"))
+			{
+				if (++pos == argc)
+				{
+					printf("Error: USAGE\n");
+					exit(1);
+				}
+				printf("argc = %i, pos == %i\n", argc, pos);
+				dest = argv[pos++];
+			}
+			else if (!strcmp(argv[pos], "--open_with_gimp") || !strcmp(argv[pos], "-owg"))
+			{
+				++pos;
+				owg = true;
+			}
+			else
+			{
+				printf("Error: USAGE\n");
+				exit(1);
+			}
+		}
+	}
 	//google::InitGoogleLogging(argv[0]);
 	//for (int i = 0; i < 3; ++i)
-//{
-//	for (int j = 0; j < 3; ++j)
-//	{
-//		std::cout << mat3[i][j] << " ";
-//	}
-//	std::cout << std::endl;
-//}	
-
 /*
 	Gui g = Gui();
 	g.init();
@@ -199,12 +255,15 @@ ofs.close();
 //getchar();
 
 // launch rendering 
-	render();
+	helper_fun(dest);
 
+	if (owg)
+	{
+	}
 #ifdef OPEN_WITH_GIMP
 	// OPEN FILE IN GIMP
 	std::string gimp_path = "C:\\Program Files\\GIMP 2\\bin\\gimp-2.10.exe";
-	std::string image_path = "C:\\Users\\Dood\\source\\repos\\RayTracer\\RayTracer\\results\\picture.ppm";
+	std::string image_path = dest;
 	std::string szCmdline = gimp_path + " " + image_path;
 
 	LOG(INFO) << "Opening image with " << gimp_path;
@@ -237,7 +296,6 @@ ofs.close();
 	CloseHandle(pi.hProcess);
 	CloseHandle(pi.hThread);
 #endif
-
 	//MessageBox(nullptr, TEXT("Done."), TEXT("Notification"), MB_OK);
 	return 0;
 }
